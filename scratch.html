@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8"> 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
@@ -19,8 +20,8 @@ canvas {
 
 <body>
 
-<h2>?? ½ºÅ©·¡Ä¡ º¹±Ç Å×½ºÆ®</h2>
-<p>±Ü¾î¼­ °á°ú È®ÀÎ!</p>
+<h2>?? ìŠ¤í¬ë˜ì¹˜ ë³µê¶Œ í…ŒìŠ¤íŠ¸</h2>
+<p>ê¸ì–´ì„œ ê²°ê³¼ í™•ì¸!</p>
 
 <canvas id="scratch" width="300" height="150"></canvas>
 
@@ -30,18 +31,18 @@ canvas {
 const canvas = document.getElementById("scratch");
 const ctx = canvas.getContext("2d");
 
-// ?? ·£´ı °á°ú (Å×½ºÆ®¿ë)
+// ?? ëœë¤ ê²°ê³¼ (í…ŒìŠ¤íŠ¸ìš©)
 let resultValue = Math.random() < 0.5 ? "WIN" : "LOSE";
 
-// °á°ú ÅØ½ºÆ® ¹Ì¸® ¼³Á¤
+// ê²°ê³¼ í…ìŠ¤íŠ¸ ë¯¸ë¦¬ ì„¤ì •
 const resultText = document.getElementById("resultText");
-resultText.innerText = resultValue === "WIN" ? "?? ´çÃ·!" : "?? ²Î";
+resultText.innerText = resultValue === "WIN" ? "?? ë‹¹ì²¨!" : "?? ê½";
 
-// È¸»ö µ¤±â
+// íšŒìƒ‰ ë®ê¸°
 ctx.fillStyle = "gray";
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-// ±Ü±â ÇÔ¼ö
+// ê¸ê¸° í•¨ìˆ˜
 function scratch(x, y){
   ctx.globalCompositeOperation = "destination-out";
   ctx.beginPath();
@@ -49,7 +50,7 @@ function scratch(x, y){
   ctx.fill();
 }
 
-// ¸¶¿ì½º ÀÌº¥Æ®
+// ë§ˆìš°ìŠ¤ ì´ë²¤íŠ¸
 canvas.addEventListener("mousemove", function(e){
   if(e.buttons === 1){
     const rect = canvas.getBoundingClientRect();
@@ -57,7 +58,7 @@ canvas.addEventListener("mousemove", function(e){
   }
 });
 
-// ?? ¸ğ¹ÙÀÏ ÅÍÄ¡ Áö¿ø
+// ?? ëª¨ë°”ì¼ í„°ì¹˜ ì§€ì›
 canvas.addEventListener("touchmove", function(e){
   e.preventDefault();
   const rect = canvas.getBoundingClientRect();
