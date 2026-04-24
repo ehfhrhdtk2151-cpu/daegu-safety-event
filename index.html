@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8"> 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body { margin:0; font-family:sans-serif; text-align:center; background:#f5f5f5; }
@@ -9,7 +10,7 @@ body { margin:0; font-family:sans-serif; text-align:center; background:#f5f5f5; 
 button { padding:15px 25px; font-size:18px; margin-top:20px; }
 canvas { border:1px solid #ccc; margin-top:20px; }
 
-/* ¿Âµµ°è */
+/* ì˜¨ë„ê³„ */
 .bar-wrap {
   width:80%;
   margin:20px auto;
@@ -28,57 +29,57 @@ canvas { border:1px solid #ccc; margin-top:20px; }
 
 <!-- STEP 1 -->
 <div id="step1" class="step active">
-  <h2>STEP 1 ½¬¾î°¡±â</h2>
-  <p>Àá½Ã ½¬¾î°¡¼¼¿ä ??</p>
-  <button onclick="next(2)">Ä·ÆäÀÎ Âü¿©ÇÏ±â</button>
+  <h2>STEP 1 ì‰¬ì–´ê°€ê¸°</h2>
+  <p>ì ì‹œ ì‰¬ì–´ê°€ì„¸ìš” ??</p>
+  <button onclick="next(2)">ìº í˜ì¸ ì°¸ì—¬í•˜ê¸°</button>
 </div>
 
 <!-- STEP 2 -->
 <div id="step2" class="step">
-  <h2>STEP 2 ¾Ë¾Æ°¡±â</h2>
+  <h2>STEP 2 ì•Œì•„ê°€ê¸°</h2>
 
-  <!-- ¿©±â ÀÌ¹ÌÁö ÆÄÀÏ ³Ö±â -->
+  <!-- ì—¬ê¸° ì´ë¯¸ì§€ íŒŒì¼ ë„£ê¸° -->
   <img src="safety.jpg" style="width:100%; max-width:400px;">
 
-  <button id="nextBtn" onclick="next(3)" disabled>È®ÀÎÇß½À´Ï´Ù</button>
+  <button id="nextBtn" onclick="next(3)" disabled>í™•ì¸í–ˆìŠµë‹ˆë‹¤</button>
 </div>
 
 <!-- STEP 3 -->
 <div id="step3" class="step">
-  <h2>STEP 3 ³ª´©±â</h2>
-  <p>¾ÈÀüÀ» ³ª´©¾î ÁÖ¼¼¿ä</p>
-  <button onclick="donate()">500¿ø ±âºÎ Âü¿©ÇÏ±â</button>
+  <h2>STEP 3 ë‚˜ëˆ„ê¸°</h2>
+  <p>ì•ˆì „ì„ ë‚˜ëˆ„ì–´ ì£¼ì„¸ìš”</p>
+  <button onclick="donate()">500ì› ê¸°ë¶€ ì°¸ì—¬í•˜ê¸°</button>
 </div>
 
-<!-- STEP 4 (¿Âµµ°è) -->
+<!-- STEP 4 (ì˜¨ë„ê³„) -->
 <div id="step4" class="step">
-  <h2>±âºÎ ¿Ï·á ??</h2>
+  <h2>ê¸°ë¶€ ì™„ë£Œ ??</h2>
 
   <div class="bar-wrap">
     <div id="bar" class="bar"></div>
   </div>
 
-  <p id="amountText">0¿ø</p>
+  <p id="amountText">0ì›</p>
 
-  <button onclick="next(5)">½ºÅ©·¡Ä¡ º¹±Ç È®ÀÎ</button>
+  <button onclick="next(5)">ìŠ¤í¬ë˜ì¹˜ ë³µê¶Œ í™•ì¸</button>
 </div>
 
-<!-- STEP 5 (½ºÅ©·¡Ä¡) -->
+<!-- STEP 5 (ìŠ¤í¬ë˜ì¹˜) -->
 <div id="step5" class="step">
-  <h2>½ºÅ©·¡Ä¡ º¹±Ç ??</h2>
-  <p>±Ü¾î¼­ °á°ú È®ÀÎ!</p>
+  <h2>ìŠ¤í¬ë˜ì¹˜ ë³µê¶Œ ??</h2>
+  <p>ê¸ì–´ì„œ ê²°ê³¼ í™•ì¸!</p>
   <canvas id="scratch" width="300" height="150"></canvas>
   <h3 id="resultText"></h3>
 </div>
 
 <script>
-// ¼­¹ö URL ³Ö±â
-const API_URL = "¿©±â¿¡_AppsScript_URL";
+// ì„œë²„ URL ë„£ê¸°
+const API_URL = "ì—¬ê¸°ì—_AppsScript_URL";
 
-// °á°ú ÀúÀå
+// ê²°ê³¼ ì €ì¥
 let resultValue = "LOSE";
 
-// STEP ÀÌµ¿
+// STEP ì´ë™
 function next(n){
   document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
   document.getElementById('step'+n).classList.add('active');
@@ -88,13 +89,13 @@ function next(n){
   }
 }
 
-// STEP2 ¹öÆ° Áö¿¬ È°¼ºÈ­
+// STEP2 ë²„íŠ¼ ì§€ì—° í™œì„±í™”
 setTimeout(()=>{
   const btn = document.getElementById("nextBtn");
   if(btn) btn.disabled = false;
 }, 3000);
 
-// ±âºÎ Ã³¸®
+// ê¸°ë¶€ ì²˜ë¦¬
 function donate(){
   fetch(API_URL, {
     method: "POST",
@@ -106,13 +107,13 @@ function donate(){
   .then(data => {
 
     if(data === "DUPLICATE"){
-      alert("ÀÌ¹Ì Âü¿©ÇÏ¼Ì½À´Ï´Ù");
+      alert("ì´ë¯¸ ì°¸ì—¬í•˜ì…¨ìŠµë‹ˆë‹¤");
       return;
     }
 
     resultValue = data;
 
-    // ±âºÎ±İ Áõ°¡
+    // ê¸°ë¶€ê¸ˆ ì¦ê°€
     let current = localStorage.getItem("donation") || 0;
     current = Number(current) + 500;
     localStorage.setItem("donation", current);
@@ -123,17 +124,17 @@ function donate(){
   });
 }
 
-// ¿Âµµ°è ¾÷µ¥ÀÌÆ®
+// ì˜¨ë„ê³„ ì—…ë°ì´íŠ¸
 function updateBar(amount){
   const goal = 10000000;
   const percent = Math.min((amount / goal) * 100, 100);
 
   document.getElementById("bar").style.width = percent + "%";
   document.getElementById("amountText").innerText =
-    amount.toLocaleString() + "¿ø";
+    amount.toLocaleString() + "ì›";
 }
 
-// ½ºÅ©·¡Ä¡ ±â´É
+// ìŠ¤í¬ë˜ì¹˜ ê¸°ëŠ¥
 function initScratch(){
   const canvas = document.getElementById("scratch");
   const ctx = canvas.getContext("2d");
@@ -149,7 +150,7 @@ function initScratch(){
   });
 
   document.getElementById("resultText").innerText =
-    resultValue === "WIN" ? "?? ´çÃ·!" : "?? ²Î";
+    resultValue === "WIN" ? "?? ë‹¹ì²¨!" : "?? ê½";
 }
 </script>
 
