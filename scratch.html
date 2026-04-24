@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  text-align:center;
+  font-family:sans-serif;
+  margin-top:50px;
+}
+
+canvas {
+  border:1px solid #ccc;
+  margin-top:20px;
+  touch-action: none;
+}
+</style>
+</head>
+
+<body>
+
+<h2>?? 스크래치 복권 테스트</h2>
+<p>긁어서 결과 확인!</p>
+
+<canvas id="scratch" width="300" height="150"></canvas>
+
+<h2 id="resultText"></h2>
+
+<script>
+const canvas = document.getElementById("scratch");
+const ctx = canvas.getContext("2d");
+
+// ?? 랜덤 결과 (테스트용)
+let resultValue = Math.random() < 0.5 ? "WIN" : "LOSE";
+
+// 결과 텍스트 미리 설정
+const resultText = document.getElementById("resultText");
+resultText.innerText = resultValue === "WIN" ? "?? 당첨!" : "?? 꽝";
+
+// 회색 덮기
+ctx.fillStyle = "gray";
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+// 긁기 함수
+function scratch(x, y){
+  ctx.globalCompositeOperation = "destination-out";
+  ctx.beginPath();
+  ctx.arc(x, y, 12, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// 마우스 이벤트
+canvas.addEventListener("mousemove", function(e){
+  if(e.buttons === 1){
+    const rect = canvas.getBoundingClientRect();
+    scratch(e.clientX - rect.left, e.clientY - rect.top);
+  }
+});
+
+// ?? 모바일 터치 지원
+canvas.addEventListener("touchmove", function(e){
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches[0];
+  scratch(touch.clientX - rect.left, touch.clientY - rect.top);
+});
+</script>
+
+</body>
+</html>
