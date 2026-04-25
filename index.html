@@ -122,42 +122,78 @@ function initScratch(){
   const canvas = document.getElementById("scratch");
   const ctx = canvas.getContext("2d");
   const display = document.getElementById("resultDisplay");
+  let isDrawing = false;
+  let lastX = 0;
+  let lastY = 0;
 
-  // 결과 텍스트 숨겨두기
   display.innerText = "";
 
-  // 덮개 그리기
+  // 1. 초기 덮개 설정
   ctx.globalCompositeOperation = "source-over";
   ctx.fillStyle = "#aaaaaa";
   ctx.fillRect(0,0,300,150);
+  
+  // 안내 문구 추가
   ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 18px sans-serif";
+  ctx.font = "bold 20px sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("여기를 긁어주세요", 150, 85);
+  ctx.fillText("여기를 슥슥 긁어보세요!", 150, 85);
 
-  function scratch(x, y){
+  // 2. 부드러운 긁기 함수 (선을 연결하는 방식)
+  function scratch(x, y) {
     ctx.globalCompositeOperation = "destination-out";
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    ctx.lineWidth = 40; // 👈 원 크기를 40으로 키웠습니다. (기존 15~24에서 대폭 상향)
+
     ctx.beginPath();
-    ctx.arc(x, y, 15, 0, Math.PI*2);
-    ctx.fill();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+
+    lastX = x;
+    lastY = y;
     
-    // 결과 텍스트 노출 (어느 정도 긁으면 표시)
+    // 결과 텍스트 노출
     display.innerText = (resultValue === "WIN") ? "🎁 당첨! 안전드림 커피" : "🙏 다음 기회에!";
   }
 
-  canvas.addEventListener("mousemove", (e) => {
-    if(e.buttons === 1) {
-      const rect = canvas.getBoundingClientRect();
-      scratch(e.clientX - rect.left, e.clientY - rect.top);
-    }
-  });
-
-  canvas.addEventListener("touchmove", (e) => {
-    e.preventDefault();
+  // 3. 이벤트 리스너 통합 (마우스 & 터치)
+  function getPos(e) {
     const rect = canvas.getBoundingClientRect();
-    const touch = e.touches[0];
-    scratch(touch.clientX - rect.left, touch.clientY - rect.top);
-  }, { passive: false });
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top
+    };
+  }
+
+  const start = (e) => {
+    isDrawing = true;
+    const pos = getPos(e);
+    lastX = pos.x;
+    lastY = pos.y;
+  };
+
+  const move = (e) => {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    scratch(pos.x, pos.y);
+  };
+
+  const stop = () => { isDrawing = false; };
+
+  // 마우스 이벤트
+  canvas.addEventListener("mousedown", start);
+  canvas.addEventListener("mousemove", move);
+  window.addEventListener("mouseup", stop);
+
+  // 터치 이벤트 (모바일용)
+  canvas.addEventListener("touchstart", start, { passive: false });
+  canvas.addEventListener("touchmove", move, { passive: false });
+  canvas.addEventListener("touchend", stop);
 }
 </script>
 </body>
