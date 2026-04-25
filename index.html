@@ -111,15 +111,19 @@ function handleDonate() {
   goNext(4);
   
   var txt = document.getElementById("amountText");
+  var bar = document.getElementById("bar"); // 온도계 바 가져오기
   
-  // 1. [핵심] 기존 텍스트 완전 초기화 및 안내 문구 강제 삽입
+  // 1. 안내 문구 노출 및 깜박임 시작
   txt.style.transition = "none"; 
   txt.style.opacity = "1";
   txt.style.fontSize = "16px";
   txt.style.color = "#888";
   txt.innerText = "기부 현황을 불러오는 중..."; 
 
-  // 2. 온도계 바만 즉시 이동 (이때 updateBar 내부에서 txt를 건드리지 않게 처리)
+  // [추가] 온도계 바에 깜박임 클래스 추가
+  bar.classList.add("blinking");
+
+  // 2. 온도계 바 이동 (낙관적 업데이트)
   var currentTotal = (Number(localStorage.getItem("totalDonation") || 0)) + 500;
   moveBarOnly(currentTotal); 
 
@@ -133,14 +137,17 @@ function handleDonate() {
     var serverTotal = data.split('|')[1];
     localStorage.setItem("totalDonation", serverTotal);
     
-    // 4. 서버 데이터 도착 후 0.5초 정도 문구를 더 보여준 뒤 숫자로 교체
+    // 4. 데이터 도착 후 처리
     setTimeout(function() {
+      // [추가] 데이터가 왔으므로 깜박임 멈춤
+      bar.classList.remove("blinking");
+
       txt.style.transition = "all 0.5s";
       txt.innerText = Number(serverTotal).toLocaleString() + "원";
       txt.style.fontSize = "26px";
       txt.style.color = "#ff4b2b";
       moveBarOnly(serverTotal); 
-    }, 500); 
+    }, 800); // 0.8초간 깜박임을 충분히 보여줌
   });
 }
 
