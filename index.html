@@ -21,7 +21,7 @@
   .blinking { animation: blink 0.8s infinite; }
 
   #amountText { font-size: 24px; font-weight: bold; color: #ff4b2b; min-height: 40px; display: flex; align-items: center; justify-content: center; }
-  canvas { border:2px solid #ddd; margin-top:20px; touch-action: none; border-radius: 10px; background:#fff; }
+  canvas { border:2px solid #ddd; margin-top:20px; touch-action: none; border-radius: 10px; background:#fff; cursor: crosshair; }
   #resultDisplay { margin-top: 20px; font-size: 18px; font-weight: bold; min-height: 120px; }
   .privacy-info { font-size: 11px; color: #888; margin-top: 15px; line-height: 1.4; text-align: left; background: #eee; padding: 10px; border-radius: 5px; }
 </style>
@@ -145,7 +145,7 @@ function initScratch() {
   var revealed = false;
 
   // 1. 회색 덮개 초기화
-  ctx.globalCompositeOperation = "source-over"; // 기본 모드로 설정
+  ctx.globalCompositeOperation = "source-over";
   ctx.fillStyle = "#aaa";
   ctx.fillRect(0, 0, 300, 150);
   ctx.fillStyle = "#fff";
@@ -166,15 +166,16 @@ function initScratch() {
       fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "SCRATCH" }) })
       .then(res => res.text())
       .then(result => {
-        // [수정 핵심] 캔버스를 완전히 지우고 결과를 새로 그립니다.
-        ctx.globalCompositeOperation = "source-over"; // 다시 덮어쓰기 모드로
-        ctx.clearRect(0, 0, 300, 150); // 싹 지우기
+        // [수정 핵심] 캔버스의 투명 모드를 끄고 흰색으로 덮어쓴 뒤 글자를 씁니다.
+        ctx.globalCompositeOperation = "source-over"; 
         ctx.fillStyle = "#fff";
-        ctx.fillRect(0, 0, 300, 150); // 흰 배경 칠하기
+        ctx.fillRect(0, 0, 300, 150);
         
         ctx.fillStyle = (result === "WIN") ? "#0047a0" : "#888";
         ctx.font = "bold 40px sans-serif";
-        ctx.fillText(result === "WIN" ? "★ 당 첨 ★" : "다음 기회에", 150, 85);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(result === "WIN" ? "★ 당 첨 ★" : "다음 기회에", 150, 75);
 
         if (result === "WIN") {
           var phone = prompt("🎁 당첨! 안전드림 커피 쿠폰 발송을 위해\n전화번호를 입력해주세요.");
@@ -189,7 +190,6 @@ function initScratch() {
     }
   }
 
-  // (이하 마우스/터치 이벤트는 동일하게 유지)
   function getPos(e) {
     var r = cvs.getBoundingClientRect();
     var cx = e.touches ? e.touches[0].clientX : e.clientX;
@@ -200,11 +200,14 @@ function initScratch() {
   function scratch(e) {
     if (!drawing) return;
     var p = getPos(e);
-    ctx.globalCompositeOperation = "destination-out";
-    ctx.beginPath(); ctx.arc(p.x, p.y, 20, 0, Math.PI * 2); ctx.fill();
+    ctx.globalCompositeOperation = "destination-out"; // 긁어내기 모드
+    ctx.beginPath(); 
+    ctx.arc(p.x, p.y, 20, 0, Math.PI * 2); 
+    ctx.fill();
     checkReveal();
   }
 
+  // 리스너 등록
   cvs.addEventListener("mousedown", function() { drawing = true; });
   cvs.addEventListener("mousemove", scratch);
   window.addEventListener("mouseup", function() { drawing = false; });
