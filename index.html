@@ -5,16 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>안전기뷰(Give U) 캠페인</title>
 <style>
-  body { margin:0; font-family: 'Pretendard', sans-serif; text-align:center; background:#f9f9f9; color: #333; overflow-x: hidden; }
+  body { margin:0; font-family: sans-serif; text-align:center; background:#f9f9f9; color: #333; overflow-x: hidden; }
   .step { display:none; padding:20px; max-width: 500px; margin: 0 auto; min-height: 100vh; box-sizing: border-box; }
   .active { display:block; animation: fadeIn 0.5s; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   
-  h2 { color: #0047a0; margin-bottom: 20px; word-break: keep-all; }
+  h2 { color: #0047a0; margin-bottom: 20px; }
   button { 
     padding:15px 25px; font-size:18px; margin-top:20px; width: 100%;
     border: none; border-radius: 8px; background: #0047a0; color: white; font-weight: bold;
     cursor: pointer; transition: background 0.3s;
+    /* 모바일 클릭 반응성 향상 */
     -webkit-tap-highlight-color: transparent;
   }
   button:disabled { background: #ccc; cursor: not-allowed; }
@@ -32,15 +33,14 @@
   #amountText { font-size: 24px; font-weight: bold; color: #ff4b2b; margin-top: 10px; }
 
   /* 스크래치 */
-  canvas { border:2px solid #ddd; margin-top:20px; touch-action: none; border-radius: 10px; background-color: #fff; cursor: crosshair; }
+  canvas { border:2px solid #ddd; margin-top:20px; touch-action: none; border-radius: 10px; background-color: #fff; }
   #resultDisplay { 
-    pointer-events: none; /* 클릭 방해 금지 */
+    pointer-events: none; /* 중요: 클릭 이벤트 방해 금지 */
     margin-top: 20px; 
     font-size: 22px; 
     color: #0047a0; 
     min-height: 110px; 
     font-weight: bold; 
-    line-height: 1.4;
   }
 </style>
 </head>
@@ -72,4 +72,125 @@
     <div id="bar" class="bar"></div>
   </div>
   <p id="amountText">0원</p>
-  <button onclick="next(
+  <button onclick="next(5)">럭키 스크래치 확인</button>
+</div>
+
+<div id="step5" class="step">
+  <h2>안전드림 럭키 스크래치</h2>
+  <p>회색 부분을 긁어서 결과를 확인하세요!</p>
+  <canvas id="scratch" width="300" height="150"></canvas>
+  <div id="resultDisplay"></div>
+</div>
+
+<script>
+// [필수] Apps Script URL을 따옴표 안에 넣으세요.
+const API_URL = "여기에_AppsScript_URL"; 
+let resultValue = "LOSE";
+
+function next(n){
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById('step' + n);
+  if(target) target.classList.add('active');
+  
+  if(n === 2) {
+    setTimeout(() => { 
+      const btn = document.getElementById("nextBtn");
+      if(btn) btn.disabled = false; 
+    }, 3000);
+  }
+  if(n === 5) { initScratch(); }
+}
+
+async function donate(){
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: new URLSearchParams({ phone: "user_" + Date.now() })
+    });
+    const data = await response.text();
+
+    if(data === "DUPLICATE"){
+      alert("이미 참여하셨습니다.");
+      return;
+    }
+
+    resultValue = data.split('|')[0] || data; 
+    const totalAmount = data.split('|')[1] || (Number(localStorage.getItem("totalDonation") || 0) + 500);
+    
+    localStorage.setItem("totalDonation", totalAmount);
+    updateBar(totalAmount);
+    next(4);
+  } catch (e) {
+    // 서버 연결 실패 시 테스트를 위해 강제 진행
+    const current = (Number(localStorage.getItem("totalDonation") || 0) + 500);
+    localStorage.setItem("totalDonation", current);
+    updateBar(current);
+    next(4);
+  }
+}
+
+function updateBar(amount) {
+  const bar = document.getElementById("bar");
+  const amountText = document.getElementById("amountText");
+  const goal = 10000000; 
+  const finalPercent = Math.min((amount / goal) * 100, 100);
+
+  bar.style.transition = "width 0.4s ease-in";
+  bar.style.width = "100%";
+  
+  setTimeout(() => {
+    bar.style.transition = "width 1.2s ease-in-out";
+    bar.style.width = finalPercent + "%";
+    amountText.innerText = Number(amount).toLocaleString() + "원";
+    
+    setTimeout(() => {
+      let count = 0;
+      const blink = setInterval(() => {
+        bar.style.opacity = (bar.style.opacity === "0.3") ? "1" : "0.3";
+        if (++count >= 6) { clearInterval(blink); bar.style.opacity = "1"; }
+      }, 150);
+    }, 1100);
+  }, 600);
+}
+
+function initScratch(){
+  const canvas = document.getElementById("scratch");
+  const ctx = canvas.getContext("2d");
+  const display = document.getElementById("resultDisplay");
+  let isDrawing = false;
+  let lastX = 0, lastY = 0;
+  let revealed = false;
+
+  display.innerHTML = "";
+
+  ctx.globalCompositeOperation = "source-over";
+  ctx.fillStyle = "#aaaaaa";
+  ctx.fillRect(0,0,300,150);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 18px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("50% 이상 긁어보세요!", 150, 85);
+
+  function checkReveal() {
+    if (revealed) return;
+    const pixels = ctx.getImageData(0, 0, 300, 150).data;
+    let trans = 0;
+    for (let i = 3; i < pixels.length; i += 4) { if (pixels[i] === 0) trans++; }
+    
+    if ((trans / (300 * 150)) > 0.5) {
+      revealed = true;
+      const res = (resultValue === "WIN") ? "🎁 당첨! 안전드림 커피" : "🙏 다음 기회에!";
+      display.innerHTML = `<div>${res}</div>`;
+      display.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 500, fill: 'forwards' });
+
+      setTimeout(() => {
+        const safety = document.createElement("div");
+        safety.innerHTML = "<div style='color:#ff4b2b; margin-top:12px;'>❤️ 오늘도 안전운행 하세요! ❤️</div>";
+        display.appendChild(safety);
+        safety.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 800, fill: 'forwards' });
+      }, 3000);
+    }
+  }
+
+  function scratch(x, y) {
+    ctx.globalCompositeOperation = "
