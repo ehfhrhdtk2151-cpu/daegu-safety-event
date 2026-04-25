@@ -15,7 +15,6 @@
     padding:15px 25px; font-size:18px; margin-top:20px; width: 100%;
     border: none; border-radius: 8px; background: #0047a0; color: white; font-weight: bold;
     cursor: pointer; transition: background 0.3s;
-    /* 모바일 클릭 반응성 향상 */
     -webkit-tap-highlight-color: transparent;
   }
   button:disabled { background: #ccc; cursor: not-allowed; }
@@ -35,7 +34,7 @@
   /* 스크래치 */
   canvas { border:2px solid #ddd; margin-top:20px; touch-action: none; border-radius: 10px; background-color: #fff; }
   #resultDisplay { 
-    pointer-events: none; /* 중요: 클릭 이벤트 방해 금지 */
+    pointer-events: none; /* 중요: 클릭 방해 금지 */
     margin-top: 20px; 
     font-size: 22px; 
     color: #0047a0; 
@@ -84,7 +83,7 @@
 
 <script>
 // [필수] Apps Script URL을 따옴표 안에 넣으세요.
-const API_URL = "여기에_AppsScript_URL"; 
+const API_URL = "여기에_Apps_Script_URL"; 
 let resultValue = "LOSE";
 
 function next(n){
@@ -121,7 +120,7 @@ async function donate(){
     updateBar(totalAmount);
     next(4);
   } catch (e) {
-    // 서버 연결 실패 시 테스트를 위해 강제 진행
+    // 서버 연결 실패 시에도 테스트 가능하도록 로컬 처리
     const current = (Number(localStorage.getItem("totalDonation") || 0) + 500);
     localStorage.setItem("totalDonation", current);
     updateBar(current);
@@ -193,4 +192,27 @@ function initScratch(){
   }
 
   function scratch(x, y) {
-    ctx.globalCompositeOperation = "
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.lineWidth = 45;
+    ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
+    lastX = x; lastY = y;
+    if (Math.random() > 0.9) checkReveal();
+  }
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const cy = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: cx - rect.left, y: cy - rect.top };
+  }
+
+  canvas.addEventListener("mousedown", (e) => { isDrawing = true; const p = getPos(e); lastX = p.x; lastY = p.y; });
+  canvas.addEventListener("mousemove", (e) => { if (isDrawing) { const p = getPos(e); scratch(p.x, p.y); } });
+  window.addEventListener("mouseup", () => { isDrawing = false; checkReveal(); });
+  canvas.addEventListener("touchstart", (e) => { isDrawing = true; const p = getPos(e); lastX = p.x; lastY = p.y; }, { passive: false });
+  canvas.addEventListener("touchmove", (e) => { if (isDrawing) { e.preventDefault(); const p = getPos(e); scratch(p.x, p.y); } }, { passive: false });
+  canvas.addEventListener("touchend", () => { isDrawing = false; checkReveal(); });
+}
+</script>
+</body>
+</html>
