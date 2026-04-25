@@ -96,15 +96,22 @@ async function donate(){
 function updateBar(amount) {
   const bar = document.getElementById("bar");
   const txt = document.getElementById("amountText");
-  const goal = 10000000; 
-  const per = Math.min((amount / goal) * 100, 100);
+  const goal = 10000000; // 목표액
+  
+  // 기부금이 적어도 최소 5%는 차 보이게 설정 (눈에 띄게 하기 위함)
+  const actualPercent = (amount / goal) * 100;
+  const finalPercent = Math.max(actualPercent, 5); 
 
+  // 1. 풀 충전 효과 (0.4초 만에 100% 도달)
   bar.style.transition = "width 0.4s ease-in";
   bar.style.width = "100%";
   
   setTimeout(() => {
+    // 2. 현재 수치(최소 5%)로 복귀 (1.2초 동안 부드럽게)
     bar.style.transition = "width 1.2s ease-in-out";
-    bar.style.width = per + "%";
+    bar.style.width = finalPercent + "%";
+    
+    // 금액 텍스트 업데이트
     txt.innerText = Number(amount).toLocaleString() + "원";
   }, 600);
 }
