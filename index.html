@@ -18,20 +18,16 @@
   }
   button:disabled { background: #ccc; cursor: not-allowed; }
   
-  /* 이미지 및 홍보물 */
   .safety-img { width:100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 
-  /* 기부 온도계 (애니메이션 추가) */
   .bar-wrap { width:100%; margin:30px auto; border:1px solid #ddd; height:35px; border-radius: 20px; overflow: hidden; background: #eee; }
   .bar {
-  height:100%;
-  width:0%;
-  background: linear-gradient(90deg, #ff4b2b, #ff416c);
-  box-shadow: 0 0 15px rgba(255, 75, 43, 0.7); /* 빛나는 효과 미리 추가 */
-}
+    height:100%; width:0%;
+    background: linear-gradient(90deg, #ff4b2b, #ff416c);
+    box-shadow: 0 0 15px rgba(255, 75, 43, 0.7);
+  }
   #amountText { font-size: 24px; font-weight: bold; color: #ff4b2b; margin-top: 10px; }
 
-  /* 스크래치 */
   canvas { border:2px solid #ddd; margin-top:20px; touch-action: none; border-radius: 10px; background-color: #fff; }
 </style>
 </head>
@@ -70,11 +66,11 @@
   <h2>안전드림 럭키 스크래치</h2>
   <p>회색 부분을 긁어서 결과를 확인하세요!</p>
   <canvas id="scratch" width="300" height="150"></canvas>
-  <h3 id="resultDisplay" style="margin-top: 20px; font-size: 24px; color: #0047a0;"></h3>
+  <div id="resultDisplay" style="margin-top: 20px; font-size: 22px; color: #0047a0; min-height: 80px; font-weight: bold;"></div>
 </div>
 
 <script>
-const API_URL = "여기에_AppsScript_URL"; // 실제 주소로 변경 필수
+const API_URL = "여기에_AppsScript_URL"; 
 let resultValue = "LOSE";
 
 function next(n){
@@ -100,9 +96,7 @@ async function donate(){
       return;
     }
 
-    // 결과 저장 (WIN 또는 LOSE)
     resultValue = data.split('|')[0] || data; 
-    // 전체 누적 금액 (서버에서 넘겨준다고 가정, 예: "WIN|50500")
     const totalAmount = data.split('|')[1] || (Number(localStorage.getItem("totalDonation") || 0) + 500);
     
     localStorage.setItem("totalDonation", totalAmount);
@@ -119,27 +113,20 @@ function updateBar(amount) {
   const goal = 10000000; 
   const finalPercent = Math.min((amount / goal) * 100, 100);
 
-  // 1. 즉시 100%로 채우기 (transition을 아주 빠르게)
   bar.style.transition = "width 0.4s cubic-bezier(0.17, 0.67, 0.83, 0.67)";
   bar.style.width = "100%";
   
-  // 2. 100% 도달 후 현재 수치로 복귀 (0.6초 뒤 실행)
   setTimeout(() => {
     bar.style.transition = "width 1.2s ease-in-out";
     bar.style.width = finalPercent + "%";
-    
-    // 수치 텍스트 업데이트
     amountText.innerText = Number(amount).toLocaleString() + "원";
     
-    // 3. 복귀가 거의 끝날 때쯤 깜박임 시작 (1.2초 뒤 실행)
     setTimeout(() => {
-      // 깜박임 애니메이션 (CSS Keyframe 없이 직접 구현)
       let blinkCount = 0;
       const blinkInterval = setInterval(() => {
         bar.style.opacity = (bar.style.opacity === "0.3") ? "1" : "0.3";
         blinkCount++;
-        
-        if (blinkCount >= 6) { // 3번 깜박임 (껐다 켰다 총 6회)
+        if (blinkCount >= 6) {
           clearInterval(blinkInterval);
           bar.style.opacity = "1";
         }
@@ -153,78 +140,65 @@ function initScratch(){
   const ctx = canvas.getContext("2d");
   const display = document.getElementById("resultDisplay");
   let isDrawing = false;
-  let lastX = 0;
-  let lastY = 0;
+  let lastX = 0, lastY = 0;
+  let isRevealed = false;
 
-  display.innerText = "";
+  display.innerHTML = ""; // 기존 내용 초기화
 
-  // 1. 초기 덮개 설정
   ctx.globalCompositeOperation = "source-over";
   ctx.fillStyle = "#aaaaaa";
   ctx.fillRect(0,0,300,150);
-  
-  // 안내 문구 추가
   ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 20px sans-serif";
+  ctx.font = "bold 18px sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("여기를 슥슥 긁어보세요!", 150, 85);
+  ctx.fillText("50% 이상 긁어보세요!", 150, 85);
 
-  // 2. 부드러운 긁기 함수 (선을 연결하는 방식)
+  function checkScratchPercentage() {
+    if (isRevealed) return;
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageData.data;
+    let transparentPixels = 0;
+    for (let i = 3; i < pixels.length; i += 4) {
+      if (pixels[i] === 0) transparentPixels++;
+    }
+    const percentage = (transparentPixels / (canvas.width * canvas.height)) * 100;
+
+    if (percentage > 50) {
+      isRevealed = true;
+      // 1. 결과 메시지 표시
+      const mainText = (resultValue === "WIN") ? "🎁 당첨! 안전드림 커피" : "🙏 다음 기회에!";
+      display.innerHTML = `<div>${mainText}</div>`;
+      
+      display.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 500, fill: 'forwards' });
+
+      // 2. 3초 후 안전운행 메시지 추가
+      setTimeout(() => {
+        const safetyMsg = document.createElement("div");
+        safetyMsg.innerHTML = "<div style='color:#ff4b2b; margin-top:10px;'>❤️ 오늘도 안전운행 하세요! ❤️</div>";
+        display.appendChild(safetyMsg);
+        safetyMsg.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 800, fill: 'forwards' });
+      }, 3000);
+    }
+  }
+
   function scratch(x, y) {
     ctx.globalCompositeOperation = "destination-out";
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
-    ctx.lineWidth = 40; // 👈 원 크기를 40으로 키웠습니다. (기존 15~24에서 대폭 상향)
-
+    ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.lineWidth = 45;
     ctx.beginPath();
     ctx.moveTo(lastX, lastY);
     ctx.lineTo(x, y);
     ctx.stroke();
-
-    lastX = x;
-    lastY = y;
-    
-    // 결과 텍스트 노출
-    display.innerText = (resultValue === "WIN") ? "🎁 당첨! 안전드림 커피" : "🙏 다음 기회에!";
+    lastX = x; lastY = y;
+    if (Math.random() > 0.9) checkScratchPercentage();
   }
 
-  // 3. 이벤트 리스너 통합 (마우스 & 터치)
   function getPos(e) {
     const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return {
-      x: clientX - rect.left,
-      y: clientY - rect.top
-    };
+    return { x: clientX - rect.left, y: clientY - rect.top };
   }
 
-  const start = (e) => {
-    isDrawing = true;
-    const pos = getPos(e);
-    lastX = pos.x;
-    lastY = pos.y;
-  };
-
-  const move = (e) => {
-    if (!isDrawing) return;
-    e.preventDefault();
-    const pos = getPos(e);
-    scratch(pos.x, pos.y);
-  };
-
-  const stop = () => { isDrawing = false; };
-
-  // 마우스 이벤트
-  canvas.addEventListener("mousedown", start);
-  canvas.addEventListener("mousemove", move);
-  window.addEventListener("mouseup", stop);
-
-  // 터치 이벤트 (모바일용)
-  canvas.addEventListener("touchstart", start, { passive: false });
-  canvas.addEventListener("touchmove", move, { passive: false });
-  canvas.addEventListener("touchend", stop);
-}
-</script>
-</body>
-</html>
+  const start = (e) => { isDrawing = true; const pos = getPos(e); lastX = pos.x; lastY = pos.y; };
+  const move = (e) => { if (!isDrawing) return; e.preventDefault(); const pos = getPos(e); scratch(pos.x, pos.y); };
+  const
