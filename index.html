@@ -15,31 +15,14 @@
   #timerNumber { font-size: 40px; font-weight: bold; color: #ff4b2b; margin: 10px 0; }
   .bar-wrap { width:100%; margin:30px 0; border:1px solid #ddd; height:35px; border-radius: 20px; overflow: hidden; background: #eee; position: relative; }
   .bar { height:100%; width:0%; background: linear-gradient(90deg, #ff4b2b, #ff416c); position: absolute; left: 0; top: 0; transition: width 0.8s ease-out; }
-  /* 온도계 바 깜박임 효과 정의 */
-@keyframes blink {
-  0% { opacity: 1; }
-  50% { opacity: 0.4; }
-  100% { opacity: 1; }
-}
+  
+  @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+  .blinking { animation: blink 0.8s infinite; }
 
-/* 애니메이션을 적용할 클래스 */
-.blinking {
-  animation: blink 0.8s infinite;
-}
- #amountText { 
-  font-size: 24px; 
-  font-weight: bold; 
-  color: #ff4b2b; 
-  min-height: 40px; 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* transition을 여기에 넣지 말고 자바스크립트에서 조절하는 게 더 정확합니다 */
-}
+  #amountText { font-size: 24px; font-weight: bold; color: #ff4b2b; min-height: 40px; display: flex; align-items: center; justify-content: center; }
   canvas { border:2px solid #ddd; margin-top:20px; touch-action: none; border-radius: 10px; background:#fff; }
   #resultDisplay { margin-top: 20px; font-size: 18px; font-weight: bold; min-height: 120px; }
   .privacy-info { font-size: 11px; color: #888; margin-top: 15px; line-height: 1.4; text-align: left; background: #eee; padding: 10px; border-radius: 5px; }
-  
 </style>
 </head>
 <body>
@@ -109,64 +92,36 @@ function startTimer() {
 
 function handleDonate() {
   goNext(4);
-  
   var txt = document.getElementById("amountText");
-  var bar = document.getElementById("bar"); // 온도계 바 가져오기
+  var bar = document.getElementById("bar");
   
-  // 1. 안내 문구 노출 및 깜박임 시작
-  txt.style.transition = "none"; 
-  txt.style.opacity = "1";
-  txt.style.fontSize = "16px";
-  txt.style.color = "#888";
+  txt.style.transition = "none"; txt.style.opacity = "1"; txt.style.fontSize = "16px"; txt.style.color = "#888";
   txt.innerText = "기부 현황을 불러오는 중..."; 
-
-  // [추가] 온도계 바에 깜박임 클래스 추가
   bar.classList.add("blinking");
 
-  // 2. 온도계 바 이동 (낙관적 업데이트)
   var currentTotal = (Number(localStorage.getItem("totalDonation") || 0)) + 500;
   moveBarOnly(currentTotal); 
 
-  // 3. 서버 통신
-  fetch(API_URL, {
-    method: "POST",
-    body: new URLSearchParams({ type: "DONATE" })
-  })
-  .then(function(res) { return res.text(); })
-  .then(function(data) {
+  fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) })
+  .then(res => res.text())
+  .then(data => {
     var serverTotal = data.split('|')[1];
     localStorage.setItem("totalDonation", serverTotal);
-    
-    // 4. 데이터 도착 후 처리
     setTimeout(function() {
-      // [추가] 데이터가 왔으므로 깜박임 멈춤
       bar.classList.remove("blinking");
-
       txt.style.transition = "all 0.5s";
       txt.innerText = Number(serverTotal).toLocaleString() + "원";
-      txt.style.fontSize = "26px";
-      txt.style.color = "#ff4b2b";
+      txt.style.fontSize = "26px"; txt.style.color = "#ff4b2b";
       moveBarOnly(serverTotal); 
-    }, 800); // 0.8초간 깜박임을 충분히 보여줌
+    }, 800);
   });
 }
 
-// [추가] 글자는 건드리지 않고 '온도계 바'만 움직이는 함수
 function moveBarOnly(amount) {
   var bar = document.getElementById("bar");
   var goal = 10000000;
   var per = Math.max((amount / goal) * 100, 5);
   bar.style.width = per + "%";
-}
-
-// 기존 updateBar는 초기 로딩 등에서 필요할 수 있으니 유지하되 간섭 최소화
-function updateBar(amount) {
-  moveBarOnly(amount);
-  var txt = document.getElementById("amountText");
-  // 안내 문구 출력 중일 때는 숫자로 덮어쓰지 않음
-  if(txt.innerText.indexOf("불러오는") === -1) {
-    txt.innerText = Number(amount).toLocaleString() + "원";
-  }
 }
 
 function initScratch() {
@@ -176,31 +131,21 @@ function initScratch() {
   var drawing = false;
   var revealed = false;
 
-  // 1. [핵심] 먼저 흰색 바탕에 결과 글자를 미리 그립니다.
+  // 1. 초기화: 흰 배경에 결과 대기 문구
+  ctx.globalCompositeOperation = "source-over";
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, 300, 150);
-  
   ctx.fillStyle = "#333"; 
-  ctx.font = "bold 30px sans-serif";
+  ctx.font = "bold 25px sans-serif";
   ctx.textAlign = "center";
-  
-  // 결과값에 따라 미리 글자를 써둡니다. (서버 응답 전이라도 공간 확보)
   ctx.fillText("결과 확인 중...", 150, 85);
 
-  // 2. 그 위에 회색 덮개(스크래치 층)를 입힙니다.
-  // 이 부분은 결과가 서버에서 오기 전까지는 덮여있어야 하므로 
-  // 기존 로직을 유지하되, 긁어낼 때 아래 글자가 보이게 합니다.
-  
-  function drawCover() {
-    ctx.globalCompositeOperation = "source-over"; // 덮어쓰기 모드
-    ctx.fillStyle = "#aaa";
-    ctx.fillRect(0, 0, 300, 150);
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 16px sans-serif";
-    ctx.fillText("슥슥 긁어보세요!", 150, 85);
-  }
-  
-  drawCover();
+  // 2. 회색 덮개 칠하기
+  ctx.fillStyle = "#aaa";
+  ctx.fillRect(0, 0, 300, 150);
+  ctx.fillStyle = "#fff";
+  ctx.font = "bold 16px sans-serif";
+  ctx.fillText("슥슥 긁어보세요!", 150, 85);
 
   function checkReveal() {
     if (revealed) return;
@@ -215,20 +160,20 @@ function initScratch() {
       fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "SCRATCH" }) })
       .then(res => res.text())
       .then(result => {
-        // [추가] 50% 이상 긁었을 때, 캔버스 아래에 최종 결과를 다시 한번 그려줍니다.
-        ctx.globalCompositeOperation = "destination-over"; // 배경에 그리기
-        ctx.clearRect(0,0,300,150); // 캔버스를 깨끗이 지우고
+        // 결과 글자 그리기
+        ctx.globalCompositeOperation = "destination-over";
+        ctx.clearRect(0,0,300,150);
         ctx.fillStyle = "#fff";
         ctx.fillRect(0,0,300,150);
-        ctx.fillStyle = result === "WIN" ? "#0047a0" : "#888"; // 당첨은 파란색, 낙첨은 회색
-        ctx.font = "bold 40px sans-serif";
+        ctx.fillStyle = result === "WIN" ? "#0047a0" : "#888";
+        ctx.font = "bold 35px sans-serif";
         ctx.fillText(result === "WIN" ? "★ 당 첨 ★" : "다음 기회에", 150, 85);
 
         if (result === "WIN") {
           var phone = prompt("🎁 당첨! 안전드림 커피 쿠폰 발송을 위해\n전화번호를 입력해주세요.");
           if (phone) {
             fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "PHONE", phone: phone }) });
-            disp.innerHTML = "<div style='color:#0047a0;'>✅ 등록완료! 쿠폰이 한달이내 발송됩니다.</div>";
+            disp.innerHTML = "<div style='color:#0047a0;'>✅ 등록 완료! 한달이내 발송됩니다.</div>";
           }
         } else {
           disp.innerHTML = "🙏 다음 기회에! 안전운전 하세요.";
@@ -236,10 +181,6 @@ function initScratch() {
       });
     }
   }
-  
-  // (이하 마우스/터치 이벤트 로직은 동일)
-  // ...
-}
 
   function getPos(e) {
     var r = cvs.getBoundingClientRect();
@@ -256,13 +197,5 @@ function initScratch() {
     checkReveal();
   }
 
-  cvs.addEventListener("mousedown", () => drawing = true);
-  cvs.addEventListener("mousemove", scratch);
-  window.addEventListener("mouseup", () => drawing = false);
-  cvs.addEventListener("touchstart", (e) => { drawing = true; e.preventDefault(); }, {passive:false});
-  cvs.addEventListener("touchmove", (e) => { scratch(e); e.preventDefault(); }, {passive:false});
-  cvs.addEventListener("touchend", () => drawing = false);
-}
-</script>
-</body>
-</html>
+  // 이벤트 리스너를 initScratch 함수 내부로 이동 (cvs 변수 접근을 위해)
+  cvs
