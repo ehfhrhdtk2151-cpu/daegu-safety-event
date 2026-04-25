@@ -56,6 +56,15 @@
 </div>
 
 <script>
+  // 페이지 시작 시 누적 데이터 가져오기
+window.onload = function() {
+  fetch(API_URL)
+    .then(res => res.text())
+    .then(amount => {
+      // 초기 온도계 수치 업데이트 (기부 완료 전 미리 보여주기용)
+      localStorage.setItem("totalDonation", amount);
+    });
+};
 // Apps Script URL을 여기에 넣으세요
 var API_URL = "https://script.google.com/macros/s/AKfycbwXvL495c9He-qYcOPYQKFl9hmlPNEc9P5nLYdFPxb61bmkh8QE4gbz8Fja8n4Vjf1DOw/exec"; 
 var resultValue = "LOSE";
