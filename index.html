@@ -131,4 +131,42 @@ function initScratch() {
   ctx.textAlign = "center";
   ctx.fillText("50% 이상 긁어보세요", 150, 85);
 
-  function
+  function getPos(e) {
+    var r = cvs.getBoundingClientRect();
+    var cx = e.touches ? e.touches[0].clientX : e.clientX;
+    var cy = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: cx - r.left, y: cy - r.top };
+  }
+
+  function scratch(e) {
+    if (!drawing) return;
+    var p = getPos(e);
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 25, 0, Math.PI * 2);
+    ctx.fill();
+    
+    if (!revealed && Math.random() > 0.9) {
+      var pix = ctx.getImageData(0,0,300,150).data;
+      var t = 0;
+      for (var i=3; i<pix.length; i+=4) { if(pix[i] === 0) t++; }
+      if ((t/(300*150)) > 0.5) {
+        revealed = true;
+        disp.innerHTML = resultValue === "WIN" ? "🎁 당첨! 커피" : "🙏 다음 기회에!";
+        setTimeout(function() {
+          disp.innerHTML += "<div style='color:red; margin-top:10px;'>❤️ 안전운행 하세요! ❤️</div>";
+        }, 3000);
+      }
+    }
+  }
+
+  cvs.addEventListener("mousedown", function(e) { drawing = true; });
+  cvs.addEventListener("mousemove", scratch);
+  window.addEventListener("mouseup", function() { drawing = false; });
+  cvs.addEventListener("touchstart", function(e) { drawing = true; e.preventDefault(); }, {passive:false});
+  cvs.addEventListener("touchmove", function(e) { scratch(e); e.preventDefault(); }, {passive:false});
+  cvs.addEventListener("touchend", function() { drawing = false; });
+}
+</script>
+</body>
+</html>
