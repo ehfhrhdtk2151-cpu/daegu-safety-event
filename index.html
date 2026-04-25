@@ -112,7 +112,7 @@ function updateBar(amount) {
   const bar = document.getElementById("bar");
   const amountText = document.getElementById("amountText");
   const goal = 10000000; // 목표액
-  const finalPercent = Math.min((amount / goal) * 100, 100);
+  const finalPercent = Math.max((amount / goal) * 100, 2);
 
   // 1. 게이지가 끝까지 확 차오르는 '풀 충전' 효과
   bar.style.transition = "width 0.5s ease-in"; 
