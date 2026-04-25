@@ -15,7 +15,15 @@
   #timerNumber { font-size: 40px; font-weight: bold; color: #ff4b2b; margin: 10px 0; }
   .bar-wrap { width:100%; margin:30px 0; border:1px solid #ddd; height:35px; border-radius: 20px; overflow: hidden; background: #eee; position: relative; }
   .bar { height:100%; width:0%; background: linear-gradient(90deg, #ff4b2b, #ff416c); position: absolute; left: 0; top: 0; transition: width 0.8s ease-out; }
-  #amountText { font-size: 24px; font-weight: bold; color: #ff4b2b; transition: opacity 0.5s; }
+  #amountText { 
+  font-size: 24px; 
+  font-weight: bold; 
+  color: #ff4b2b; 
+  min-height: 35px; /* 문구와 금액이 바뀔 때 화면 들썩임 방지 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
   canvas { border:2px solid #ddd; margin-top:20px; touch-action: none; border-radius: 10px; background:#fff; }
   #resultDisplay { margin-top: 20px; font-size: 18px; font-weight: bold; min-height: 120px; }
   .privacy-info { font-size: 11px; color: #888; margin-top: 15px; line-height: 1.4; text-align: left; background: #eee; padding: 10px; border-radius: 5px; }
@@ -89,13 +97,17 @@ function startTimer() {
 function handleDonate() {
   goNext(4);
   var txt = document.getElementById("amountText");
-  txt.style.opacity = "0";
+  
+  // [추가] 숫자가 뜨기 전 안내 문구를 먼저 보여줌
+  txt.innerText = "기부 현황을 불러오는 중...";
+  txt.style.fontSize = "16px"; // 문구는 살짝 작게
+  txt.style.color = "#888";    // 색상은 차분하게
 
-  // 1. 낙관적 업데이트 (즉시 온도계 이동)
+  // 1. 낙관적 업데이트 (온도계 바는 즉시 이동)
   var currentTotal = (Number(localStorage.getItem("totalDonation") || 0)) + 500;
   updateBar(currentTotal);
 
-  // 2. 서버에 기부 기록 전송
+  // 2. 서버에 실제 데이터 요청
   fetch(API_URL, {
     method: "POST",
     body: new URLSearchParams({ type: "DONATE" })
@@ -104,8 +116,12 @@ function handleDonate() {
   .then(data => {
     var serverTotal = data.split('|')[1];
     localStorage.setItem("totalDonation", serverTotal);
+    
+    // 3. 데이터 도착 시 숫자로 교체
     updateBar(serverTotal);
-    txt.style.opacity = "1";
+    txt.innerText = Number(serverTotal).toLocaleString() + "원";
+    txt.style.fontSize = "24px"; // 다시 크게
+    txt.style.color = "#ff4b2b"; // 다시 강조색으로
   });
 }
 
