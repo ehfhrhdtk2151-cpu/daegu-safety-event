@@ -3,198 +3,132 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>안전기뷰(Give U) 캠페인</title>
+<title>안전기뷰 캠페인</title>
 <style>
-  body { margin:0; font-family: sans-serif; text-align:center; background:#f9f9f9; color: #333; overflow-x: hidden; }
-  .step { display:none; padding:20px; max-width: 500px; margin: 0 auto; min-height: 100vh; box-sizing: border-box; }
+  body { margin:0; font-family: sans-serif; text-align:center; background:#f9f9f9; }
+  .step { display:none; padding:20px; max-width: 500px; margin: 0 auto; min-height: 100vh; }
   .active { display:block; }
-  h2 { color: #0047a0; margin-top: 10px; }
   button { 
-    padding:18px 25px; font-size:18px; margin-top:20px; width: 100%;
+    padding:18px; font-size:18px; margin-top:20px; width: 100%;
     border: none; border-radius: 10px; background: #0047a0; color: white; font-weight: bold;
-    cursor: pointer; -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
   }
-  button:disabled { background: #ccc; cursor: default; }
-  .safety-img { width:100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-  
-  /* 카운트다운 스타일 */
-  #countdownContainer { margin-top: 15px; height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  #timerNumber { font-size: 40px; font-weight: bold; color: #ff4b2b; }
-
-  /* 기부 온도계 */
-  .bar-wrap { width:100%; margin:30px auto; border:1px solid #ddd; height:35px; border-radius: 20px; overflow: hidden; background: #eee; position: relative; }
-  .bar { height:100%; width:0%; background: linear-gradient(90deg, #ff4b2b, #ff416c); position: absolute; left: 0; top: 0; }
-  #amountText { font-size: 24px; font-weight: bold; color: #ff4b2b; }
-  
-  /* 스크래치 */
-  canvas { border:2px solid #ddd; margin-top:20px; touch-action: none; border-radius: 10px; background-color: #fff; }
-  #resultDisplay { margin-top: 20px; font-size: 22px; color: #0047a0; font-weight: bold; min-height: 110px; pointer-events: none; }
+  button:disabled { background: #ccc; }
+  .safety-img { width:100%; border-radius: 12px; }
+  .bar-wrap { width:100%; margin:30px 0; border:1px solid #ddd; height:30px; border-radius: 15px; overflow: hidden; background: #eee; position: relative; }
+  .bar { height:100%; width:0%; background: red; position: absolute; left: 0; top: 0; transition: width 1s ease; }
+  canvas { border:1px solid #ccc; margin-top:20px; touch-action: none; background:#fff; }
+  #resultDisplay { margin-top: 20px; font-size: 20px; font-weight: bold; min-height: 80px; }
 </style>
 </head>
 <body>
 
 <div id="step1" class="step active">
   <h2>안전기뷰(Give U)</h2>
-  <p>잠시 쉬며 안전을 충전하세요!<br>참여하시면 기부금이 전달됩니다.</p>
-  <button onclick="next(2)">캠페인 참여하기</button>
+  <p>잠시 쉬며 안전을 충전하세요!</p>
+  <button onclick="goNext(2)">캠페인 참여하기</button>
 </div>
 
 <div id="step2" class="step">
   <h2>안전운전 약속하기</h2>
   <img src="safety.jpg" class="safety-img">
-  <div id="countdownContainer">
-    <div id="timerNumber">3</div>
-    <div id="timerSubText" style="font-size: 14px; color: #666;">안전 수칙을 확인해 주세요</div>
-  </div>
-  <button id="nextBtn" onclick="next(3)" disabled>확인했습니다</button>
+  <div id="timerNum" style="font-size:40px; color:red; margin:10px;">3</div>
+  <button id="nextBtn" onclick="goNext(3)" disabled>확인했습니다</button>
 </div>
 
 <div id="step3" class="step">
   <h2>안전 나눔</h2>
-  <p>확인 버튼을 누르면 500원이 자동으로 기부됩니다.</p>
-  <button onclick="donate()">기부하고 복권 받기</button>
+  <p>500원이 자동으로 기부됩니다.</p>
+  <button onclick="handleDonate()">기부하고 복권 받기</button>
 </div>
 
 <div id="step4" class="step">
   <h2>기부 완료!</h2>
   <div class="bar-wrap"><div id="bar" class="bar"></div></div>
   <p id="amountText">0원</p>
-  <button onclick="next(5)">럭키 스크래치 확인</button>
+  <button onclick="goNext(5)">복권 긁기</button>
 </div>
 
 <div id="step5" class="step">
   <h2>럭키 스크래치</h2>
-  <p>회색 부분을 50% 이상 긁어주세요!</p>
   <canvas id="scratch" width="300" height="150"></canvas>
   <div id="resultDisplay"></div>
 </div>
 
 <script>
-const API_URL = "여기에_AppsScript_URL"; 
-let resultValue = "LOSE";
+// Apps Script URL을 여기에 넣으세요
+var API_URL = "여기에_Apps_Script_URL"; 
+var resultValue = "LOSE";
 
-function next(n){
-  const steps = document.getElementsByClassName('step');
-  for(let i=0; i<steps.length; i++) { steps[i].classList.remove('active'); }
+function goNext(n) {
+  var steps = document.getElementsByClassName('step');
+  for (var i = 0; i < steps.length; i++) { steps[i].classList.remove('active'); }
   document.getElementById('step' + n).classList.add('active');
   
-  if(n === 2) { startTimer(); }
-  if(n === 5) { initScratch(); }
+  if (n === 2) { startTimer(); }
+  if (n === 5) { initScratch(); }
 }
 
 function startTimer() {
-  let timeLeft = 3;
-  const timerNum = document.getElementById("timerNumber");
-  const subText = document.getElementById("timerSubText");
-  const nextBtn = document.getElementById("nextBtn");
+  var time = 3;
+  var btn = document.getElementById("nextBtn");
+  var num = document.getElementById("timerNum");
+  btn.disabled = true;
   
-  nextBtn.disabled = true;
-  timerNum.innerText = timeLeft;
-
-  const timerId = setInterval(function() {
-    timeLeft--;
-    if (timeLeft > 0) {
-      timerNum.innerText = timeLeft;
+  var interval = setInterval(function() {
+    time--;
+    if (time > 0) {
+      num.innerText = time;
     } else {
-      clearInterval(timerId);
-      timerNum.innerText = "✓";
-      timerNum.style.color = "#0047a0";
-      subText.innerText = "확인 버튼을 눌러주세요";
-      nextBtn.disabled = false;
+      clearInterval(interval);
+      num.innerText = "✓";
+      btn.disabled = false;
     }
   }, 1000);
 }
 
-async function donate(){
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      body: new URLSearchParams({ phone: "user_" + Date.now() })
-    });
-    const data = await res.text();
-    resultValue = data.split('|')[0] || "LOSE"; 
-    const total = data.split('|')[1] || (Number(localStorage.getItem("totalDonation") || 0) + 500);
-    localStorage.setItem("totalDonation", total);
-    updateBar(total);
-  } catch (e) {
-    const total = (Number(localStorage.getItem("totalDonation") || 0) + 500);
-    localStorage.setItem("totalDonation", total);
-    updateBar(total);
-  }
-  next(4);
+function handleDonate() {
+  // 테스트를 위해 우선 다음 단계로 바로 이동하게 설정
+  var currentTotal = Number(localStorage.getItem("totalDonation") || 0) + 500;
+  localStorage.setItem("totalDonation", currentTotal);
+  
+  updateBar(currentTotal);
+  goNext(4);
+
+  // 실제 서버 통신 (배포 시 URL 확인 필수)
+  fetch(API_URL, {
+    method: "POST",
+    body: new URLSearchParams({ phone: "user_" + Date.now() })
+  }).then(function(res) { return res.text(); })
+    .then(function(data) {
+      resultValue = data.split('|')[0] || "LOSE";
+    }).catch(function(e) { console.log("서버 연결 안됨"); });
 }
 
 function updateBar(amount) {
-  const bar = document.getElementById("bar");
-  const txt = document.getElementById("amountText");
-  const goal = 10000000; 
-  const actualPer = (amount / goal) * 100;
-  const finalPer = Math.max(actualPer, 5); 
+  var bar = document.getElementById("bar");
+  var txt = document.getElementById("amountText");
+  var goal = 10000000;
+  var per = Math.max((amount / goal) * 100, 5); // 최소 5%
 
-  bar.style.transition = "width 0.4s ease-in";
-  bar.style.width = "100%";
-  
   setTimeout(function() {
-    bar.style.transition = "width 1.2s ease-in-out";
-    bar.style.width = finalPer + "%";
-    txt.innerText = Number(amount).toLocaleString() + "원";
-  }, 600);
+    bar.style.width = per + "%";
+    txt.innerText = amount.toLocaleString() + "원";
+  }, 500);
 }
 
-function initScratch(){
-  const cvs = document.getElementById("scratch");
-  const ctx = cvs.getContext("2d");
-  const disp = document.getElementById("resultDisplay");
-  let drawing = false;
-  let lx = 0, ly = 0;
-  let revealed = false;
+function initScratch() {
+  var cvs = document.getElementById("scratch");
+  var ctx = cvs.getContext("2d");
+  var disp = document.getElementById("resultDisplay");
+  var drawing = false;
+  var revealed = false;
 
-  ctx.globalCompositeOperation = "source-over";
   ctx.fillStyle = "#aaa";
-  ctx.fillRect(0,0,300,150);
+  ctx.fillRect(0, 0, 300, 150);
   ctx.fillStyle = "#fff";
   ctx.font = "bold 18px sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("슥슥 긁어보세요!", 150, 85);
+  ctx.fillText("50% 이상 긁어보세요", 150, 85);
 
-  function checkReveal() {
-    if (revealed) return;
-    const pix = ctx.getImageData(0,0,300,150).data;
-    let t = 0;
-    for (let i=3; i<pix.length; i+=4) { if(pix[i] === 0) t++; }
-    if ((t/(300*150)) > 0.5) {
-      revealed = true;
-      disp.innerHTML = "<div>" + (resultValue === "WIN" ? "🎁 당첨! 안전드림 커피" : "🙏 다음 기회에!") + "</div>";
-      setTimeout(function() {
-        const safety = document.createElement("div");
-        safety.innerHTML = "<div style='color:#ff4b2b; margin-top:10px;'>❤️ 오늘도 안전운행 하세요! ❤️</div>";
-        disp.appendChild(safety);
-      }, 3000);
-    }
-  }
-
-  function scratch(x, y) {
-    ctx.globalCompositeOperation = "destination-out";
-    ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.lineWidth = 45;
-    ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(x, y); ctx.stroke();
-    lx = x; ly = y;
-    if (Math.random() > 0.9) checkReveal();
-  }
-
-  function getP(e) {
-    const r = cvs.getBoundingClientRect();
-    const cx = e.touches ? e.touches[0].clientX : e.clientX;
-    const cy = e.touches ? e.touches[0].clientY : e.clientY;
-    return { x: cx - r.left, y: cy - r.top };
-  }
-
-  cvs.addEventListener("mousedown", function(e){ drawing = true; const p = getP(e); lx = p.x; ly = p.y; });
-  cvs.addEventListener("mousemove", function(e){ if (drawing) { const p = getP(e); scratch(p.x, p.y); } });
-  window.addEventListener("mouseup", function(){ drawing = false; checkReveal(); });
-  cvs.addEventListener("touchstart", function(e){ drawing = true; const p = getP(e); lx = p.x; ly = p.y; }, {passive:false});
-  cvs.addEventListener("touchmove", function(e){ if (drawing) { e.preventDefault(); const p = getP(e); scratch(p.x, p.y); } }, {passive:false});
-  cvs.addEventListener("touchend", function(){ drawing = false; checkReveal(); });
-}
-</script>
-</body>
-</html>
+  function
