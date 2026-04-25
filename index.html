@@ -9,26 +9,16 @@
   .step { display:none; padding:20px; max-width: 500px; margin: 0 auto; min-height: 100vh; box-sizing: border-box; }
   .active { display:block; }
   h2 { color: #0047a0; margin-top: 10px; }
-  button { 
-    padding:18px 25px; font-size:18px; margin-top:20px; width: 100%;
-    border: none; border-radius: 10px; background: #0047a0; color: white; font-weight: bold;
-    cursor: pointer; -webkit-tap-highlight-color: transparent;
-  }
-  button:disabled { background: #ccc; cursor: default; }
+  button { padding:18px 25px; font-size:18px; margin-top:20px; width: 100%; border: none; border-radius: 10px; background: #0047a0; color: white; font-weight: bold; cursor: pointer; }
+  button:disabled { background: #ccc; }
   .safety-img { width:100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-  
-  /* 카운트다운 스타일 */
   #timerNumber { font-size: 40px; font-weight: bold; color: #ff4b2b; margin: 10px 0; }
-  
-  /* 온도계 스타일 */
   .bar-wrap { width:100%; margin:30px 0; border:1px solid #ddd; height:35px; border-radius: 20px; overflow: hidden; background: #eee; position: relative; }
-  .bar { height:100%; width:0%; background: linear-gradient(90deg, #ff4b2b, #ff416c); position: absolute; left: 0; top: 0; transition: width 1s ease; }
-  #amountText { font-size: 24px; font-weight: bold; color: #ff4b2b; }
-  
-  /* 스크래치 및 개인정보 문구 */
+  .bar { height:100%; width:0%; background: linear-gradient(90deg, #ff4b2b, #ff416c); position: absolute; left: 0; top: 0; transition: width 0.8s ease-out; }
+  #amountText { font-size: 24px; font-weight: bold; color: #ff4b2b; transition: opacity 0.5s; }
   canvas { border:2px solid #ddd; margin-top:20px; touch-action: none; border-radius: 10px; background:#fff; }
   #resultDisplay { margin-top: 20px; font-size: 18px; font-weight: bold; min-height: 120px; }
-  .privacy-info { font-size: 12px; color: #888; margin-top: 15px; line-height: 1.4; text-align: left; background: #eee; padding: 10px; border-radius: 5px; }
+  .privacy-info { font-size: 11px; color: #888; margin-top: 15px; line-height: 1.4; text-align: left; background: #eee; padding: 10px; border-radius: 5px; }
 </style>
 </head>
 <body>
@@ -65,18 +55,16 @@
   <p>회색 부분을 50% 이상 긁어주세요!</p>
   <canvas id="scratch" width="300" height="150"></canvas>
   <div id="resultDisplay"></div>
-  
   <div class="privacy-info">
     <b>[개인정보 수집 및 이용 안내]</b><br>
     - 수집 항목: 휴대전화 번호 (당첨 시에 한함)<br>
-    - 이용 목적: 경품(커피 쿠폰) 발송 및 중복 참여 방지<br>
+    - 이용 목적: 경품(커피 쿠폰) 발송용<br>
     - 보유 기간: <b>경품 발송 완료 후 즉시 파기</b>
   </div>
 </div>
 
 <script>
-var API_URL = "https://script.google.com/macros/s/AKfycbyPywvkEIQUTNVyJxd6Yc8QEbEkEQQLGMGv95d1GhtMgEhmDgfDTFREvxmrbyvVd0MQ_g/exec"; 
-var resultValue = "LOSE";
+var API_URL = "https://script.google.com/macros/s/AKfycbzVuM3sCCQD4J3wmW1eCk7UKYxlfdUa2f5UYzMi_AgfxHm3X_HgZ84IOiEQ_CJ1Dna8gg/exec"; 
 
 function goNext(n) {
   var steps = document.getElementsByClassName('step');
@@ -100,26 +88,23 @@ function startTimer() {
 
 function handleDonate() {
   goNext(4);
-  
-  // 온도계 바는 즉시 움직이되, 숫자는 서버 응답을 받은 후 정확하게 표시
   var txt = document.getElementById("amountText");
-  txt.style.opacity = "0"; // 숫자를 잠시 숨김
-  
+  txt.style.opacity = "0";
+
+  // 1. 낙관적 업데이트 (즉시 온도계 이동)
+  var currentTotal = (Number(localStorage.getItem("totalDonation") || 0)) + 500;
+  updateBar(currentTotal);
+
+  // 2. 서버에 기부 기록 전송
   fetch(API_URL, {
     method: "POST",
-    body: new URLSearchParams({ phone: "PRE_CHECK" })
+    body: new URLSearchParams({ type: "DONATE" })
   })
-  .then(function(res) { return res.text(); })
-  .then(function(data) {
-    var parts = data.split('|');
-    resultValue = parts[0];
-    var serverTotal = parts[1];
-    
+  .then(res => res.text())
+  .then(data => {
+    var serverTotal = data.split('|')[1];
     localStorage.setItem("totalDonation", serverTotal);
-    
-    // 서버 데이터가 오면 숫자를 서서히 나타나게 함
     updateBar(serverTotal);
-    txt.style.transition = "opacity 0.5s";
     txt.style.opacity = "1";
   });
 }
@@ -129,13 +114,8 @@ function updateBar(amount) {
   var txt = document.getElementById("amountText");
   var goal = 10000000;
   var per = Math.max((amount / goal) * 100, 5);
-
-  // 애니메이션 지연 시간을 0.6초 -> 0.1초로 단축
-  setTimeout(function() {
-    bar.style.transition = "width 0.8s ease-out"; // 애니메이션 자체도 더 부드럽게
-    bar.style.width = per + "%";
-    txt.innerText = Number(amount).toLocaleString() + "원";
-  }, 100); 
+  bar.style.width = per + "%";
+  txt.innerText = Number(amount).toLocaleString() + "원";
 }
 
 function initScratch() {
@@ -148,7 +128,7 @@ function initScratch() {
   ctx.fillStyle = "#aaa";
   ctx.fillRect(0, 0, 300, 150);
   ctx.fillStyle = "#fff";
-  ctx.font = "bold 18px sans-serif";
+  ctx.font = "bold 16px sans-serif";
   ctx.textAlign = "center";
   ctx.fillText("슥슥 긁어보세요!", 150, 85);
 
@@ -157,20 +137,27 @@ function initScratch() {
     var pix = ctx.getImageData(0,0,300,150).data;
     var t = 0;
     for (var i=3; i<pix.length; i+=4) { if(pix[i] === 0) t++; }
+    
     if ((t/(300*150)) > 0.5) {
       revealed = true;
-      if (resultValue === "WIN") {
-        var phone = prompt("🎁 당첨을 축하드립니다!\n커피 쿠폰 발송을 위해 전화번호를 입력해주세요.\n(예: 01012345678)");
-        if (phone) {
-          // 전화번호 서버 전송 (이미 기록된 행에 업데이트하거나 새 로그 남기기)
-          fetch(API_URL, { method: "POST", body: new URLSearchParams({ phone: phone }) });
-          disp.innerHTML = "<div style='color:#0047a0;'>✅ 등록 완료!<br>쿠폰이 곧 발송됩니다.</div>";
+      disp.innerHTML = "결과 확인 중...";
+
+      // 긁은 시점에 서버에 당첨 여부 요청
+      fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "SCRATCH" }) })
+      .then(res => res.text())
+      .then(result => {
+        if (result === "WIN") {
+          var phone = prompt("🎁 당첨! 안전드림 커피 쿠폰 발송을 위해\n전화번호를 입력해주세요. (예: 01012345678)");
+          if (phone) {
+            fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "PHONE", phone: phone }) });
+            disp.innerHTML = "<div style='color:#0047a0;'>✅ 등록 완료! 쿠폰이 곧 발송됩니다.</div>";
+          } else {
+            disp.innerHTML = "<div style='color:red;'>번호 미입력으로 당첨이 취소될 수 있습니다.</div>";
+          }
         } else {
-          disp.innerHTML = "<div style='color:red;'>번호를 입력하지 않으시면<br>경품 발송이 어렵습니다.</div>";
+          disp.innerHTML = "🙏 다음 기회에! 안전운전 하세요.";
         }
-      } else {
-        disp.innerHTML = "🙏 다음 기회에!<br>안전운전 하세요.";
-      }
+      });
     }
   }
 
@@ -185,16 +172,16 @@ function initScratch() {
     if (!drawing) return;
     var p = getPos(e);
     ctx.globalCompositeOperation = "destination-out";
-    ctx.beginPath(); ctx.arc(p.x, p.y, 25, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(p.x, p.y, 20, 0, Math.PI * 2); ctx.fill();
     checkReveal();
   }
 
-  cvs.addEventListener("mousedown", function() { drawing = true; });
+  cvs.addEventListener("mousedown", () => drawing = true);
   cvs.addEventListener("mousemove", scratch);
-  window.addEventListener("mouseup", function() { drawing = false; });
-  cvs.addEventListener("touchstart", function(e) { drawing = true; e.preventDefault(); }, {passive:false});
-  cvs.addEventListener("touchmove", function(e) { scratch(e); e.preventDefault(); }, {passive:false});
-  cvs.addEventListener("touchend", function() { drawing = false; });
+  window.addEventListener("mouseup", () => drawing = false);
+  cvs.addEventListener("touchstart", (e) => { drawing = true; e.preventDefault(); }, {passive:false});
+  cvs.addEventListener("touchmove", (e) => { scratch(e); e.preventDefault(); }, {passive:false});
+  cvs.addEventListener("touchend", () => drawing = false);
 }
 </script>
 </body>
