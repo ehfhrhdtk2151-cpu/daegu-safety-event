@@ -1,158 +1,164 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-<meta charset="UTF-8"> 
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>안전기뷰(Give U) 캠페인</title>
 <style>
-body { margin:0; font-family:sans-serif; text-align:center; background:#f5f5f5; }
-.step { display:none; padding:20px; }
-.active { display:block; }
-button { padding:15px 25px; font-size:18px; margin-top:20px; }
-canvas { border:1px solid #ccc; margin-top:20px; }
+  body { margin:0; font-family: 'Pretendard', sans-serif; text-align:center; background:#f9f9f9; color: #333; }
+  .step { display:none; padding:20px; max-width: 500px; margin: 0 auto; }
+  .active { display:block; animation: fadeIn 0.5s; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  
+  h2 { color: #0047a0; margin-bottom: 20px; }
+  button { 
+    padding:15px 25px; font-size:18px; margin-top:20px; width: 100%;
+    border: none; border-radius: 8px; background: #0047a0; color: white; font-weight: bold;
+    cursor: pointer; transition: background 0.3s;
+  }
+  button:disabled { background: #ccc; cursor: not-allowed; }
+  
+  /* 이미지 및 홍보물 */
+  .safety-img { width:100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 
-/* 온도계 */
-.bar-wrap {
-  width:80%;
-  margin:20px auto;
-  border:1px solid #ccc;
-  height:30px;
-}
-.bar {
-  height:100%;
-  width:0%;
-  background:red;
-}
+  /* 기부 온도계 (애니메이션 추가) */
+  .bar-wrap { width:100%; margin:30px auto; border:1px solid #ddd; height:35px; border-radius: 20px; overflow: hidden; background: #eee; }
+  .bar { height:100%; width:0%; background: linear-gradient(90deg, #ff4b2b, #ff416c); transition: width 1.5s ease-out; }
+  #amountText { font-size: 24px; font-weight: bold; color: #ff4b2b; margin-top: 10px; }
+
+  /* 스크래치 */
+  canvas { border:2px solid #ddd; margin-top:20px; touch-action: none; border-radius: 10px; background-color: #fff; }
 </style>
 </head>
-
 <body>
 
-<!-- STEP 1 -->
 <div id="step1" class="step active">
-  <h2>STEP 1 쉬어가기</h2>
-  <p>잠시 쉬어가세요 ??</p>
+  <h2>안전기뷰(Give U)</h2>
+  <p>잠시 쉬며 안전을 충전하세요!<br>캠페인에 참여하시면 기부금이 전달됩니다.</p>
   <button onclick="next(2)">캠페인 참여하기</button>
 </div>
 
-<!-- STEP 2 -->
 <div id="step2" class="step">
-  <h2>STEP 2 알아가기</h2>
-
-  <!-- 여기 이미지 파일 넣기 -->
-  <img src="safety.jpg" style="width:100%; max-width:400px;">
-
+  <h2>안전운전 약속하기</h2>
+  <img src="safety.jpg" class="safety-img" alt="배려운전 12대 수칙">
+  <p style="font-size: 0.9em; color: #666; margin-top: 10px;">수칙을 3초간 확인해 주세요.</p>
   <button id="nextBtn" onclick="next(3)" disabled>확인했습니다</button>
 </div>
 
-<!-- STEP 3 -->
 <div id="step3" class="step">
-  <h2>STEP 3 나누기</h2>
-  <p>안전을 나누어 주세요</p>
-  <button onclick="donate()">500원 기부 참여하기</button>
+  <h2>안전 나눔</h2>
+  <p>확인 버튼을 누르면 <strong>안전드림 커피</strong> 기금으로<br>500원이 자동으로 기부됩니다.</p>
+  <button onclick="donate()">기부하고 복권 받기</button>
 </div>
 
-<!-- STEP 4 (온도계) -->
 <div id="step4" class="step">
-  <h2>기부 완료 ??</h2>
-
+  <h2>기부 완료!</h2>
+  <p>우리의 안전한 마음이 이만큼 모였습니다.</p>
   <div class="bar-wrap">
     <div id="bar" class="bar"></div>
   </div>
-
   <p id="amountText">0원</p>
-
-  <button onclick="next(5)">스크래치 복권 확인</button>
+  <button onclick="next(5)">럭키 스크래치 확인</button>
 </div>
 
-<!-- STEP 5 (스크래치) -->
 <div id="step5" class="step">
-  <h2>스크래치 복권 ??</h2>
-  <p>긁어서 결과 확인!</p>
+  <h2>안전드림 럭키 스크래치</h2>
+  <p>회색 부분을 긁어서 결과를 확인하세요!</p>
   <canvas id="scratch" width="300" height="150"></canvas>
-  <h3 id="resultText"></h3>
+  <h3 id="resultDisplay" style="margin-top: 20px; font-size: 24px; color: #0047a0;"></h3>
 </div>
 
 <script>
-// 서버 URL 넣기
-const API_URL = "여기에_AppsScript_URL";
-
-// 결과 저장
+const API_URL = "여기에_AppsScript_URL"; // 실제 주소로 변경 필수
 let resultValue = "LOSE";
 
-// STEP 이동
 function next(n){
   document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
   document.getElementById('step'+n).classList.add('active');
-
-  if(n === 5){
-    initScratch();
+  
+  if(n === 2) {
+    setTimeout(() => { document.getElementById("nextBtn").disabled = false; }, 3000);
   }
+  if(n === 5) { initScratch(); }
 }
 
-// STEP2 버튼 지연 활성화
-setTimeout(()=>{
-  const btn = document.getElementById("nextBtn");
-  if(btn) btn.disabled = false;
-}, 3000);
-
-// 기부 처리
-function donate(){
-  fetch(API_URL, {
-    method: "POST",
-    body: new URLSearchParams({
-      phone: "user_" + Math.random()
-    })
-  })
-  .then(res => res.text())
-  .then(data => {
+async function donate(){
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: new URLSearchParams({ phone: "user_" + Date.now() })
+    });
+    const data = await response.text();
 
     if(data === "DUPLICATE"){
-      alert("이미 참여하셨습니다");
+      alert("이미 참여하신 기기입니다.");
       return;
     }
 
-    resultValue = data;
-
-    // 기부금 증가
-    let current = localStorage.getItem("donation") || 0;
-    current = Number(current) + 500;
-    localStorage.setItem("donation", current);
-
-    updateBar(current);
-
+    // 결과 저장 (WIN 또는 LOSE)
+    resultValue = data.split('|')[0] || data; 
+    // 전체 누적 금액 (서버에서 넘겨준다고 가정, 예: "WIN|50500")
+    const totalAmount = data.split('|')[1] || (Number(localStorage.getItem("totalDonation") || 0) + 500);
+    
+    localStorage.setItem("totalDonation", totalAmount);
+    updateBar(totalAmount);
     next(4);
-  });
+  } catch (e) {
+    alert("연결에 실패했습니다. 다시 시도해주세요.");
+  }
 }
 
-// 온도계 업데이트
 function updateBar(amount){
-  const goal = 10000000;
+  const goal = 10000000; // 목표액 1,000만원
   const percent = Math.min((amount / goal) * 100, 100);
-
-  document.getElementById("bar").style.width = percent + "%";
-  document.getElementById("amountText").innerText =
-    amount.toLocaleString() + "원";
+  
+  setTimeout(() => {
+    document.getElementById("bar").style.width = percent + "%";
+    document.getElementById("amountText").innerText = Number(amount).toLocaleString() + "원";
+  }, 100);
 }
 
-// 스크래치 기능
 function initScratch(){
   const canvas = document.getElementById("scratch");
   const ctx = canvas.getContext("2d");
+  const display = document.getElementById("resultDisplay");
 
-  ctx.fillStyle = "gray";
+  // 결과 텍스트 숨겨두기
+  display.innerText = "";
+
+  // 덮개 그리기
+  ctx.globalCompositeOperation = "source-over";
+  ctx.fillStyle = "#aaaaaa";
   ctx.fillRect(0,0,300,150);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 18px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("여기를 긁어주세요", 150, 85);
 
-  canvas.addEventListener("mousemove", function(e){
+  function scratch(x, y){
     ctx.globalCompositeOperation = "destination-out";
     ctx.beginPath();
-    ctx.arc(e.offsetX, e.offsetY, 12, 0, Math.PI*2);
+    ctx.arc(x, y, 15, 0, Math.PI*2);
     ctx.fill();
+    
+    // 결과 텍스트 노출 (어느 정도 긁으면 표시)
+    display.innerText = (resultValue === "WIN") ? "🎁 당첨! 안전드림 커피" : "🙏 다음 기회에!";
+  }
+
+  canvas.addEventListener("mousemove", (e) => {
+    if(e.buttons === 1) {
+      const rect = canvas.getBoundingClientRect();
+      scratch(e.clientX - rect.left, e.clientY - rect.top);
+    }
   });
 
-  document.getElementById("resultText").innerText =
-    resultValue === "WIN" ? "?? 당첨!" : "?? 꽝";
+  canvas.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    scratch(touch.clientX - rect.left, touch.clientY - rect.top);
+  }, { passive: false });
 }
 </script>
-
 </body>
 </html>
