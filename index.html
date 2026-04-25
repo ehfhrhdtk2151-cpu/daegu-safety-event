@@ -15,14 +15,15 @@
   #timerNumber { font-size: 40px; font-weight: bold; color: #ff4b2b; margin: 10px 0; }
   .bar-wrap { width:100%; margin:30px 0; border:1px solid #ddd; height:35px; border-radius: 20px; overflow: hidden; background: #eee; position: relative; }
   .bar { height:100%; width:0%; background: linear-gradient(90deg, #ff4b2b, #ff416c); position: absolute; left: 0; top: 0; transition: width 0.8s ease-out; }
-  #amountText { 
+ #amountText { 
   font-size: 24px; 
   font-weight: bold; 
   color: #ff4b2b; 
-  min-height: 35px; /* 문구와 금액이 바뀔 때 화면 들썩임 방지 */
+  min-height: 40px; 
   display: flex;
   align-items: center;
   justify-content: center;
+  /* transition을 여기에 넣지 말고 자바스크립트에서 조절하는 게 더 정확합니다 */
 }
   canvas { border:2px solid #ddd; margin-top:20px; touch-action: none; border-radius: 10px; background:#fff; }
   #resultDisplay { margin-top: 20px; font-size: 18px; font-weight: bold; min-height: 120px; }
@@ -98,30 +99,37 @@ function handleDonate() {
   goNext(4);
   var txt = document.getElementById("amountText");
   
-  // [추가] 숫자가 뜨기 전 안내 문구를 먼저 보여줌
+  // 1. 즉시 안내 문구 노출 (기존의 opacity 설정을 무시하고 강제로 보이게 함)
+  txt.style.opacity = "1"; 
+  txt.style.fontSize = "16px";
+  txt.style.color = "#888";
   txt.innerText = "기부 현황을 불러오는 중...";
-  txt.style.fontSize = "16px"; // 문구는 살짝 작게
-  txt.style.color = "#888";    // 색상은 차분하게
 
-  // 1. 낙관적 업데이트 (온도계 바는 즉시 이동)
+  // 2. 온도계 바는 즉시 이동 (낙관적 업데이트)
   var currentTotal = (Number(localStorage.getItem("totalDonation") || 0)) + 500;
   updateBar(currentTotal);
 
-  // 2. 서버에 실제 데이터 요청
+  // 3. 서버에 실제 데이터 요청
   fetch(API_URL, {
     method: "POST",
     body: new URLSearchParams({ type: "DONATE" })
   })
-  .then(res => res.text())
-  .then(data => {
+  .then(function(res) { return res.text(); })
+  .then(function(data) {
     var serverTotal = data.split('|')[1];
     localStorage.setItem("totalDonation", serverTotal);
     
-    // 3. 데이터 도착 시 숫자로 교체
+    // 4. 데이터 도착 시 숫자로 교체하며 강조
     updateBar(serverTotal);
-    txt.innerText = Number(serverTotal).toLocaleString() + "원";
-    txt.style.fontSize = "24px"; // 다시 크게
-    txt.style.color = "#ff4b2b"; // 다시 강조색으로
+    
+    // 부드럽게 숫자가 나타나는 효과
+    txt.style.opacity = "0"; // 잠시 숨겼다가
+    setTimeout(function() {
+      txt.innerText = Number(serverTotal).toLocaleString() + "원";
+      txt.style.fontSize = "26px"; // 금액은 더 크게
+      txt.style.color = "#ff4b2b"; // 강조색
+      txt.style.opacity = "1";      // 다시 보임
+    }, 150);
   });
 }
 
