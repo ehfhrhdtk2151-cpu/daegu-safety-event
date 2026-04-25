@@ -108,14 +108,36 @@ async function donate(){
   }
 }
 
-function updateBar(amount){
-  const goal = 10000000; // 목표액 1,000만원
-  const percent = Math.min((amount / goal) * 100, 100);
-  
+function updateBar(amount) {
+  const bar = document.getElementById("bar");
+  const amountText = document.getElementById("amountText");
+  const goal = 10000000; // 목표액
+  const finalPercent = Math.min((amount / goal) * 100, 100);
+
+  // 1. 게이지가 끝까지 확 차오르는 '풀 충전' 효과
+  bar.style.transition = "width 0.5s ease-in"; 
+  bar.style.width = "100% ";
+  bar.style.filter = "brightness(1.5) blur(1px)"; // 빛나는 효과 추가
+
+  // 2. 잠시 후 현재 기부 수치로 돌아오며 깜박거림
   setTimeout(() => {
-    document.getElementById("bar").style.width = percent + "%";
-    document.getElementById("amountText").innerText = Number(amount).toLocaleString() + "원";
-  }, 100);
+    bar.style.transition = "width 1s ease-out";
+    bar.style.width = finalPercent + "%";
+    bar.style.filter = "none";
+    
+    // 수치 텍스트 업데이트
+    amountText.innerText = Number(amount).toLocaleString() + "원";
+
+    // 3. 현재 수치에서 깜박거리는 애니메이션 추가
+    bar.animate([
+      { opacity: 1 },
+      { opacity: 0.5 },
+      { opacity: 1 }
+    ], {
+      duration: 500,
+      iterations: 3 // 3번 깜박임
+    });
+  }, 600);
 }
 
 function initScratch(){
