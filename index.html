@@ -99,19 +99,27 @@ function startTimer() {
 }
 
 function handleDonate() {
-  // 우선 다음 화면으로 이동 (사용자 체감 속도 향상)
+  // 1. 즉시 다음 화면으로 이동
   goNext(4);
-  
+
+  // 2. [낙관적 업데이트] 서버 응답 전, 화면에 500원을 먼저 더해서 보여줌
+  var currentTotal = Number(localStorage.getItem("totalDonation") || 0) + 500;
+  updateBar(currentTotal); // 즉시 실행
+
+  // 3. 서버 통신은 배경에서 조용히 진행
   fetch(API_URL, {
     method: "POST",
-    body: new URLSearchParams({ phone: "PRE_CHECK" }) // 초기 기부 기록
+    body: new URLSearchParams({ phone: "PRE_CHECK" })
   })
   .then(function(res) { return res.text(); })
   .then(function(data) {
     var parts = data.split('|');
     resultValue = parts[0];
-    var total = parts[1];
-    updateBar(total);
+    var serverTotal = parts[1];
+    
+    // 4. 서버에서 받은 정확한 누적 금액으로 최종 동기화
+    localStorage.setItem("totalDonation", serverTotal);
+    updateBar(serverTotal);
   });
 }
 
@@ -120,8 +128,13 @@ function updateBar(amount) {
   var txt = document.getElementById("amountText");
   var goal = 10000000;
   var per = Math.max((amount / goal) * 100, 5);
-  bar.style.width = per + "%";
-  txt.innerText = Number(amount).toLocaleString() + "원";
+
+  // 애니메이션 지연 시간을 0.6초 -> 0.1초로 단축
+  setTimeout(function() {
+    bar.style.transition = "width 0.8s ease-out"; // 애니메이션 자체도 더 부드럽게
+    bar.style.width = per + "%";
+    txt.innerText = Number(amount).toLocaleString() + "원";
+  }, 100); 
 }
 
 function initScratch() {
