@@ -99,14 +99,12 @@ function startTimer() {
 }
 
 function handleDonate() {
-  // 1. 즉시 다음 화면으로 이동
   goNext(4);
-
-  // 2. [낙관적 업데이트] 서버 응답 전, 화면에 500원을 먼저 더해서 보여줌
-  var currentTotal = Number(localStorage.getItem("totalDonation") || 0) + 500;
-  updateBar(currentTotal); // 즉시 실행
-
-  // 3. 서버 통신은 배경에서 조용히 진행
+  
+  // 온도계 바는 즉시 움직이되, 숫자는 서버 응답을 받은 후 정확하게 표시
+  var txt = document.getElementById("amountText");
+  txt.style.opacity = "0"; // 숫자를 잠시 숨김
+  
   fetch(API_URL, {
     method: "POST",
     body: new URLSearchParams({ phone: "PRE_CHECK" })
@@ -117,9 +115,12 @@ function handleDonate() {
     resultValue = parts[0];
     var serverTotal = parts[1];
     
-    // 4. 서버에서 받은 정확한 누적 금액으로 최종 동기화
     localStorage.setItem("totalDonation", serverTotal);
+    
+    // 서버 데이터가 오면 숫자를 서서히 나타나게 함
     updateBar(serverTotal);
+    txt.style.transition = "opacity 0.5s";
+    txt.style.opacity = "1";
   });
 }
 
