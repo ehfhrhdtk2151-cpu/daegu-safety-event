@@ -176,12 +176,31 @@ function initScratch() {
   var drawing = false;
   var revealed = false;
 
-  ctx.fillStyle = "#aaa";
-  ctx.fillRect(0, 0, 300, 150);
+  // 1. [핵심] 먼저 흰색 바탕에 결과 글자를 미리 그립니다.
   ctx.fillStyle = "#fff";
-  ctx.font = "bold 16px sans-serif";
+  ctx.fillRect(0, 0, 300, 150);
+  
+  ctx.fillStyle = "#333"; 
+  ctx.font = "bold 30px sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("슥슥 긁어보세요!", 150, 85);
+  
+  // 결과값에 따라 미리 글자를 써둡니다. (서버 응답 전이라도 공간 확보)
+  ctx.fillText("결과 확인 중...", 150, 85);
+
+  // 2. 그 위에 회색 덮개(스크래치 층)를 입힙니다.
+  // 이 부분은 결과가 서버에서 오기 전까지는 덮여있어야 하므로 
+  // 기존 로직을 유지하되, 긁어낼 때 아래 글자가 보이게 합니다.
+  
+  function drawCover() {
+    ctx.globalCompositeOperation = "source-over"; // 덮어쓰기 모드
+    ctx.fillStyle = "#aaa";
+    ctx.fillRect(0, 0, 300, 150);
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 16px sans-serif";
+    ctx.fillText("슥슥 긁어보세요!", 150, 85);
+  }
+  
+  drawCover();
 
   function checkReveal() {
     if (revealed) return;
@@ -196,13 +215,20 @@ function initScratch() {
       fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "SCRATCH" }) })
       .then(res => res.text())
       .then(result => {
+        // [추가] 50% 이상 긁었을 때, 캔버스 아래에 최종 결과를 다시 한번 그려줍니다.
+        ctx.globalCompositeOperation = "destination-over"; // 배경에 그리기
+        ctx.clearRect(0,0,300,150); // 캔버스를 깨끗이 지우고
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0,0,300,150);
+        ctx.fillStyle = result === "WIN" ? "#0047a0" : "#888"; // 당첨은 파란색, 낙첨은 회색
+        ctx.font = "bold 40px sans-serif";
+        ctx.fillText(result === "WIN" ? "★ 당 첨 ★" : "다음 기회에", 150, 85);
+
         if (result === "WIN") {
-          var phone = prompt("🎁 당첨! 안전드림 커피 쿠폰 발송을 위해\n전화번호를 입력해주세요. (예: 01012345678)");
+          var phone = prompt("🎁 당첨! 안전드림 커피 쿠폰 발송을 위해\n전화번호를 입력해주세요.");
           if (phone) {
             fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "PHONE", phone: phone }) });
             disp.innerHTML = "<div style='color:#0047a0;'>✅ 등록완료! 쿠폰이 한달이내 발송됩니다.</div>";
-          } else {
-            disp.innerHTML = "<div style='color:red;'>번호 미입력으로 당첨이 취소될 수 있습니다.</div>";
           }
         } else {
           disp.innerHTML = "🙏 다음 기회에! 안전운전 하세요.";
@@ -210,6 +236,10 @@ function initScratch() {
       });
     }
   }
+  
+  // (이하 마우스/터치 이벤트 로직은 동일)
+  // ...
+}
 
   function getPos(e) {
     var r = cvs.getBoundingClientRect();
