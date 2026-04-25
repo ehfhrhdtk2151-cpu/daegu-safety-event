@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>안전기뷰(Give U) 캠페인</title>
+<style>
+  body { margin:0; font-family: 'Pretendard', sans-serif; text-align:center; background:#f9f9f9; color: #333; overflow-x: hidden; }
+  .step { display:none; padding:20px; max-width: 500px; margin: 0 auto; min-height: 100vh; box-sizing: border-box; }
+  .active { display:block; animation: fadeIn 0.5s; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  
+  h2 { color: #0047a0; margin-bottom: 20px; word-break: keep-all; }
+  button { 
+    padding:15px 25px; font-size:18px; margin-top:20px; width: 100%;
+    border: none; border-radius: 8px; background: #0047a0; color: white; font-weight: bold;
+    cursor: pointer; transition: background 0.3s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:disabled { background: #ccc; cursor: not-allowed; }
+  
+  .safety-img { width:100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+
+  /* 기부 온도계 */
+  .bar-wrap { width:100%; margin:30px auto; border:1px solid #ddd; height:35px; border-radius: 20px; overflow: hidden; background: #eee; position: relative; }
+  .bar {
+    height:100%; width:0%;
+    background: linear-gradient(90deg, #ff4b2b, #ff416c);
+    box-shadow: 0 0 15px rgba(255, 75, 43, 0.7);
+    position: absolute; left: 0; top: 0;
+  }
+  #amountText { font-size: 24px; font-weight: bold; color: #ff4b2b; margin-top: 10px; }
+
+  /* 스크래치 */
+  canvas { border:2px solid #ddd; margin-top:20px; touch-action: none; border-radius: 10px; background-color: #fff; cursor: crosshair; }
+  #resultDisplay { 
+    pointer-events: none; /* 클릭 방해 금지 */
+    margin-top: 20px; 
+    font-size: 22px; 
+    color: #0047a0; 
+    min-height: 110px; 
+    font-weight: bold; 
+    line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+
+<div id="step1" class="step active">
+  <h2>안전기뷰(Give U)</h2>
+  <p>잠시 쉬며 안전을 충전하세요!<br>캠페인에 참여하시면 기부금이 전달됩니다.</p>
+  <button onclick="next(2)">캠페인 참여하기</button>
+</div>
+
+<div id="step2" class="step">
+  <h2>안전운전 약속하기</h2>
+  <img src="safety.jpg" class="safety-img" alt="배려운전 12대 수칙">
+  <p style="font-size: 0.9em; color: #666; margin-top: 10px;">수칙을 3초간 확인해 주세요.</p>
+  <button id="nextBtn" onclick="next(3)" disabled>확인했습니다</button>
+</div>
+
+<div id="step3" class="step">
+  <h2>안전 나눔</h2>
+  <p>확인 버튼을 누르면 <strong>안전드림 커피</strong> 기금으로<br>500원이 자동으로 기부됩니다.</p>
+  <button onclick="donate()">기부하고 복권 받기</button>
+</div>
+
+<div id="step4" class="step">
+  <h2>기부 완료!</h2>
+  <p>우리의 안전한 마음이 이만큼 모였습니다.</p>
+  <div class="bar-wrap">
+    <div id="bar" class="bar"></div>
+  </div>
+  <p id="amountText">0원</p>
+  <button onclick="next(
