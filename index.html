@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>안전기뷰(Give U) 캠페인</title>
 <style>
-  body { margin:0; font-family: sans-serif; text-align:center; background:#f9f9f9; color: #333; }
+  body { margin:0; font-family: sans-serif; text-align:center; background:#f9f9f9; color: #333; overflow-x: hidden; }
   .step { display:none; padding:20px; max-width: 500px; margin: 0 auto; min-height: 100vh; box-sizing: border-box; }
   .active { display:block; }
   h2 { color: #0047a0; margin-top: 10px; }
@@ -14,11 +14,16 @@
     border: none; border-radius: 10px; background: #0047a0; color: white; font-weight: bold;
     cursor: pointer; -webkit-tap-highlight-color: transparent;
   }
-  button:disabled { background: #ccc; }
+  button:disabled { background: #ccc; cursor: default; }
   .safety-img { width:100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+  
+  /* 카운트다운 스타일 */
+  #timerText { font-size: 20px; font-weight: bold; color: #ff4b2b; margin-top: 10px; height: 24px; }
+
   .bar-wrap { width:100%; margin:30px auto; border:1px solid #ddd; height:35px; border-radius: 20px; overflow: hidden; background: #eee; position: relative; }
   .bar { height:100%; width:0%; background: linear-gradient(90deg, #ff4b2b, #ff416c); position: absolute; left: 0; top: 0; }
   #amountText { font-size: 24px; font-weight: bold; color: #ff4b2b; }
+  
   canvas { border:2px solid #ddd; margin-top:20px; touch-action: none; border-radius: 10px; background-color: #fff; }
   #resultDisplay { margin-top: 20px; font-size: 22px; color: #0047a0; font-weight: bold; min-height: 100px; pointer-events: none; }
 </style>
@@ -34,7 +39,7 @@
 <div id="step2" class="step">
   <h2>안전운전 약속하기</h2>
   <img src="safety.jpg" class="safety-img">
-  <p style="font-size: 0.9em; color: #666; margin-top: 10px;">수칙을 3초간 확인해 주세요.</p>
+  <div id="timerText">3초 후 버튼이 활성화됩니다</div>
   <button id="nextBtn" onclick="next(3)" disabled>확인했습니다</button>
 </div>
 
@@ -59,7 +64,6 @@
 </div>
 
 <script>
-// API URL이 없어도 작동하도록 기본값 설정
 const API_URL = "여기에_AppsScript_URL"; 
 let resultValue = "LOSE";
 
@@ -69,9 +73,31 @@ function next(n){
   document.getElementById('step' + n).classList.add('active');
   
   if(n === 2) {
-    setTimeout(() => { document.getElementById("nextBtn").disabled = false; }, 3000);
+    startTimer(); // 2단계 진입 시 타이머 시작
   }
   if(n === 5) { initScratch(); }
+}
+
+// 카운트다운 타이머 함수
+function startTimer() {
+  let timeLeft = 3;
+  const timerText = document.getElementById("timerText");
+  const nextBtn = document.getElementById("nextBtn");
+  
+  // 초기화
+  nextBtn.disabled = true;
+  timerText.innerText = timeLeft + "초 후 버튼이 활성화됩니다";
+
+  const timerId = setInterval(() => {
+    timeLeft--;
+    if (timeLeft > 0) {
+      timerText.innerText = timeLeft + "초 후 버튼이 활성화됩니다";
+    } else {
+      clearInterval(timerId);
+      timerText.innerText = "수칙을 확인했습니다!";
+      nextBtn.disabled = false;
+    }
+  }, 1000);
 }
 
 async function donate(){
@@ -96,22 +122,18 @@ async function donate(){
 function updateBar(amount) {
   const bar = document.getElementById("bar");
   const txt = document.getElementById("amountText");
-  const goal = 10000000; // 목표액
+  const goal = 10000000; 
   
-  // 기부금이 적어도 최소 5%는 차 보이게 설정 (눈에 띄게 하기 위함)
-  const actualPercent = (amount / goal) * 100;
-  const finalPercent = Math.max(actualPercent, 5); 
+  // 최소 5%는 항상 차 보이게 설정
+  const actualPer = (amount / goal) * 100;
+  const finalPer = Math.max(actualPer, 5);
 
-  // 1. 풀 충전 효과 (0.4초 만에 100% 도달)
   bar.style.transition = "width 0.4s ease-in";
   bar.style.width = "100%";
   
   setTimeout(() => {
-    // 2. 현재 수치(최소 5%)로 복귀 (1.2초 동안 부드럽게)
     bar.style.transition = "width 1.2s ease-in-out";
-    bar.style.width = finalPercent + "%";
-    
-    // 금액 텍스트 업데이트
+    bar.style.width = finalPer + "%";
     txt.innerText = Number(amount).toLocaleString() + "원";
   }, 600);
 }
@@ -142,7 +164,7 @@ function initScratch(){
       disp.innerHTML = resultValue === "WIN" ? "🎁 당첨! 안전드림 커피" : "🙏 다음 기회에!";
       setTimeout(() => {
         disp.innerHTML += "<div style='color:#ff4b2b; margin-top:10px;'>❤️ 오늘도 안전운행 하세요! ❤️</div>";
-      }, 1500);
+      }, 3000);
     }
   }
 
