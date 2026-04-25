@@ -23,7 +23,12 @@
 
   /* 기부 온도계 (애니메이션 추가) */
   .bar-wrap { width:100%; margin:30px auto; border:1px solid #ddd; height:35px; border-radius: 20px; overflow: hidden; background: #eee; }
-  .bar { height:100%; width:0%; background: linear-gradient(90deg, #ff4b2b, #ff416c); transition: width 1.5s ease-out; }
+  .bar {
+  height:100%;
+  width:0%;
+  background: linear-gradient(90deg, #ff4b2b, #ff416c);
+  box-shadow: 0 0 15px rgba(255, 75, 43, 0.7); /* 빛나는 효과 미리 추가 */
+}
   #amountText { font-size: 24px; font-weight: bold; color: #ff4b2b; margin-top: 10px; }
 
   /* 스크래치 */
@@ -111,32 +116,35 @@ async function donate(){
 function updateBar(amount) {
   const bar = document.getElementById("bar");
   const amountText = document.getElementById("amountText");
-  const goal = 10000000; // 목표액
-  const finalPercent = Math.max((amount / goal) * 100, 2);
+  const goal = 10000000; 
+  const finalPercent = Math.min((amount / goal) * 100, 100);
 
-  // 1. 게이지가 끝까지 확 차오르는 '풀 충전' 효과
-  bar.style.transition = "width 0.5s ease-in"; 
-  bar.style.width = "100% ";
-  bar.style.filter = "brightness(1.5) blur(1px)"; // 빛나는 효과 추가
-
-  // 2. 잠시 후 현재 기부 수치로 돌아오며 깜박거림
+  // 1. 즉시 100%로 채우기 (transition을 아주 빠르게)
+  bar.style.transition = "width 0.4s cubic-bezier(0.17, 0.67, 0.83, 0.67)";
+  bar.style.width = "100%";
+  
+  // 2. 100% 도달 후 현재 수치로 복귀 (0.6초 뒤 실행)
   setTimeout(() => {
-    bar.style.transition = "width 1s ease-out";
+    bar.style.transition = "width 1.2s ease-in-out";
     bar.style.width = finalPercent + "%";
-    bar.style.filter = "none";
     
     // 수치 텍스트 업데이트
     amountText.innerText = Number(amount).toLocaleString() + "원";
-
-    // 3. 현재 수치에서 깜박거리는 애니메이션 추가
-    bar.animate([
-      { opacity: 1 },
-      { opacity: 0.5 },
-      { opacity: 1 }
-    ], {
-      duration: 500,
-      iterations: 3 // 3번 깜박임
-    });
+    
+    // 3. 복귀가 거의 끝날 때쯤 깜박임 시작 (1.2초 뒤 실행)
+    setTimeout(() => {
+      // 깜박임 애니메이션 (CSS Keyframe 없이 직접 구현)
+      let blinkCount = 0;
+      const blinkInterval = setInterval(() => {
+        bar.style.opacity = (bar.style.opacity === "0.3") ? "1" : "0.3";
+        blinkCount++;
+        
+        if (blinkCount >= 6) { // 3번 깜박임 (껐다 켰다 총 6회)
+          clearInterval(blinkInterval);
+          bar.style.opacity = "1";
+        }
+      }, 150);
+    }, 1000);
   }, 600);
 }
 
