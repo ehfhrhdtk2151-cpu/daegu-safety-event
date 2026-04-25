@@ -144,24 +144,14 @@ function initScratch() {
   var drawing = false;
   var revealed = false;
 
-  // 1. 배경 결과 텍스트 (긁으면 보일 내용)
-  ctx.globalCompositeOperation = "source-over";
-  ctx.fillStyle = "#fff";
+  // 1. 회색 덮개 초기화
+  ctx.globalCompositeOperation = "source-over"; // 기본 모드로 설정
+  ctx.fillStyle = "#aaa";
   ctx.fillRect(0, 0, 300, 150);
-  ctx.fillStyle = "#333"; 
-  ctx.font = "bold 25px sans-serif";
+  ctx.fillStyle = "#fff";
+  ctx.font = "bold 16px sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("결과 확인 중...", 150, 85);
-
-  // 2. 회색 덮개 그리기 (위에 덮음)
-  function drawCover() {
-    ctx.fillStyle = "#aaa";
-    ctx.fillRect(0, 0, 300, 150);
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 16px sans-serif";
-    ctx.fillText("슥슥 긁어보세요!", 150, 85);
-  }
-  drawCover();
+  ctx.fillText("슥슥 긁어보세요!", 150, 85);
 
   function checkReveal() {
     if (revealed) return;
@@ -176,13 +166,14 @@ function initScratch() {
       fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "SCRATCH" }) })
       .then(res => res.text())
       .then(result => {
-        // 배경에 최종 글자 노출
-        ctx.globalCompositeOperation = "destination-over";
-        ctx.clearRect(0,0,300,150);
+        // [수정 핵심] 캔버스를 완전히 지우고 결과를 새로 그립니다.
+        ctx.globalCompositeOperation = "source-over"; // 다시 덮어쓰기 모드로
+        ctx.clearRect(0, 0, 300, 150); // 싹 지우기
         ctx.fillStyle = "#fff";
-        ctx.fillRect(0,0,300,150);
-        ctx.fillStyle = result === "WIN" ? "#0047a0" : "#888";
-        ctx.font = "bold 35px sans-serif";
+        ctx.fillRect(0, 0, 300, 150); // 흰 배경 칠하기
+        
+        ctx.fillStyle = (result === "WIN") ? "#0047a0" : "#888";
+        ctx.font = "bold 40px sans-serif";
         ctx.fillText(result === "WIN" ? "★ 당 첨 ★" : "다음 기회에", 150, 85);
 
         if (result === "WIN") {
@@ -198,6 +189,7 @@ function initScratch() {
     }
   }
 
+  // (이하 마우스/터치 이벤트는 동일하게 유지)
   function getPos(e) {
     var r = cvs.getBoundingClientRect();
     var cx = e.touches ? e.touches[0].clientX : e.clientX;
@@ -213,7 +205,6 @@ function initScratch() {
     checkReveal();
   }
 
-  // 리스너 등록 (cvs가 정의된 함수 내부에서 실행)
   cvs.addEventListener("mousedown", function() { drawing = true; });
   cvs.addEventListener("mousemove", scratch);
   window.addEventListener("mouseup", function() { drawing = false; });
