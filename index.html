@@ -16,6 +16,7 @@
   .bar-wrap { width:100%; margin:30px 0; border:1px solid #ddd; height:35px; border-radius: 20px; overflow: hidden; background: #eee; position: relative; }
   .bar { height:100%; width:0%; background: linear-gradient(90deg, #ff4b2b, #ff416c); position: absolute; left: 0; top: 0; transition: width 0.8s ease-out; }
   
+  /* 온도계 깜박임 */
   @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
   .blinking { animation: blink 0.8s infinite; }
 
@@ -124,6 +125,14 @@ function moveBarOnly(amount) {
   bar.style.width = per + "%";
 }
 
+function updateBar(amount) {
+  moveBarOnly(amount);
+  var txt = document.getElementById("amountText");
+  if(txt.innerText.indexOf("불러오는") === -1) {
+    txt.innerText = Number(amount).toLocaleString() + "원";
+  }
+}
+
 function initScratch() {
   var cvs = document.getElementById("scratch");
   var ctx = cvs.getContext("2d");
@@ -131,7 +140,7 @@ function initScratch() {
   var drawing = false;
   var revealed = false;
 
-  // 1. 초기화: 흰 배경에 결과 대기 문구
+  // 초기 흰 배경 글자
   ctx.globalCompositeOperation = "source-over";
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, 300, 150);
@@ -140,7 +149,7 @@ function initScratch() {
   ctx.textAlign = "center";
   ctx.fillText("결과 확인 중...", 150, 85);
 
-  // 2. 회색 덮개 칠하기
+  // 회색 덮개
   ctx.fillStyle = "#aaa";
   ctx.fillRect(0, 0, 300, 150);
   ctx.fillStyle = "#fff";
@@ -160,7 +169,6 @@ function initScratch() {
       fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "SCRATCH" }) })
       .then(res => res.text())
       .then(result => {
-        // 결과 글자 그리기
         ctx.globalCompositeOperation = "destination-over";
         ctx.clearRect(0,0,300,150);
         ctx.fillStyle = "#fff";
@@ -173,7 +181,7 @@ function initScratch() {
           var phone = prompt("🎁 당첨! 안전드림 커피 쿠폰 발송을 위해\n전화번호를 입력해주세요.");
           if (phone) {
             fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "PHONE", phone: phone }) });
-            disp.innerHTML = "<div style='color:#0047a0;'>✅ 등록 완료! 한달이내 발송됩니다.</div>";
+            disp.innerHTML = "<div style='color:#0047a0;'>✅ 등록완료! 한달이내 발송됩니다.</div>";
           }
         } else {
           disp.innerHTML = "🙏 다음 기회에! 안전운전 하세요.";
@@ -197,5 +205,14 @@ function initScratch() {
     checkReveal();
   }
 
-  // 이벤트 리스너를 initScratch 함수 내부로 이동 (cvs 변수 접근을 위해)
-  cvs
+  // 괄호 밖으로 튕겨 나갔던 이벤트들을 안으로 넣었습니다.
+  cvs.addEventListener("mousedown", () => drawing = true);
+  cvs.addEventListener("mousemove", scratch);
+  window.addEventListener("mouseup", () => drawing = false);
+  cvs.addEventListener("touchstart", (e) => { drawing = true; e.preventDefault(); }, {passive:false});
+  cvs.addEventListener("touchmove", (e) => { scratch(e); e.preventDefault(); }, {passive:false});
+  cvs.addEventListener("touchend", () => drawing = false);
+}
+</script>
+</body>
+</html>
