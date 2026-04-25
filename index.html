@@ -96,20 +96,24 @@ function startTimer() {
 }
 
 function handleDonate() {
+  // 1. 즉시 다음 화면(STEP 4)으로 이동
   goNext(4);
-  var txt = document.getElementById("amountText");
   
-  // 1. 즉시 안내 문구 노출 (기존의 opacity 설정을 무시하고 강제로 보이게 함)
-  txt.style.opacity = "1"; 
-  txt.style.fontSize = "16px";
-  txt.style.color = "#888";
-  txt.innerText = "기부 현황을 불러오는 중...";
+  var txt = document.getElementById("amountText");
+  var bar = document.getElementById("bar");
 
-  // 2. 온도계 바는 즉시 이동 (낙관적 업데이트)
+  // 2. [강제 초기화] 기존 숫자를 지우고 안내 문구만 먼저 띄움
+  txt.style.transition = "none"; // 애니메이션 일시 중단
+  txt.style.opacity = "1";       // 투명도 해제
+  txt.style.color = "#888";      // 차분한 색상
+  txt.style.fontSize = "16px";   // 문구 크기
+  txt.innerText = "기부 현황을 불러오는 중..."; 
+
+  // 3. 온도계 바는 즉시 100% 갔다가 현재 수치로 이동 (역동성 부여)
   var currentTotal = (Number(localStorage.getItem("totalDonation") || 0)) + 500;
   updateBar(currentTotal);
 
-  // 3. 서버에 실제 데이터 요청
+  // 4. 서버 통신 시작
   fetch(API_URL, {
     method: "POST",
     body: new URLSearchParams({ type: "DONATE" })
@@ -119,17 +123,15 @@ function handleDonate() {
     var serverTotal = data.split('|')[1];
     localStorage.setItem("totalDonation", serverTotal);
     
-    // 4. 데이터 도착 시 숫자로 교체하며 강조
-    updateBar(serverTotal);
-    
-    // 부드럽게 숫자가 나타나는 효과
-    txt.style.opacity = "0"; // 잠시 숨겼다가
+    // 5. 서버 데이터 도착 시 숫자 업데이트
+    // 문구를 지우고 숫자를 강조해서 노출
     setTimeout(function() {
+      txt.style.transition = "all 0.5s"; // 부드러운 전환 효과 다시 부여
       txt.innerText = Number(serverTotal).toLocaleString() + "원";
-      txt.style.fontSize = "26px"; // 금액은 더 크게
-      txt.style.color = "#ff4b2b"; // 강조색
-      txt.style.opacity = "1";      // 다시 보임
-    }, 150);
+      txt.style.fontSize = "26px";
+      txt.style.color = "#ff4b2b";
+      updateBar(serverTotal);
+    }, 300); // 0.3초 정도 문구를 확실히 보여준 뒤 숫자로 교체
   });
 }
 
