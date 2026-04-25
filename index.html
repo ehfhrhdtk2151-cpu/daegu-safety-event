@@ -181,7 +181,7 @@ function initScratch() {
           var phone = prompt("🎁 당첨! 안전드림 커피 쿠폰 발송을 위해\n전화번호를 입력해주세요.");
           if (phone) {
             fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "PHONE", phone: phone }) });
-            disp.innerHTML = "<div style='color:#0047a0;'>✅ 등록완료! 쿠폰이 발송됩니다.</div>";
+            disp.innerHTML = "<div style='color:#0047a0;'>✅ 등록완료! 쿠폰이 한달이내 발송됩니다.</div>";
           }
         } else {
           disp.innerHTML = "🙏 다음 기회에! 안전운전 하세요.";
