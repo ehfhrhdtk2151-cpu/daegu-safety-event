@@ -9,56 +9,46 @@
   .step { display:none; padding:20px; max-width: 500px; margin: 0 auto; min-height: 100vh; box-sizing: border-box; }
   .active { display:block; }
   
-  /* [수정] Step 1: 포스터 이미지가 주인공이 되도록 버튼 위치 조정 */
+  /* Step 1 포스터 배경 */
   #step1 { 
     display: none; padding: 0; background-image: url('intro.png'); background-size: contain; 
     background-position: top center; background-repeat: no-repeat; background-color: #FDF3D0; 
     position: relative; height: 100vh; 
   }
   #step1.active { display: flex; flex-direction: column; justify-content: flex-end; }
-  #step1 button { 
-    margin: 0 20px 40px 20px; /* 하단 여백을 주어 버튼을 아래로 바짝 내림 */
-    width: calc(100% - 40px); 
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
-    z-index: 10;
-  }
+  #step1 button { margin: 0 20px 40px 20px; width: calc(100% - 40px); box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 10; }
 
-  /* [핵심] 세로형 온도계 스타일 최적화 */
-  .thermometer-wrapper { position: relative; width: 120px; margin: 0 auto; padding-top: 20px; }
+  /* 세로형 온도계 및 눈금선 */
+  .thermometer-wrapper { position: relative; width: 150px; margin: 0 auto; padding-top: 20px; }
   .thermometer-container {
     position: relative; width: 34px; height: 220px; margin: 0 auto;
-    background: #ddd; border: 3px solid #333; border-radius: 20px 20px 0 0;
-    border-bottom: none; z-index: 1;
+    background: #ddd; border: 3px solid #333; border-radius: 20px 20px 0 0; border-bottom: none; z-index: 1;
   }
-  .thermo-bar {
-    position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; 
-    background: linear-gradient(to top, #ff4b2b, #ff416c); transition: height 1s ease-out;
-  }
-  .thermo-bulb {
-    width: 70px; height: 70px; background: #ff4b2b; border: 3px solid #333;
-    border-radius: 50%; margin: -15px auto 10px; position: relative; z-index: 2;
-  }
-  .marks {
-    position: absolute; left: 85px; top: 20px; height: 220px;
-    display: flex; flex-direction: column; justify-content: space-between;
-    font-size: 12px; font-weight: bold; color: #666; text-align: left;
-  }
+  .thermo-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: linear-gradient(to top, #ff4b2b, #ff416c); transition: height 1s ease-out; }
+  
+  @keyframes thermo-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+  .thermo-blinking { animation: thermo-blink 0.5s infinite; }
+
+  .thermo-bulb { width: 70px; height: 70px; background: #ff4b2b; border: 3px solid #333; border-radius: 50%; margin: -15px auto 10px; position: relative; z-index: 2; }
+  
+  .marks { position: absolute; left: 85px; top: 20px; height: 220px; display: flex; flex-direction: column; justify-content: space-between; font-size: 12px; font-weight: bold; color: #555; text-align: left; }
+  .mark-line-long { position: absolute; left: -50px; width: 15px; height: 2px; background: #333; }
+  .mark-line-short { position: absolute; left: -45px; width: 10px; height: 1px; background: #666; transform: translateY(10px); }
 
   /* 텍스트 및 버튼 */
   h2 { color: #0047a0; margin-top: 10px; font-size: 20px; word-break: keep-all; }
   .status-text { font-size: 22px; font-weight: bold; color: #000; margin: 10px 0; }
   .sub-text { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 20px; }
+  .desc-text { font-size: 14px; color: #666; margin-top: 5px; line-height: 1.4; word-break: keep-all; }
+  
   button { padding:18px 25px; font-size:18px; width: 100%; border: none; border-radius: 10px; background: #852722; color: white; font-weight: bold; cursor: pointer; }
   .btn-group { display: flex; gap: 10px; }
   .btn-no { background: #fff; color: #333; border: 2px solid #333; }
   
-  /* 이미지 및 애니메이션 */
   .safety-img { width:100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
   .bye-img { width: 80%; max-width: 250px; margin-top: 40px; border-radius: 20px; }
   #timerNumber { font-size: 40px; font-weight: bold; color: #ff4b2b; margin: 10px 0; }
   canvas { border:2px solid #ddd; margin-top:20px; border-radius: 10px; background:#fff; touch-action: none; }
-  .blinking { animation: blink 0.8s infinite; }
-  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 </style>
 </head>
 <body>
@@ -78,9 +68,15 @@
 <div id="step3" class="step">
   <h2>기부 온도계</h2>
   <div class="thermometer-wrapper">
-    <div class="thermometer-container"><div id="bar3" class="thermo-bar"></div></div>
-    <div class="thermo-bulb"></div>
-    <div class="marks"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div>
+    <div class="thermometer-container"><div class="thermo-bar"><div id="bar3" style="height:100%; background:inherit;"></div></div></div>
+    <div id="bulb3" class="thermo-bulb"></div>
+    <div class="marks">
+      <div style="position:relative;">100%<div class="mark-line-long"></div></div><div style="position:relative;"><div class="mark-line-short"></div></div>
+      <div style="position:relative;">75%<div class="mark-line-long"></div></div><div style="position:relative;"><div class="mark-line-short"></div></div>
+      <div style="position:relative;">50%<div class="mark-line-long"></div></div><div style="position:relative;"><div class="mark-line-short"></div></div>
+      <div style="position:relative;">25%<div class="mark-line-long"></div></div><div style="position:relative;"><div class="mark-line-short"></div></div>
+      <div style="position:relative;">0%<div class="mark-line-long"></div></div>
+    </div>
   </div>
   <div id="status3" class="status-text">현황 불러오는 중...</div>
   <div class="sub-text">기부에 참여하시겠습니까?</div>
@@ -91,14 +87,23 @@
 </div>
 
 <div id="step4" class="step">
-  <h2>기부 완료!</h2>
+  <h2 id="step4Title">기부 진행 중...</h2>
   <div class="thermometer-wrapper">
-    <div class="thermometer-container"><div id="bar4" class="thermo-bar"></div></div>
-    <div class="thermo-bulb"></div>
-    <div class="marks"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div>
+    <div class="thermometer-container"><div class="thermo-bar"><div id="bar4" style="height:100%; background:inherit;"></div></div></div>
+    <div id="bulb4" class="thermo-bulb"></div>
+    <div class="marks">
+      <div style="position:relative;">100%<div class="mark-line-long"></div></div><div style="position:relative;"><div class="mark-line-short"></div></div>
+      <div style="position:relative;">75%<div class="mark-line-long"></div></div><div style="position:relative;"><div class="mark-line-short"></div></div>
+      <div style="position:relative;">50%<div class="mark-line-long"></div></div><div style="position:relative;"><div class="mark-line-short"></div></div>
+      <div style="position:relative;">25%<div class="mark-line-long"></div></div><div style="position:relative;"><div class="mark-line-short"></div></div>
+      <div style="position:relative;">0%<div class="mark-line-long"></div></div>
+    </div>
   </div>
-  <p id="amountText" class="status-text">0원 적립 완료!</p>
-  <button onclick="goNext(5)">럭키 스크래치 확인</button>
+  <p id="amountText" class="status-text">처리 중...</p>
+  <p id="usageText" class="desc-text" style="display:none;">
+    모금된 기부금은 고속도로 교통사고 유자녀 지원 및<br><b>교통안전 증진 활동</b>을 위해 소중히 사용됩니다.
+  </p>
+  <button id="scratchBtn" onclick="goNext(5)" style="display:none;">럭키 스크래치 확인</button>
 </div>
 
 <div id="step5" class="step">
@@ -130,35 +135,55 @@ function goNext(n) {
 }
 
 function refreshStatus() {
+  document.getElementById("bar3").parentElement.classList.add("thermo-blinking");
+  document.getElementById("bulb3").classList.add("thermo-blinking");
   fetch(API_URL).then(r => r.text()).then(t => {
     var amount = Number(t);
-    var count = Math.floor(amount / 500);
-    document.getElementById("status3").innerText = count + "명 참여 / " + amount.toLocaleString() + "원 적립";
-    updateVerticalBar("bar3", amount);
+    document.getElementById("status3").innerText = Math.floor(amount / 500) + "명 참여 / " + amount.toLocaleString() + "원 적립";
+    setTimeout(() => {
+      document.getElementById("bar3").parentElement.classList.remove("thermo-blinking");
+      document.getElementById("bulb3").classList.remove("thermo-blinking");
+      updateVerticalBar("bar3", amount);
+    }, 500);
   });
 }
 
 function handleDonate() {
   goNext(4);
+  var title = document.getElementById("step4Title");
   var txt = document.getElementById("amountText");
-  var bar4 = document.getElementById("bar4");
-  txt.innerText = "전달 중...";
-  bar4.classList.add("blinking");
+  var usage = document.getElementById("usageText");
+  var btn = document.getElementById("scratchBtn");
+  
+  title.innerText = "기부 진행 중...";
+  txt.innerText = "잠시만 기다려주세요...";
+  usage.style.display = "none";
+  btn.style.display = "none";
+  
+  document.getElementById("bar4").parentElement.classList.add("thermo-blinking");
+  document.getElementById("bulb4").classList.add("thermo-blinking");
 
   fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) })
   .then(res => res.text())
   .then(data => {
     var serverTotal = data.split('|')[1] || data;
-    setTimeout(function() {
-      bar4.classList.remove("blinking");
+    setTimeout(() => {
+      document.getElementById("bar4").parentElement.classList.remove("thermo-blinking");
+      document.getElementById("bulb4").classList.remove("thermo-blinking");
+      
+      // [수정] 완료 후 텍스트 변경 및 문구 노출
+      title.innerText = "기부 완료!";
       txt.innerText = Number(serverTotal).toLocaleString() + "원 적립 완료!";
+      usage.style.display = "block"; // 안내 문구 노출
+      btn.style.display = "block";   // 버튼 노출
+      
       updateVerticalBar("bar4", serverTotal); 
-    }, 800);
+    }, 1200); // 진행 중임을 충분히 보여주기 위해 약간의 지연 추가
   });
 }
 
 function updateVerticalBar(id, amount) {
-  var bar = document.getElementById(id);
+  var bar = document.getElementById(id).parentElement;
   var goal = 10000000;
   var per = Math.min(Math.max((amount / goal) * 100, 5), 100);
   if(bar) bar.style.height = per + "%";
@@ -184,7 +209,6 @@ function initScratch() {
   ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = "#aaa"; ctx.fillRect(0, 0, 300, 150);
   ctx.fillStyle = "#fff"; ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center";
   ctx.fillText("슥슥 긁어보세요!", 150, 85);
-
   function checkReveal() {
     if (revealed) return;
     var pix = ctx.getImageData(0,0,300,150).data;
