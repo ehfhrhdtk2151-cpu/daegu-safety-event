@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>안전기뷰(Give U) 캠페인</title>
 <style>
+  /* 기존 스타일 유지 */
   body { margin:0; font-family: sans-serif; text-align:center; background:#f9f9f9; color: #333; overflow-x: hidden; }
   .step { display:none; padding:20px; max-width: 500px; margin: 0 auto; min-height: 100vh; box-sizing: border-box; }
   .active { display:block; }
@@ -25,14 +26,12 @@
     background: #ddd; border: 3px solid #333; border-radius: 20px 20px 0 0; border-bottom: none; z-index: 1; overflow: hidden;
   }
   .thermo-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: linear-gradient(to top, #ff4b2b, #ff416c); transition: height 1s ease-out; }
-  
   @keyframes total-blink { 0%, 100% { opacity: 1; filter: brightness(1); } 50% { opacity: 0.5; filter: brightness(1.3); } }
   .thermo-group-blinking { animation: total-blink 0.8s infinite ease-in-out; }
   .thermo-bulb { width: 76px; height: 76px; background: #ff4b2b; border: 3px solid #333; border-radius: 50%; margin: -18px auto 10px; position: relative; z-index: 2; }
   
   .marks { position: absolute; left: 110px; top: 20px; height: 220px; display: flex; flex-direction: column; justify-content: space-between; font-size: 13px; font-weight: bold; color: #444; text-align: left; }
   .mark-line-long { position: absolute; left: -35px; width: 25px; height: 2px; background: #333; }
-  .mark-line-short { position: absolute; left: -25px; width: 15px; height: 1px; background: #888; transform: translateY(10px); }
 
   h2 { color: #0047a0; margin-top: 10px; font-size: 20px; word-break: keep-all; }
   .status-text { font-size: 22px; font-weight: bold; color: #000; margin: 10px 0; }
@@ -48,6 +47,13 @@
 </style>
 </head>
 <body>
+
+<div id="step0" class="step">
+  <img src="safety_bye.jpg" style="width:80%; border-radius:20px; margin-top:40px;">
+  <div style="font-size:20px; font-weight:bold; color:#852722; margin-top:30px;">이미 참여하셨습니다!</div>
+  <p class="status-text" id="prevParticipationMsg"></p>
+  <div style="font-size:16px; color:#666; margin-top:10px;">안전운전을 실천해주셔서 감사합니다.<br>내일 다시 참여해주세요!</div>
+</div>
 
 <div id="step1" class="step active"><button onclick="goNext(2)">캠페인 참여하기</button></div>
 
@@ -112,6 +118,21 @@
 <script>
 var API_URL = "https://script.google.com/macros/s/AKfycbyUoMPN-xEmrSakJC4zvb4SZlRcE5pytPLcwd8oIcqO2i3PiENRZ_dBHiLGYNnH2Pis6g/exec"; 
 
+// [수정] 페이지 로드 시 중복 참여 체크
+window.onload = function() {
+  var participatedDate = localStorage.getItem("lastParticipatedDate");
+  var today = new Date().toLocaleDateString();
+
+  if (participatedDate === today) {
+    goNext(0); // 이미 오늘 참여했다면 Step 0(방지 화면)으로 이동
+    document.getElementById("prevParticipationMsg").innerText = "오늘은 이미 기부에 동참하셨습니다.";
+  }
+
+  fetch(API_URL).then(r => r.text()).then(t => {
+    localStorage.setItem("totalDonation", t);
+  });
+}
+
 function goNext(n) {
   var steps = document.getElementsByClassName('step');
   for (var i = 0; i < steps.length; i++) { steps[i].classList.remove('active'); }
@@ -131,6 +152,10 @@ function refreshStatus() {
 }
 
 function handleDonate() {
+  // [추가] 기부 버튼 누르는 순간 로컬스토리지에 날짜 기록
+  var today = new Date().toLocaleDateString();
+  localStorage.setItem("lastParticipatedDate", today);
+
   goNext(4);
   document.getElementById("thermoGroup4").classList.add("thermo-group-blinking");
   fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) })
@@ -146,6 +171,8 @@ function handleDonate() {
     }, 1000);
   });
 }
+
+// ... 이하 기존 함수(updateVerticalBar, startTimer, initScratch) 동일 ...
 
 function updateVerticalBar(id, amount) {
   var bar = document.getElementById(id);
@@ -187,19 +214,18 @@ function initScratch() {
 
       if (type === "WIN") {
         ctx.fillText("★ 커피 쿠폰 당첨 ★", 150, 85);
-        resTxt.innerHTML = "<b>축하합니다! 커피 쿠폰 당첨!</b><br>연락처를 입력하시면 Log 탭에 자동 저장됩니다.";
+        resTxt.innerHTML = "<b>축하합니다! 커피 쿠폰 당첨!</b>";
         var phone = prompt("🎁 커피 쿠폰 발송용 연락처를 입력하세요.");
         if (phone) fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "PHONE", phone: phone }) });
         giftBtn.style.display = "block";
       } else if (type === "DOUBLE") {
         ctx.fillText("기부금 2배 적립 당첨!", 150, 85);
-        resTxt.innerHTML = "<b>기부금 2배 적립!</b><br>방금 하신 기부 외에 대구경북본부가 500원을 추가로 더 적립합니다!";
-        // [수정] 2배 적립 시 서버에 기부 신호 한 번 더 전송
+        resTxt.innerHTML = "<b>기부금 2배 적립!</b><br>대구경북본부가 500원을 추가 적립합니다!";
         fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) });
         giftBtn.style.display = "block";
       } else {
         ctx.fillText("베스트 배려운전자 선정!", 150, 85);
-        resTxt.innerHTML = "<b>당신은 도로 위의 영웅입니다!</b><br>안전과 기부를 실천하신 인증서를 확인하세요.";
+        resTxt.innerHTML = "<b>당신은 도로 위의 영웅입니다!</b>";
         certBtn.style.display = "block";
       }
     }
