@@ -9,80 +9,56 @@
   .step { display:none; padding:20px; max-width: 500px; margin: 0 auto; min-height: 100vh; box-sizing: border-box; }
   .active { display:block; }
   
-  /* Step 1 포스터 배경 */
+  /* [수정] Step 1: 포스터 이미지가 주인공이 되도록 버튼 위치 조정 */
   #step1 { 
     display: none; padding: 0; background-image: url('intro.png'); background-size: contain; 
     background-position: top center; background-repeat: no-repeat; background-color: #FDF3D0; 
     position: relative; height: 100vh; 
   }
-  #step1.active { display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 20px; }
-  #step1 button { margin: 30px 20px 50px 20px; width: calc(100% - 40px); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+  #step1.active { display: flex; flex-direction: column; justify-content: flex-end; }
+  #step1 button { 
+    margin: 0 20px 40px 20px; /* 하단 여백을 주어 버튼을 아래로 바짝 내림 */
+    width: calc(100% - 40px); 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+    z-index: 10;
+  }
 
-  /* [핵심] 세로형 온도계 스타일 */
+  /* [핵심] 세로형 온도계 스타일 최적화 */
+  .thermometer-wrapper { position: relative; width: 120px; margin: 0 auto; padding-top: 20px; }
   .thermometer-container {
-    position: relative;
-    width: 60px;
-    height: 250px; /* 온도계 높이 */
-    margin: 20px auto;
-    background: #eee;
-    border: 3px solid #333;
-    border-radius: 30px 30px 0 0;
-    border-bottom: none;
+    position: relative; width: 34px; height: 220px; margin: 0 auto;
+    background: #ddd; border: 3px solid #333; border-radius: 20px 20px 0 0;
+    border-bottom: none; z-index: 1;
   }
-  /* 빨간색 기둥 바 */
   .thermo-bar {
-    position: absolute;
-    bottom: 0;
-    left: 15%;
-    width: 70%;
-    height: 0%; /* 실시간으로 변화 */
-    background: linear-gradient(to top, #ff4b2b, #ff416c);
-    border-radius: 20px 20px 0 0;
-    transition: height 1s ease-out;
+    position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; 
+    background: linear-gradient(to top, #ff4b2b, #ff416c); transition: height 1s ease-out;
   }
-  /* 하단 둥근 구슬 부분 */
   .thermo-bulb {
-    width: 90px;
-    height: 90px;
-    background: #ff4b2b;
-    border: 3px solid #333;
-    border-radius: 50%;
-    margin: -15px auto 20px; /* 기둥과 겹치게 배치 */
-    position: relative;
-    z-index: 2;
+    width: 70px; height: 70px; background: #ff4b2b; border: 3px solid #333;
+    border-radius: 50%; margin: -15px auto 10px; position: relative; z-index: 2;
   }
-  /* 눈금 표시 */
   .marks {
-    position: absolute;
-    left: 100%;
-    top: 0;
-    height: 100%;
-    width: 40px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 10px 0;
-    font-size: 11px;
-    color: #666;
-    text-align: left;
+    position: absolute; left: 85px; top: 20px; height: 220px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    font-size: 12px; font-weight: bold; color: #666; text-align: left;
   }
 
-  .blinking { animation: blink 0.8s infinite; }
-  @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-
-  /* 텍스트 및 버튼 스타일 */
+  /* 텍스트 및 버튼 */
   h2 { color: #0047a0; margin-top: 10px; font-size: 20px; word-break: keep-all; }
   .status-text { font-size: 22px; font-weight: bold; color: #000; margin: 10px 0; }
   .sub-text { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 20px; }
   button { padding:18px 25px; font-size:18px; width: 100%; border: none; border-radius: 10px; background: #852722; color: white; font-weight: bold; cursor: pointer; }
   .btn-group { display: flex; gap: 10px; }
   .btn-no { background: #fff; color: #333; border: 2px solid #333; }
-
-  /* 이미지 및 기타 */
+  
+  /* 이미지 및 애니메이션 */
   .safety-img { width:100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-  .bye-img { width: 80%; max-width: 300px; margin-top: 50px; border-radius: 20px; }
+  .bye-img { width: 80%; max-width: 250px; margin-top: 40px; border-radius: 20px; }
   #timerNumber { font-size: 40px; font-weight: bold; color: #ff4b2b; margin: 10px 0; }
-  canvas { border:2px solid #ddd; margin-top:20px; touch-action: none; border-radius: 10px; background:#fff; }
+  canvas { border:2px solid #ddd; margin-top:20px; border-radius: 10px; background:#fff; touch-action: none; }
+  .blinking { animation: blink 0.8s infinite; }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 </style>
 </head>
 <body>
@@ -101,11 +77,10 @@
 
 <div id="step3" class="step">
   <h2>기부 온도계</h2>
-  <div style="padding-right: 40px;"> <div class="thermometer-container">
-      <div id="bar3" class="thermo-bar"></div>
-      <div class="marks"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div>
-    </div>
+  <div class="thermometer-wrapper">
+    <div class="thermometer-container"><div id="bar3" class="thermo-bar"></div></div>
     <div class="thermo-bulb"></div>
+    <div class="marks"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div>
   </div>
   <div id="status3" class="status-text">현황 불러오는 중...</div>
   <div class="sub-text">기부에 참여하시겠습니까?</div>
@@ -117,12 +92,10 @@
 
 <div id="step4" class="step">
   <h2>기부 완료!</h2>
-  <div style="padding-right: 40px;">
-    <div class="thermometer-container">
-      <div id="bar4" class="thermo-bar"></div>
-      <div class="marks"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div>
-    </div>
+  <div class="thermometer-wrapper">
+    <div class="thermometer-container"><div id="bar4" class="thermo-bar"></div></div>
     <div class="thermo-bulb"></div>
+    <div class="marks"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div>
   </div>
   <p id="amountText" class="status-text">0원 적립 완료!</p>
   <button onclick="goNext(5)">럭키 스크래치 확인</button>
@@ -130,17 +103,17 @@
 
 <div id="step5" class="step">
   <h2>럭키 스크래치</h2>
-  <p>회색 부분을 50% 이상 긁어주세요!</p>
+  <p>회색 부분을 슥슥 긁어주세요!</p>
   <canvas id="scratch" width="300" height="150"></canvas>
   <div id="resultDisplay" style="margin-top:20px; font-weight:bold; min-height:80px;"></div>
 </div>
 
 <div id="step6" class="step">
   <img src="safety_bye.jpg" class="bye-img">
-  <div style="font-size:22px; font-weight:bold; color:#0047a0; margin-top:30px;">
+  <div style="font-size:20px; font-weight:bold; color:#0047a0; margin-top:30px;">
     안전운전이 최고의 배려입니다!<br>오늘도 기분 좋은 운행 되세요.
   </div>
-  <button onclick="location.reload()" style="margin-top:50px; background:#666;">처음으로 돌아가기</button>
+  <button onclick="location.reload()" style="margin-top:40px; background:#666;">처음으로 돌아가기</button>
 </div>
 
 <script>
@@ -150,9 +123,9 @@ function goNext(n) {
   var steps = document.getElementsByClassName('step');
   for (var i = 0; i < steps.length; i++) { steps[i].classList.remove('active'); }
   document.getElementById('step' + n).classList.add('active');
-  if (n === 2) { startTimer(); }
-  if (n === 3) { refreshStatus(); }
-  if (n === 5) { initScratch(); }
+  if (n === 2) startTimer();
+  if (n === 3) refreshStatus();
+  if (n === 5) initScratch();
   window.scrollTo(0,0);
 }
 
@@ -169,7 +142,7 @@ function handleDonate() {
   goNext(4);
   var txt = document.getElementById("amountText");
   var bar4 = document.getElementById("bar4");
-  txt.innerText = "업데이트 중...";
+  txt.innerText = "전달 중...";
   bar4.classList.add("blinking");
 
   fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) })
@@ -184,7 +157,6 @@ function handleDonate() {
   });
 }
 
-// 세로 바의 높이(height)를 조절하는 함수
 function updateVerticalBar(id, amount) {
   var bar = document.getElementById(id);
   var goal = 10000000;
@@ -199,7 +171,7 @@ function startTimer() {
   btn.disabled = true;
   var interval = setInterval(function() {
     time--;
-    if (time > 0) { num.innerText = time; } 
+    if (time > 0) num.innerText = time;
     else { clearInterval(interval); num.innerText = "✓"; num.style.color = "#0047a0"; btn.disabled = false; }
   }, 1000);
 }
@@ -212,10 +184,11 @@ function initScratch() {
   ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = "#aaa"; ctx.fillRect(0, 0, 300, 150);
   ctx.fillStyle = "#fff"; ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center";
   ctx.fillText("슥슥 긁어보세요!", 150, 85);
+
   function checkReveal() {
     if (revealed) return;
     var pix = ctx.getImageData(0,0,300,150).data;
-    var t = 0; for (var i=3; i<pix.length; i+=4) { if(pix[i] === 0) t++; }
+    var t = 0; for (var i=3; i<pix.length; i+=4) if(pix[i] === 0) t++;
     if ((t/(300*150)) > 0.5) {
       revealed = true;
       fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "SCRATCH" }) })
@@ -236,9 +209,8 @@ function initScratch() {
     var r = cvs.getBoundingClientRect();
     var cx = e.touches ? e.touches[0].clientX : e.clientX;
     var cy = e.touches ? e.touches[0].clientY : e.clientY;
-    var x = cx - r.left, y = cy - r.top;
     ctx.globalCompositeOperation = "destination-out";
-    ctx.beginPath(); ctx.arc(x, y, 20, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx - r.left, cy - r.top, 20, 0, Math.PI * 2); ctx.fill();
     checkReveal();
   }
   cvs.addEventListener("mousedown", () => drawing = true);
