@@ -18,7 +18,7 @@
   #step1.active { display: flex; flex-direction: column; justify-content: flex-end; }
   #step1 button { margin: 0 20px 40px 20px; width: calc(100% - 40px); box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 10; }
 
-  /* 세로형 온도계 디자인 */
+  /* 온도계 디자인 */
   .thermometer-wrapper { position: relative; width: 180px; margin: 0 auto; padding-top: 20px; }
   .thermometer-container {
     position: relative; width: 34px; height: 220px; margin: 0 auto;
@@ -30,18 +30,14 @@
   .thermo-group-blinking { animation: total-blink 0.8s infinite ease-in-out; }
   .thermo-bulb { width: 76px; height: 76px; background: #ff4b2b; border: 3px solid #333; border-radius: 50%; margin: -18px auto 10px; position: relative; z-index: 2; }
   
-  /* 눈금 */
   .marks { position: absolute; left: 110px; top: 20px; height: 220px; display: flex; flex-direction: column; justify-content: space-between; font-size: 13px; font-weight: bold; color: #444; text-align: left; }
   .mark-line-long { position: absolute; left: -35px; width: 25px; height: 2px; background: #333; }
   .mark-line-short { position: absolute; left: -25px; width: 15px; height: 1px; background: #888; transform: translateY(10px); }
 
-  /* 텍스트 스타일 */
   h2 { color: #0047a0; margin-top: 10px; font-size: 20px; word-break: keep-all; }
   .status-text { font-size: 22px; font-weight: bold; color: #000; margin: 10px 0; }
-  .desc-text { font-size: 14px; color: #666; margin-top: 5px; line-height: 1.5; word-break: keep-all; }
   .result-msg { background: #fff; border: 2px dashed #ff4b2b; padding: 15px; border-radius: 10px; margin-top: 20px; font-size: 15px; line-height: 1.6; text-align: left; }
 
-  /* 버튼 스타일 */
   button { padding: 18px 25px; font-size: 18px; width: 100%; border: none; border-radius: 10px; background: #852722; color: white; font-weight: bold; cursor: pointer; transition: transform 0.1s; }
   button:active { transform: scale(0.98); }
   .cert-btn { background: #0047a0; margin-top: 15px; }
@@ -49,20 +45,16 @@
   .btn-no { background: #fff; color: #333; border: 2px solid #333; }
 
   canvas { border:2px solid #ddd; margin-top:20px; border-radius: 10px; background:#fff; touch-action: none; }
-  .bye-img { width: 80%; max-width: 250px; margin-top: 40px; border-radius: 20px; }
 </style>
 </head>
 <body>
 
-<div id="step1" class="step active">
-  <button onclick="goNext(2)">캠페인 참여하기</button>
-</div>
+<div id="step1" class="step active"><button onclick="goNext(2)">캠페인 참여하기</button></div>
 
 <div id="step2" class="step">
   <h2>배려운전이 안전운전의 시작입니다.</h2>
-  <img src="safety.jpg" class="safety-img" style="width:100%; border-radius:12px;">
+  <img src="safety.jpg" style="width:100%; border-radius:12px;">
   <div id="timerNumber" style="font-size:40px; font-weight:bold; color:#ff4b2b; margin:10px 0;">3</div>
-  <p style="font-size: 14px; color: #666;">안전 수칙을 3초간 확인해 주세요.</p>
   <button id="nextBtn" onclick="goNext(3)" disabled>기부 참여하기</button>
 </div>
 
@@ -74,15 +66,14 @@
       <div class="thermo-bulb"></div>
     </div>
     <div class="marks">
-      <div style="position:relative;">100%<div class="mark-line-long"></div></div><div style="position:relative;"><div class="mark-line-short"></div></div>
-      <div style="position:relative;">75%<div class="mark-line-long"></div></div><div style="position:relative;"><div class="mark-line-short"></div></div>
-      <div style="position:relative;">50%<div class="mark-line-long"></div></div><div style="position:relative;"><div class="mark-line-short"></div></div>
-      <div style="position:relative;">25%<div class="mark-line-long"></div></div><div style="position:relative;"><div class="mark-line-short"></div></div>
-      <div style="position:relative;">0%<div class="mark-line-long"></div></div>
+        <div style="position:relative;">100%<div class="mark-line-long"></div></div>
+        <div style="position:relative;">75%<div class="mark-line-long"></div></div>
+        <div style="position:relative;">50%<div class="mark-line-long"></div></div>
+        <div style="position:relative;">25%<div class="mark-line-long"></div></div>
+        <div style="position:relative;">0%<div class="mark-line-long"></div></div>
     </div>
   </div>
   <div id="status3" class="status-text">현황 불러오는 중...</div>
-  <div style="font-size:18px; font-weight:bold; margin-bottom:20px;">기부에 참여하시겠습니까?</div>
   <div class="btn-group">
     <button onclick="handleDonate()">네 좋아요 ></button>
     <button class="btn-no" onclick="goNext(6)">아니요 ></button>
@@ -96,16 +87,8 @@
       <div class="thermometer-container"><div id="bar4" class="thermo-bar"></div></div>
       <div class="thermo-bulb"></div>
     </div>
-    <div class="marks">
-      <div style="position:relative;">100%<div class="mark-line-long"></div></div><div style="position:relative;"><div class="mark-line-short"></div></div>
-      <div style="position:relative;">75%<div class="mark-line-long"></div></div><div style="position:relative;"><div class="mark-line-short"></div></div>
-      <div style="position:relative;">50%<div class="mark-line-long"></div></div><div style="position:relative;"><div class="mark-line-short"></div></div>
-      <div style="position:relative;">25%<div class="mark-line-long"></div></div><div style="position:relative;"><div class="mark-line-short"></div></div>
-      <div style="position:relative;">0%<div class="mark-line-long"></div></div>
-    </div>
   </div>
   <p id="amountText" class="status-text">처리 중...</p>
-  <p id="usageText" class="desc-text" style="display:none;">모금된 기부금은 고속도로 교통사고 유자녀 지원 및<br><b>교통안전 증진 활동</b>을 위해 소중히 사용됩니다.</p>
   <button id="scratchBtn" onclick="goNext(5)" style="display:none; margin-top:20px;">럭키 스크래치 확인</button>
 </div>
 
@@ -116,16 +99,14 @@
   <div id="resultBox" style="display:none; margin-top:20px;">
     <div id="resultText" class="result-msg"></div>
     <button id="giftNextBtn" onclick="goNext(6)" style="margin-top:20px; display:none;">참여 완료 ></button>
-    <button id="certBtn" class="cert-btn" onclick="alert('배려운전 인증서 페이지로 이동합니다.')" style="display:none;">배려인증서 확인하기 ></button>
+    <button id="certBtn" class="cert-btn" onclick="alert('인증서 페이지로 이동')" style="display:none;">인증서 확인하기 ></button>
   </div>
 </div>
 
 <div id="step6" class="step">
-  <img src="safety_bye.jpg" class="bye-img">
-  <div style="font-size:20px; font-weight:bold; color:#0047a0; margin-top:30px;">
-    안전운전이 최고의 배려입니다!<br>오늘도 기분 좋은 운행 되세요.
-  </div>
-  <button onclick="location.reload()" style="margin-top:40px; background:#666;">처음으로 돌아가기</button>
+  <img src="safety_bye.jpg" style="width:80%; border-radius:20px; margin-top:40px;">
+  <div style="font-size:20px; font-weight:bold; color:#0047a0; margin-top:30px;">안전운전이 최고의 배려입니다!</div>
+  <button onclick="location.reload()" style="margin-top:40px; background:#666;">처음으로</button>
 </div>
 
 <script>
@@ -142,36 +123,25 @@ function goNext(n) {
 }
 
 function refreshStatus() {
-  document.getElementById("thermoGroup3").classList.add("thermo-group-blinking");
   fetch(API_URL).then(r => r.text()).then(t => {
     var amount = Number(t);
     document.getElementById("status3").innerText = Math.floor(amount / 500) + "명 참여 / " + amount.toLocaleString() + "원 적립";
-    setTimeout(() => {
-      document.getElementById("thermoGroup3").classList.remove("thermo-group-blinking");
-      updateVerticalBar("bar3", amount);
-    }, 600);
+    updateVerticalBar("bar3", amount);
   });
 }
 
 function handleDonate() {
   goNext(4);
-  var group = document.getElementById("thermoGroup4");
-  var title = document.getElementById("step4Title");
-  var txt = document.getElementById("amountText");
-  var usage = document.getElementById("usageText");
-  var btn = document.getElementById("scratchBtn");
-  
-  group.classList.add("thermo-group-blinking");
+  document.getElementById("thermoGroup4").classList.add("thermo-group-blinking");
   fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) })
   .then(res => res.text())
   .then(data => {
     var serverTotal = data.split('|')[1] || data;
     setTimeout(() => {
-      group.classList.remove("thermo-group-blinking");
-      title.innerText = "기부 완료!";
-      txt.innerText = Number(serverTotal).toLocaleString() + "원 적립 완료!";
-      usage.style.display = "block";
-      btn.style.display = "block";
+      document.getElementById("thermoGroup4").classList.remove("thermo-group-blinking");
+      document.getElementById("step4Title").innerText = "기부 완료!";
+      document.getElementById("amountText").innerText = Number(serverTotal).toLocaleString() + "원 적립 완료!";
+      document.getElementById("scratchBtn").style.display = "block";
       updateVerticalBar("bar4", serverTotal); 
     }, 1000);
   });
@@ -179,81 +149,66 @@ function handleDonate() {
 
 function updateVerticalBar(id, amount) {
   var bar = document.getElementById(id);
-  var goal = 10000000;
-  var per = Math.min(Math.max((amount / goal) * 100, 5), 100);
+  var per = Math.min(Math.max((amount / 10000000) * 100, 5), 100);
   if(bar) bar.style.height = per + "%";
 }
 
 function startTimer() {
   var time = 3;
-  var btn = document.getElementById("nextBtn");
-  var num = document.getElementById("timerNumber");
-  btn.disabled = true;
   var interval = setInterval(function() {
     time--;
-    if (time > 0) num.innerText = time;
-    else { clearInterval(interval); num.innerText = "✓"; num.style.color = "#0047a0"; btn.disabled = false; }
+    if (time > 0) document.getElementById("timerNumber").innerText = time;
+    else { clearInterval(interval); document.getElementById("timerNumber").innerText = "✓"; document.getElementById("nextBtn").disabled = false; }
   }, 1000);
 }
 
 function initScratch() {
-  var cvs = document.getElementById("scratch");
-  var ctx = cvs.getContext("2d");
-  var resBox = document.getElementById("resultBox");
-  var resTxt = document.getElementById("resultText");
-  var certBtn = document.getElementById("certBtn");
-  var giftBtn = document.getElementById("giftNextBtn");
-  var drawing = false; var revealed = false;
+  var cvs = document.getElementById("scratch"), ctx = cvs.getContext("2d");
+  var resBox = document.getElementById("resultBox"), resTxt = document.getElementById("resultText");
+  var certBtn = document.getElementById("certBtn"), giftBtn = document.getElementById("giftNextBtn");
+  var drawing = false, revealed = false;
 
-  ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = "#aaa"; ctx.fillRect(0, 0, 300, 150);
+  ctx.fillStyle = "#aaa"; ctx.fillRect(0, 0, 300, 150);
   ctx.fillStyle = "#fff"; ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center";
   ctx.fillText("슥슥 긁어보세요!", 150, 85);
 
   function checkReveal() {
     if (revealed) return;
-    var pix = ctx.getImageData(0,0,300,150).data;
-    var t = 0; for (var i=3; i<pix.length; i+=4) if(pix[i] === 0) t++;
-    
+    var pix = ctx.getImageData(0,0,300,150).data, t = 0;
+    for (var i=3; i<pix.length; i+=4) if(pix[i] === 0) t++;
     if ((t/(300*150)) > 0.5) {
-      revealed = true; // [핵심] 결과가 노출되면 긁기 기능을 차단함
-      
+      revealed = true;
       var rand = Math.random() * 100;
       var type = (rand <= 10) ? "WIN" : (rand <= 55 ? "DOUBLE" : "HERO");
 
-      // [수정] 캔버스에 결과를 고정하여 더 이상 지워지지 않게 함
-      ctx.globalCompositeOperation = "source-over"; 
-      ctx.fillStyle = "#fff"; 
-      ctx.fillRect(0, 0, 300, 150);
-      ctx.fillStyle = "#0047a0"; 
-      ctx.font = "bold 18px sans-serif";
-      
+      ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, 300, 150);
+      ctx.fillStyle = "#0047a0"; ctx.font = "bold 18px sans-serif";
       resBox.style.display = "block";
-      certBtn.style.display = "none";
-      giftBtn.style.display = "none";
 
       if (type === "WIN") {
         ctx.fillText("★ 커피 쿠폰 당첨 ★", 150, 85);
-        resTxt.innerHTML = "<b>축하합니다! 커피 쿠폰 당첨!</b><br><br>안전운전을 실천해주신 보답으로 시원한 커피 한 잔을 드립니다. 연락처를 입력해 주세요.";
-        var phone = prompt("🎁 당첨! 커피 쿠폰 발송을 위해\n연락처를 입력해 주세요.");
+        resTxt.innerHTML = "<b>축하합니다! 커피 쿠폰 당첨!</b><br>연락처를 입력하시면 Log 탭에 자동 저장됩니다.";
+        var phone = prompt("🎁 커피 쿠폰 발송용 연락처를 입력하세요.");
         if (phone) fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "PHONE", phone: phone }) });
         giftBtn.style.display = "block";
       } else if (type === "DOUBLE") {
         ctx.fillText("기부금 2배 적립 당첨!", 150, 85);
-        resTxt.innerHTML = "<b>기부금 2배 적립 당첨!</b><br><br>운전자님의 참여에 감동하여, 한국도로공사 대구경북본부가 기부금을 2배로 매칭하여 전달하겠습니다.<br><small>(※ 기부금 전액은 대구경북본부가 후원합니다)</small>";
+        resTxt.innerHTML = "<b>기부금 2배 적립!</b><br>방금 하신 기부 외에 대구경북본부가 500원을 추가로 더 적립합니다!";
+        // [수정] 2배 적립 시 서버에 기부 신호 한 번 더 전송
+        fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) });
         giftBtn.style.display = "block";
       } else {
         ctx.fillText("베스트 배려운전자 선정!", 150, 85);
-        resTxt.innerHTML = "<b>베스트 배려운전자 인증 대상!</b><br><br>\"당신은 도로를 지키는 보이지 않는 영웅입니다.\"<br>안전과 기부를 실천하신 당신만의 <b>'배려운전 인증서'</b>를 확인해 보세요.";
+        resTxt.innerHTML = "<b>당신은 도로 위의 영웅입니다!</b><br>안전과 기부를 실천하신 인증서를 확인하세요.";
         certBtn.style.display = "block";
       }
     }
   }
 
   function scratch(e) {
-    if (!drawing || revealed) return; // [수정] 결과가 노출된 상태면 긁기 중단
+    if (!drawing || revealed) return;
     var r = cvs.getBoundingClientRect();
-    var cx = e.touches ? e.touches[0].clientX : e.clientX;
-    var cy = e.touches ? e.touches[0].clientY : e.clientY;
+    var cx = e.touches ? e.touches[0].clientX : e.clientX, cy = e.touches ? e.touches[0].clientY : e.clientY;
     ctx.globalCompositeOperation = "destination-out";
     ctx.beginPath(); ctx.arc(cx - r.left, cy - r.top, 20, 0, Math.PI * 2); ctx.fill();
     checkReveal();
@@ -263,7 +218,6 @@ function initScratch() {
   window.addEventListener("mouseup", () => drawing = false);
   cvs.addEventListener("touchstart", (e) => { drawing = true; if(e.cancelable) e.preventDefault(); }, {passive:false});
   cvs.addEventListener("touchmove", (e) => { scratch(e); if(e.cancelable) e.preventDefault(); }, {passive:false});
-  cvs.addEventListener("touchend", () => drawing = false);
 }
 </script>
 </body>
