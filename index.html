@@ -9,41 +9,37 @@
   .step { display:none; padding:20px; max-width: 500px; margin: 0 auto; min-height: 100vh; box-sizing: border-box; }
   .active { display:block; }
   
-  /* [수정] 첫 화면(Step 1) 스타일: 이미지를 배경으로 꽉 차게 설정 */
+  /* Step 1 포스터 배경 */
   #step1 { 
-    display: none; /* 기본은 숨김 */
-    padding: 0; /* 패딩 제거 */
-    background-image: url('intro.png'); /* 보내주신 이미지 삽입 */
-    background-size: contain; /* 이미지가 잘리지 않고 전체가 다 보이도록 설정 */
-    background-position: top center; /* 위쪽 중앙 기준 */
-    background-repeat: no-repeat; /* 반복 없음 */
-    background-color: #FDF3D0; /* 이미지 주변 여백 색상을 포스터 배경색과 통일 */
-    position: relative;
+    display: none; padding: 0; background-image: url('intro.png'); background-size: contain; 
+    background-position: top center; background-repeat: no-repeat; background-color: #FDF3D0; 
+    position: relative; height: 100vh; 
   }
-  #step1.active { display: flex; flex-direction: column; justify-content: flex-end; } /* 버튼을 아래쪽에 배치하기 위해 flex 사용 */
+  #step1.active { display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 20px; }
+  #step1 button { margin: 30px 20px 50px 20px; width: calc(100% - 40px); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
 
-  /* [수정] 첫 화면 버튼 스타일: 포스터 하단에 겹치지 않게 여백 추가 */
-  #step1 button { 
-    margin: 40px 20px; /* 좌우 여백 주고 하단 포스터 내용과 띄움 */
-    width: calc(100% - 40px); /* 여백 제외한 꽉 찬 너비 */
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2); /* 버튼 강조를 위해 그림자 추가 */
-  }
+  /* 온도계 공통 스타일 (Step 3, Step 4 공유) */
+  .bar-wrap { width:100%; margin:20px 0; border:2px solid #333; height:35px; border-radius: 20px; overflow: hidden; background: #eee; position: relative; }
+  .bar { height:100%; width:0%; background: linear-gradient(90deg, #ff4b2b, #ff416c); position: absolute; left: 0; top: 0; transition: width 0.8s ease-out; }
+  .blinking { animation: blink 0.8s infinite; }
+  @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-  /* 나머지 스타일은 기존과 동일 */
-  h2 { color: #0047a0; margin-top: 10px; }
-  button { padding:18px 25px; font-size:18px; margin-top:20px; width: 100%; border: none; border-radius: 10px; background: #852722; color: white; font-weight: bold; cursor: pointer; transition: background 0.2s; }
-  button:active { background: #003375; } /* 클릭했을 때 느낌 주기 */
-  button:disabled { background: #ccc; }
+  /* 수치 텍스트 스타일 */
+  .status-text { font-size: 22px; font-weight: bold; color: #000; margin: 15px 0; }
+  .sub-text { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 20px; }
+
+  /* 버튼 스타일 */
+  button { padding:18px 25px; font-size:18px; width: 100%; border: none; border-radius: 10px; background: #852722; color: white; font-weight: bold; cursor: pointer; }
+  button:active { transform: scale(0.98); background: #631d1a; }
+  
+  /* Step 3 전용 버튼 (네/아니요 느낌) */
+  .btn-group { display: flex; gap: 10px; }
+  .btn-no { background: #fff; color: #333; border: 2px solid #333; }
+
+  h2 { color: #0047a0; margin-top: 10px; font-size: 20px; word-break: keep-all; }
   .safety-img { width:100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
   #timerNumber { font-size: 40px; font-weight: bold; color: #ff4b2b; margin: 10px 0; }
-  .bar-wrap { width:100%; margin:30px 0; border:1px solid #ddd; height:35px; border-radius: 20px; overflow: hidden; background: #eee; position: relative; }
-  .bar { height:100%; width:0%; background: linear-gradient(90deg, #ff4b2b, #ff416c); position: absolute; left: 0; top: 0; transition: width 0.8s ease-out; }
-  
-  @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-  .blinking { animation: blink 0.8s infinite; }
-
-  #amountText { font-size: 24px; font-weight: bold; color: #ff4b2b; min-height: 40px; display: flex; align-items: center; justify-content: center; }
-  canvas { border:2px solid #ddd; margin-top:20px; touch-action: none; border-radius: 10px; background:#fff; cursor: crosshair; }
+  canvas { border:2px solid #ddd; margin-top:20px; touch-action: none; border-radius: 10px; background:#fff; }
   #resultDisplay { margin-top: 20px; font-size: 18px; font-weight: bold; min-height: 120px; }
   .privacy-info { font-size: 11px; color: #888; margin-top: 15px; line-height: 1.4; text-align: left; background: #eee; padding: 10px; border-radius: 5px; }
 </style>
@@ -64,14 +60,19 @@
 
 <div id="step3" class="step">
   <h2>기부 온도계</h2>
-  <p>기부하기 버튼을 누르면<br><b>500원</b>이 자동으로 기부됩니다.</p>
-  <button onclick="handleDonate()">기부하고 복권 받기</button>
+  <div class="bar-wrap"><div id="bar3" class="bar"></div></div>
+  <div id="status3" class="status-text">불러오는 중...</div>
+  <div class="sub-text">기부에 참여하시겠습니까?</div>
+  <div class="btn-group">
+    <button onclick="handleDonate()">네 좋아요 ></button>
+    <button class="btn-no" onclick="location.reload()">아니요 ></button>
+  </div>
 </div>
 
 <div id="step4" class="step">
   <h2>기부 완료!</h2>
-  <div class="bar-wrap"><div id="bar" class="bar"></div></div>
-  <p id="amountText">0원</p>
+  <div class="bar-wrap"><div id="bar4" class="bar"></div></div>
+  <p id="amountText" class="status-text">0원</p>
   <button onclick="goNext(5)">럭키 스크래치 확인</button>
 </div>
 
@@ -89,7 +90,6 @@
 </div>
 
 <script>
-// 배포된 Apps Script URL (차장님 URL 그대로 유지)
 var API_URL = "https://script.google.com/macros/s/AKfycbyUoMPN-xEmrSakJC4zvb4SZlRcE5pytPLcwd8oIcqO2i3PiENRZ_dBHiLGYNnH2Pis6g/exec"; 
 
 function goNext(n) {
@@ -97,7 +97,114 @@ function goNext(n) {
   for (var i = 0; i < steps.length; i++) { steps[i].classList.remove('active'); }
   document.getElementById('step' + n).classList.add('active');
   if (n === 2) { startTimer(); }
+  if (n === 3) { refreshStatus(); } // Step 3 진입 시 최신 현황 로딩
   if (n === 5) { initScratch(); }
+  window.scrollTo(0,0);
+}
+
+// Step 3에서 현재 참여 인원과 금액을 불러오는 함수
+function refreshStatus() {
+  fetch(API_URL)
+    .then(r => r.text())
+    .then(t => {
+      var amount = Number(t);
+      var count = amount / 500;
+      document.getElementById("status3").innerText = count + "명 참여 / " + amount.toLocaleString() + "원 적립";
+      updateThermometer("bar3", amount);
+    });
+}
+
+function handleDonate() {
+  goNext(4);
+  var txt = document.getElementById("amountText");
+  var bar4 = document.getElementById("bar4");
+  
+  txt.innerText = "기부 현황 업데이트 중..."; 
+  bar4.classList.add("blinking");
+
+  fetch(API_URL, {
+    method: "POST",
+    body: new URLSearchParams({ type: "DONATE" })
+  })
+  .then(res => res.text())
+  .then(data => {
+    var serverTotal = data.split('|')[1] || data;
+    localStorage.setItem("totalDonation", serverTotal);
+    setTimeout(function() {
+      bar4.classList.remove("blinking");
+      txt.innerText = Number(serverTotal).toLocaleString() + "원 적립 완료!";
+      updateThermometer("bar4", serverTotal); 
+    }, 800);
+  });
+}
+
+function updateThermometer(id, amount) {
+  var bar = document.getElementById(id);
+  var goal = 10000000;
+  var per = Math.min(Math.max((amount / goal) * 100, 5), 100);
+  if(bar) bar.style.width = per + "%";
+}
+
+// 스크래치 및 기타 로직 (기존과 동일)
+function initScratch() {
+  var cvs = document.getElementById("scratch");
+  var ctx = cvs.getContext("2d");
+  var disp = document.getElementById("resultDisplay");
+  var drawing = false; var revealed = false;
+
+  ctx.globalCompositeOperation = "source-over"; 
+  ctx.fillStyle = "#aaa"; ctx.fillRect(0, 0, 300, 150);
+  ctx.fillStyle = "#fff"; ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center";
+  ctx.fillText("슥슥 긁어보세요!", 150, 85);
+
+  function checkReveal() {
+    if (revealed) return;
+    var pix = ctx.getImageData(0,0,300,150).data;
+    var t = 0; for (var i=3; i<pix.length; i+=4) { if(pix[i] === 0) t++; }
+    if ((t/(300*150)) > 0.5) {
+      revealed = true;
+      disp.innerHTML = "결과 확인 중...";
+      fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "SCRATCH" }) })
+      .then(res => res.text())
+      .then(result => {
+        ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, 300, 150);
+        ctx.fillStyle = (result === "WIN") ? "#0047a0" : "#888";
+        ctx.font = "bold 40px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText(result === "WIN" ? "★ 당 첨 ★" : "다음 기회에", 150, 75);
+        if (result === "WIN") {
+          var phone = prompt("🎁 당첨! 안전드림 커피 쿠폰 발송을 위해\n전화번호를 입력해주세요.");
+          if (phone) fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "PHONE", phone: phone }) });
+        }
+        disp.innerHTML = result === "WIN" ? "✅ 당첨을 축하드립니다!" : "🙏 안전운전 하세요.";
+      });
+    }
+  }
+
+  function getPos(e) {
+    var r = cvs.getBoundingClientRect();
+    var cx = e.touches ? e.touches[0].clientX : e.clientX;
+    var cy = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: cx - r.left, y: cy - r.top };
+  }
+  function scratch(e) {
+    if (!drawing) return;
+    var p = getPos(e); ctx.globalCompositeOperation = "destination-out";
+    ctx.beginPath(); ctx.arc(p.x, p.y, 20, 0, Math.PI * 2); ctx.fill();
+    checkReveal();
+  }
+  cvs.addEventListener("mousedown", () => drawing = true);
+  cvs.addEventListener("mousemove", scratch);
+  window.addEventListener("mouseup", () => drawing = false);
+  cvs.addEventListener("touchstart", (e) => { drawing = true; if(e.cancelable) e.preventDefault(); }, {passive:false});
+  cvs.addEventListener("touchmove", (e) => { scratch(e); if(e.cancelable) e.preventDefault(); }, {passive:false});
+  cvs.addEventListener("touchend", () => drawing = false);
+}
+
+// 초기 로딩
+window.onload = function() {
+  fetch(API_URL).then(r => r.text()).then(t => {
+    localStorage.setItem("totalDonation", t);
+  });
 }
 
 function startTimer() {
@@ -110,156 +217,6 @@ function startTimer() {
     if (time > 0) { num.innerText = time; } 
     else { clearInterval(interval); num.innerText = "✓"; num.style.color = "#0047a0"; btn.disabled = false; }
   }, 1000);
-}
-
-function handleDonate() {
-  goNext(4);
-  var txt = document.getElementById("amountText");
-  var bar = document.getElementById("bar");
-  
-  txt.style.transition = "none"; txt.style.opacity = "1"; txt.style.fontSize = "16px"; txt.style.color = "#888";
-  txt.innerText = "기부 현황을 불러오는 중..."; 
-  bar.classList.add("blinking");
-
-  // [보강] 초기 기부금액 가져오기 로직 개선
-  var lastTotal = Number(localStorage.getItem("totalDonation") || 0);
-  
-  // 서버에 기록 전송
-  fetch(API_URL, {
-    method: "POST",
-    body: new URLSearchParams({ type: "DONATE" })
-  })
-  .then(function(res) { return res.text(); })
-  .then(function(data) {
-    var parts = data.split('|');
-    var serverTotal = parts[1] || parts[0]; // 데이터 형식 예외 처리
-    localStorage.setItem("totalDonation", serverTotal);
-    
-    setTimeout(function() {
-      bar.classList.remove("blinking");
-      txt.style.transition = "all 0.5s";
-      txt.innerText = Number(serverTotal).toLocaleString() + "원";
-      txt.style.fontSize = "24px"; txt.style.color = "#ff4b2b";
-      moveBarOnly(serverTotal); 
-    }, 800);
-  })
-  .catch(function(err) {
-    // 네트워크 오류 시 안내
-    bar.classList.remove("blinking");
-    txt.innerText = "연결이 원활하지 않습니다. (재시도 필요)";
-  });
-}
-
-// [보강] 페이지 로드 시 서버에서 최신 금액을 가져와서 온도계 미리 세팅
-window.onload = function() {
-  // 1. 캐시된 값으로 먼저 표시 (빠른 응답)
-  var lastTotal = Number(localStorage.getItem("totalDonation") || 0);
-  if(lastTotal > 0) moveBarOnly(lastTotal);
-
-  // 2. 서버에서 최신 금액 가져와 동기화 (정확도)
-  fetch(API_URL)
-    .then(r => r.text())
-    .then(t => {
-      var cur = Number(t);
-      if(!isNaN(cur)) {
-        localStorage.setItem("totalDonation", cur);
-        moveBarOnly(cur);
-      }
-    });
-}
-
-function moveBarOnly(amount) {
-  var bar = document.getElementById("bar");
-  var goal = 10000000;
-  var per = Math.min(Math.max((amount / goal) * 100, 5), 100);
-  bar.style.width = per + "%";
-}
-
-function initScratch() {
-  var cvs = document.getElementById("scratch");
-  var ctx = cvs.getContext("2d");
-  var disp = document.getElementById("resultDisplay");
-  var drawing = false;
-  var revealed = false;
-
-  // 1. 회색 덮개 초기화
-  ctx.globalCompositeOperation = "source-over"; 
-  ctx.fillStyle = "#aaa";
-  ctx.fillRect(0, 0, 300, 150);
-  ctx.fillStyle = "#fff";
-  ctx.font = "bold 16px sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText("슥슥 긁어보세요!", 150, 85);
-
-  function checkReveal() {
-    if (revealed) return;
-    var pix = ctx.getImageData(0,0,300,150).data;
-    var t = 0;
-    for (var i=3; i<pix.length; i+=4) { if(pix[i] === 0) t++; }
-    
-    if ((t/(300*150)) > 0.5) {
-      revealed = true;
-      disp.innerHTML = "결과 확인 중...";
-
-      fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "SCRATCH" }) })
-      .then(res => res.text())
-      .then(result => {
-        // 캔버스 결과 그리기
-        ctx.globalCompositeOperation = "source-over"; 
-        ctx.fillStyle = "#fff";
-        ctx.fillRect(0, 0, 300, 150);
-        
-        ctx.fillStyle = (result === "WIN") ? "#0047a0" : "#888";
-        ctx.font = "bold 40px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(result === "WIN" ? "★ 당 첨 ★" : "다음 기회에", 150, 75);
-
-        if (result === "WIN") {
-          var phone = prompt("🎁 당첨! 안전드림 커피 쿠폰 발송을 위해\n전화번호를 입력해주세요.");
-          if (phone) {
-            fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "PHONE", phone: phone }) });
-            disp.innerHTML = "<div style='color:#0047a0;'>✅ 등록완료! 곧 발송됩니다.</div>";
-          }
-        } else {
-          disp.innerHTML = "🙏 다음 기회에! 안전운전 하세요.";
-        }
-      });
-    }
-  }
-
-  function getPos(e) {
-    var r = cvs.getBoundingClientRect();
-    var cx = e.touches ? e.touches[0].clientX : e.clientX;
-    var cy = e.touches ? e.touches[0].clientY : e.clientY;
-    return { x: cx - r.left, y: cy - r.top };
-  }
-
-  function scratch(e) {
-    if (!drawing) return;
-    var p = getPos(e);
-    ctx.globalCompositeOperation = "destination-out"; // 긁어내기 모드
-    ctx.beginPath(); 
-    ctx.arc(p.x, p.y, 20, 0, Math.PI * 2); 
-    ctx.fill();
-    checkReveal();
-  }
-
-  // 리스너 등록 (터치 이벤트 수동 등록으로 passive 이슈 해결)
-  cvs.addEventListener("mousedown", function() { drawing = true; });
-  cvs.addEventListener("mousemove", scratch);
-  window.addEventListener("mouseup", function() { drawing = false; });
-  cvs.addEventListener("touchstart", function(e) { drawing = true; if(e.cancelable) e.preventDefault(); }, {passive:false});
-  cvs.addEventListener("touchmove", function(e) { scratch(e); if(e.cancelable) e.preventDefault(); }, {passive:false});
-  cvs.addEventListener("touchend", function() { drawing = false; });
-}
-
-// 초기 온도계 로딩 (캐시된 값 있으면 사용)
-window.onload = function() {
-    var lastTotal = Number(localStorage.getItem("totalDonation") || 0);
-    if(lastTotal > 0) {
-        moveBarOnly(lastTotal);
-    }
 }
 </script>
 </body>
