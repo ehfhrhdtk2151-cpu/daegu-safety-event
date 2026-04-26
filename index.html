@@ -5,18 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>안전기뷰(Give U) 캠페인</title>
 <style>
-  body { margin:0; font-family: sans-serif; text-align:center; background:#f9f9f9; color: #333; }
+  body { margin:0; font-family: sans-serif; text-align:center; background:#f9f9f9; color: #333; overflow-x: hidden; }
   .step { display:none; padding:20px; max-width: 500px; margin: 0 auto; min-height: 100vh; box-sizing: border-box; }
   .active { display:block; }
+  
+  /* [수정] 첫 화면(Step 1) 스타일: 이미지를 배경으로 꽉 차게 설정 */
+  #step1 { 
+    display: none; /* 기본은 숨김 */
+    padding: 0; /* 패딩 제거 */
+    background-image: url('intro.png'); /* 보내주신 이미지 삽입 */
+    background-size: contain; /* 이미지가 잘리지 않고 전체가 다 보이도록 설정 */
+    background-position: top center; /* 위쪽 중앙 기준 */
+    background-repeat: no-repeat; /* 반복 없음 */
+    background-color: #FDF3D0; /* 이미지 주변 여백 색상을 포스터 배경색과 통일 */
+    position: relative;
+  }
+  #step1.active { display: flex; flex-direction: column; justify-content: flex-end; } /* 버튼을 아래쪽에 배치하기 위해 flex 사용 */
+
+  /* [수정] 첫 화면 버튼 스타일: 포스터 하단에 겹치지 않게 여백 추가 */
+  #step1 button { 
+    margin: 40px 20px; /* 좌우 여백 주고 하단 포스터 내용과 띄움 */
+    width: calc(100% - 40px); /* 여백 제외한 꽉 찬 너비 */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2); /* 버튼 강조를 위해 그림자 추가 */
+  }
+
+  /* 나머지 스타일은 기존과 동일 */
   h2 { color: #0047a0; margin-top: 10px; }
-  button { padding:18px 25px; font-size:18px; margin-top:20px; width: 100%; border: none; border-radius: 10px; background: #0047a0; color: white; font-weight: bold; cursor: pointer; }
+  button { padding:18px 25px; font-size:18px; margin-top:20px; width: 100%; border: none; border-radius: 10px; background: #0047a0; color: white; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+  button:active { background: #003375; } /* 클릭했을 때 느낌 주기 */
   button:disabled { background: #ccc; }
   .safety-img { width:100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
   #timerNumber { font-size: 40px; font-weight: bold; color: #ff4b2b; margin: 10px 0; }
   .bar-wrap { width:100%; margin:30px 0; border:1px solid #ddd; height:35px; border-radius: 20px; overflow: hidden; background: #eee; position: relative; }
   .bar { height:100%; width:0%; background: linear-gradient(90deg, #ff4b2b, #ff416c); position: absolute; left: 0; top: 0; transition: width 0.8s ease-out; }
   
-  /* 깜박임 효과 */
   @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
   .blinking { animation: blink 0.8s infinite; }
 
@@ -29,8 +51,6 @@
 <body>
 
 <div id="step1" class="step active">
-  <h2>안전기뷰(Give U)</h2>
-  <p>잠시 쉬며 안전을 충전하세요!<br>참여하시면 기부금이 전달됩니다.</p>
   <button onclick="goNext(2)">캠페인 참여하기</button>
 </div>
 
@@ -69,7 +89,7 @@
 </div>
 
 <script>
-// 배포된 Apps Script URL
+// 배포된 Apps Script URL (차장님 URL 그대로 유지)
 var API_URL = "https://script.google.com/macros/s/AKfycbyUoMPN-xEmrSakJC4zvb4SZlRcE5pytPLcwd8oIcqO2i3PiENRZ_dBHiLGYNnH2Pis6g/exec"; 
 
 function goNext(n) {
@@ -101,8 +121,17 @@ function handleDonate() {
   txt.innerText = "기부 현황을 불러오는 중..."; 
   bar.classList.add("blinking");
 
-  var currentTotal = (Number(localStorage.getItem("totalDonation") || 0)) + 500;
-  moveBarOnly(currentTotal); 
+  // 낙관적 업데이트
+  var lastTotal = Number(localStorage.getItem("totalDonation") || 0);
+  if(lastTotal === 0) {
+      fetch(API_URL).then(r=>r.text()).then(t=>{
+          var cur = Number(t);
+          localStorage.setItem("totalDonation", cur);
+          moveBarOnly(cur + 500);
+      });
+  } else {
+      moveBarOnly(lastTotal + 500);
+  }
 
   fetch(API_URL, {
     method: "POST",
@@ -125,16 +154,8 @@ function handleDonate() {
 function moveBarOnly(amount) {
   var bar = document.getElementById("bar");
   var goal = 10000000;
-  var per = Math.max((amount / goal) * 100, 5);
+  var per = Math.min(Math.max((amount / goal) * 100, 5), 100);
   bar.style.width = per + "%";
-}
-
-function updateBar(amount) {
-  moveBarOnly(amount);
-  var txt = document.getElementById("amountText");
-  if(txt && txt.innerText.indexOf("불러오는") === -1) {
-    txt.innerText = Number(amount).toLocaleString() + "원";
-  }
 }
 
 function initScratch() {
@@ -145,7 +166,7 @@ function initScratch() {
   var revealed = false;
 
   // 1. 회색 덮개 초기화
-  ctx.globalCompositeOperation = "source-over";
+  ctx.globalCompositeOperation = "source-over"; 
   ctx.fillStyle = "#aaa";
   ctx.fillRect(0, 0, 300, 150);
   ctx.fillStyle = "#fff";
@@ -166,7 +187,7 @@ function initScratch() {
       fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "SCRATCH" }) })
       .then(res => res.text())
       .then(result => {
-        // [수정 핵심] 캔버스의 투명 모드를 끄고 흰색으로 덮어쓴 뒤 글자를 씁니다.
+        // 캔버스 결과 그리기
         ctx.globalCompositeOperation = "source-over"; 
         ctx.fillStyle = "#fff";
         ctx.fillRect(0, 0, 300, 150);
@@ -181,7 +202,7 @@ function initScratch() {
           var phone = prompt("🎁 당첨! 안전드림 커피 쿠폰 발송을 위해\n전화번호를 입력해주세요.");
           if (phone) {
             fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "PHONE", phone: phone }) });
-            disp.innerHTML = "<div style='color:#0047a0;'>✅ 등록완료! 쿠폰이 한달이내 발송됩니다.</div>";
+            disp.innerHTML = "<div style='color:#0047a0;'>✅ 등록완료! 곧 발송됩니다.</div>";
           }
         } else {
           disp.innerHTML = "🙏 다음 기회에! 안전운전 하세요.";
@@ -207,13 +228,21 @@ function initScratch() {
     checkReveal();
   }
 
-  // 리스너 등록
+  // 리스너 등록 (터치 이벤트 수동 등록으로 passive 이슈 해결)
   cvs.addEventListener("mousedown", function() { drawing = true; });
   cvs.addEventListener("mousemove", scratch);
   window.addEventListener("mouseup", function() { drawing = false; });
-  cvs.addEventListener("touchstart", function(e) { drawing = true; e.preventDefault(); }, {passive:false});
-  cvs.addEventListener("touchmove", function(e) { scratch(e); e.preventDefault(); }, {passive:false});
+  cvs.addEventListener("touchstart", function(e) { drawing = true; if(e.cancelable) e.preventDefault(); }, {passive:false});
+  cvs.addEventListener("touchmove", function(e) { scratch(e); if(e.cancelable) e.preventDefault(); }, {passive:false});
   cvs.addEventListener("touchend", function() { drawing = false; });
+}
+
+// 초기 온도계 로딩 (캐시된 값 있으면 사용)
+window.onload = function() {
+    var lastTotal = Number(localStorage.getItem("totalDonation") || 0);
+    if(lastTotal > 0) {
+        moveBarOnly(lastTotal);
+    }
 }
 </script>
 </body>
