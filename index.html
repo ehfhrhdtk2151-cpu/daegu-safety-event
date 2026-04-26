@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>안전기뷰(Give U) 캠페인</title>
 <style>
-  /* 기존 스타일 유지 */
   body { margin:0; font-family: sans-serif; text-align:center; background:#f9f9f9; color: #333; overflow-x: hidden; }
   .step { display:none; padding:20px; max-width: 500px; margin: 0 auto; min-height: 100vh; box-sizing: border-box; }
   .active { display:block; }
@@ -50,9 +49,9 @@
 
 <div id="step0" class="step">
   <img src="safety_bye.jpg" style="width:80%; border-radius:20px; margin-top:40px;">
-  <div style="font-size:20px; font-weight:bold; color:#852722; margin-top:30px;">이미 참여하셨습니다!</div>
-  <p class="status-text" id="prevParticipationMsg"></p>
-  <div style="font-size:16px; color:#666; margin-top:10px;">안전운전을 실천해주셔서 감사합니다.<br></div>
+  <div id="step0Title" style="font-size:22px; font-weight:bold; color:#852722; margin-top:30px;">안내</div>
+  <p id="step0Msg" style="font-size:18px; color:#333; margin-top:15px; line-height:1.6; word-break:keep-all;"></p>
+  <button onclick="location.reload()" style="margin-top:40px; background:#666;">새로고침</button>
 </div>
 
 <div id="step1" class="step active"><button onclick="goNext(2)">캠페인 참여하기</button></div>
@@ -67,10 +66,7 @@
 <div id="step3" class="step">
   <h2>기부 온도계</h2>
   <div class="thermometer-wrapper">
-    <div id="thermoGroup3">
-      <div class="thermometer-container"><div id="bar3" class="thermo-bar"></div></div>
-      <div class="thermo-bulb"></div>
-    </div>
+    <div id="thermoGroup3"><div class="thermometer-container"><div id="bar3" class="thermo-bar"></div></div><div class="thermo-bulb"></div></div>
     <div class="marks">
         <div style="position:relative;">100%<div class="mark-line-long"></div></div>
         <div style="position:relative;">75%<div class="mark-line-long"></div></div>
@@ -89,10 +85,7 @@
 <div id="step4" class="step">
   <h2 id="step4Title">기부 진행 중...</h2>
   <div class="thermometer-wrapper">
-    <div id="thermoGroup4">
-      <div class="thermometer-container"><div id="bar4" class="thermo-bar"></div></div>
-      <div class="thermo-bulb"></div>
-    </div>
+    <div id="thermoGroup4"><div class="thermometer-container"><div id="bar4" class="thermo-bar"></div></div><div class="thermo-bulb"></div></div>
   </div>
   <p id="amountText" class="status-text">처리 중...</p>
   <button id="scratchBtn" onclick="goNext(5)" style="display:none; margin-top:20px;">럭키 스크래치 확인</button>
@@ -105,31 +98,42 @@
   <div id="resultBox" style="display:none; margin-top:20px;">
     <div id="resultText" class="result-msg"></div>
     <button id="giftNextBtn" onclick="goNext(6)" style="margin-top:20px; display:none;">참여 완료 ></button>
-    <button id="certBtn" class="cert-btn" onclick="alert('인증서 페이지로 이동')" style="display:none;">인증서 확인하기 ></button>
+    <button id="certBtn" class="cert-btn" onclick="alert('인증서 확인')" style="display:none;">인증서 확인하기 ></button>
   </div>
 </div>
 
 <div id="step6" class="step">
   <img src="safety_bye.jpg" style="width:80%; border-radius:20px; margin-top:40px;">
-  <div style="font-size:20px; font-weight:bold; color:#0047a0; margin-top:30px;">안전운전이 최고의 배려입니다!</div>
+  <div id="finalThanks" style="font-size:20px; font-weight:bold; color:#0047a0; margin-top:30px;">
+    안전운전이 최고의 배려입니다!<br>오늘도 기분 좋은 운행 되세요.
+  </div>
   <button onclick="location.reload()" style="margin-top:40px; background:#666;">처음으로</button>
 </div>
 
 <script>
 var API_URL = "https://script.google.com/macros/s/AKfycbyUoMPN-xEmrSakJC4zvb4SZlRcE5pytPLcwd8oIcqO2i3PiENRZ_dBHiLGYNnH2Pis6g/exec"; 
+var GOAL_AMOUNT = 10000000; // 목표 금액 (천만 원)
 
-// [수정] 페이지 로드 시 중복 참여 체크
 window.onload = function() {
-  var participatedDate = localStorage.getItem("lastParticipatedDate");
-  var today = new Date().toLocaleDateString();
-
-  if (participatedDate === today) {
-    goNext(0); // 이미 오늘 참여했다면 Step 0(방지 화면)으로 이동
-    document.getElementById("prevParticipationMsg").innerText = "오늘은 이미 기부에 동참하셨습니다.";
-  }
-
   fetch(API_URL).then(r => r.text()).then(t => {
-    localStorage.setItem("totalDonation", t);
+    var currentAmount = Number(t);
+    var today = new Date().toLocaleDateString();
+    
+    // [핵심] 1. 목표 달성 여부 체크
+    if (currentAmount >= GOAL_AMOUNT) {
+      goNext(0);
+      document.getElementById("step0Title").innerText = "캠페인 종료 안내";
+      document.getElementById("step0Title").style.color = "#0047a0";
+      document.getElementById("step0Msg").innerHTML = "<b>축하합니다! 목표 기부금이 모두 달성되었습니다.</b><br><br>여러분의 따뜻한 배려운전 덕분에 캠페인이 성황리에 잘 마무리되었습니다.<br>보내주신 성원에 진심으로 감사드립니다.";
+      return;
+    }
+
+    // 2. 중복 참여 체크
+    if (localStorage.getItem("lastParticipatedDate") === today) {
+      goNext(0);
+      document.getElementById("step0Title").innerText = "참여 완료 안내";
+      document.getElementById("step0Msg").innerText = "이미 기부에 동참하셨습니다.<br>감사합니다.<br>안전운행하세요~";
+    }
   });
 }
 
@@ -152,10 +156,7 @@ function refreshStatus() {
 }
 
 function handleDonate() {
-  // [추가] 기부 버튼 누르는 순간 로컬스토리지에 날짜 기록
-  var today = new Date().toLocaleDateString();
-  localStorage.setItem("lastParticipatedDate", today);
-
+  localStorage.setItem("lastParticipatedDate", new Date().toLocaleDateString());
   goNext(4);
   document.getElementById("thermoGroup4").classList.add("thermo-group-blinking");
   fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) })
@@ -168,15 +169,18 @@ function handleDonate() {
       document.getElementById("amountText").innerText = Number(serverTotal).toLocaleString() + "원 적립 완료!";
       document.getElementById("scratchBtn").style.display = "block";
       updateVerticalBar("bar4", serverTotal); 
+      
+      // 기부 후 목표 달성 여부 한 번 더 체크 (피날레 메시지 변경)
+      if (Number(serverTotal) >= GOAL_AMOUNT) {
+        document.getElementById("finalThanks").innerHTML = "<b>축하합니다! 목표 달성의 주인공이 되셨습니다!</b><br>성황리에 마무리된 캠페인에 함께해주셔서 감사합니다.";
+      }
     }, 1000);
   });
 }
 
-// ... 이하 기존 함수(updateVerticalBar, startTimer, initScratch) 동일 ...
-
 function updateVerticalBar(id, amount) {
   var bar = document.getElementById(id);
-  var per = Math.min(Math.max((amount / 10000000) * 100, 5), 100);
+  var per = Math.min(Math.max((amount / GOAL_AMOUNT) * 100, 5), 100);
   if(bar) bar.style.height = per + "%";
 }
 
@@ -215,7 +219,7 @@ function initScratch() {
       if (type === "WIN") {
         ctx.fillText("★ 커피 쿠폰 당첨 ★", 150, 85);
         resTxt.innerHTML = "<b>축하합니다! 커피 쿠폰 당첨!</b>";
-        var phone = prompt("🎁 커피 쿠폰 발송용 연락처를 입력하세요.");
+        var phone = prompt("🎁 당첨! 커피 쿠폰 발송용 연락처를 입력하세요.");
         if (phone) fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "PHONE", phone: phone }) });
         giftBtn.style.display = "block";
       } else if (type === "DOUBLE") {
