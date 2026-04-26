@@ -17,7 +17,7 @@
   #step1.active { display: flex; flex-direction: column; justify-content: flex-end; }
   #step1 button { margin: 0 20px 40px 20px; width: calc(100% - 40px); box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 10; }
 
-  /* [디자인 보강] 부드러운 입체 온도계 */
+  /* [디자인] 입체 온도계 */
   .thermometer-wrapper { position: relative; width: 220px; margin: 60px auto 30px; padding-top: 20px; }
   
   /* 아이콘 애니메이션 */
@@ -39,7 +39,6 @@
   }
   .cheer-bubble::after { content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); border-top: 8px solid #e63946; border-left: 6px solid transparent; border-right: 6px solid transparent; }
 
-  /* 샘플 느낌의 화이트 온도계 몸체 */
   .thermometer-container {
     position: relative; width: 42px; height: 240px; margin: 0 auto;
     background: #ffffff; border: 4px solid #ffffff; border-radius: 30px 30px 0 0; 
@@ -47,7 +46,7 @@
     box-shadow: 0 0 15px rgba(0,0,0,0.05), inset 0 0 10px rgba(0,0,0,0.05);
   }
 
-  /* 찰랑거리는 액체 & 물결 */
+  /* 찰랑거리는 액체 */
   .thermo-bar { 
     position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; 
     background: linear-gradient(to right, #d31027, #ff5f6d, #d31027);
@@ -60,7 +59,6 @@
   }
   @keyframes wave { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-  /* 하단 큰 구슬 및 텍스트 */
   .thermo-bulb { 
     width: 90px; height: 90px; 
     background: radial-gradient(circle at 30% 30%, #ff5f6d, #d31027);
@@ -70,7 +68,14 @@
     color: white; font-weight: bold; font-size: 16px;
   }
   
-  /* 눈금을 왼쪽으로 배치 */
+  /* [추가] 로딩/진행 중 깜박임 애니메이션 */
+  @keyframes pulse-glow {
+    0% { filter: drop-shadow(0 0 5px rgba(230, 57, 70, 0.2)); opacity: 1; }
+    50% { filter: drop-shadow(0 0 20px rgba(230, 57, 70, 0.6)); opacity: 0.8; }
+    100% { filter: drop-shadow(0 0 5px rgba(230, 57, 70, 0.2)); opacity: 1; }
+  }
+  .thermo-group-blinking { animation: pulse-glow 0.8s infinite ease-in-out; }
+
   .marks { 
     position: absolute; right: 145px; top: 15px; height: 240px; 
     display: flex; flex-direction: column; justify-content: space-between; 
@@ -92,7 +97,6 @@
   .btn-group { display: flex; gap: 10px; }
   .btn-no { background: #fff; color: #333; border: 2px solid #333; }
   canvas { border:2px solid #ddd; margin-top:20px; border-radius: 10px; background:#fff; touch-action: none; }
-  .result-msg { background: #fff; border: 2px dashed #ff4b2b; padding: 15px; border-radius: 10px; margin-top: 20px; font-size: 15px; line-height: 1.6; text-align: left; }
 </style>
 </head>
 <body>
@@ -120,7 +124,6 @@
   <h2>기부 온도계</h2>
   <div class="thermometer-wrapper">
     <div class="cheer-bubble">배려의 온도가 올라가고 있어요! ❤️</div>
-    
     <div class="marks">
         <div style="position:relative;">100<div class="mark-line-long"></div></div>
         <div style="position:relative;">80<div class="mark-line-long"></div></div>
@@ -129,12 +132,10 @@
         <div style="position:relative;">20<div class="mark-line-long"></div></div>
         <div style="position:relative;">0<div class="mark-line-long"></div></div>
     </div>
-
     <div id="thermoGroup3">
       <div class="thermometer-container"><div id="bar3" class="thermo-bar"></div></div>
       <div id="bulbText3" class="thermo-bulb">0%</div>
     </div>
-
     <div class="icon-cloud2">☁️</div><div class="icon-car">🚗</div><div class="icon-heart">❤️</div><div class="icon-star">⭐</div>
   </div>
   <div id="status3" class="status-text">현황 불러오는 중...</div>
@@ -163,9 +164,9 @@
   <p>회색 부분을 슥슥 긁어주세요!</p>
   <canvas id="scratch" width="300" height="150"></canvas>
   <div id="resultBox" style="display:none; margin-top:20px;">
-    <div id="resultText" class="result-msg"></div>
+    <div id="resultText" style="background:#fff; border:2px dashed #ff4b2b; padding:15px; border-radius:10px; margin-top:20px; font-size:15px; line-height:1.6; text-align:left;"></div>
     <button id="giftNextBtn" onclick="goNext(6)" style="margin-top:20px; display:none;">참여 완료 ></button>
-    <button id="certBtn" class="cert-btn" onclick="alert('인증서 확인')" style="display:none; background:#0047a0;">인증서 확인하기 ></button>
+    <button id="certBtn" onclick="alert('인증서 확인')" style="margin-top:15px; display:none; background:#0047a0; padding:18px; color:white; border-radius:10px; width:100%; border:none; font-weight:bold;">인증서 확인하기 ></button>
   </div>
 </div>
 
@@ -207,16 +208,23 @@ function goNext(n) {
 }
 
 function refreshStatus() {
+  // 로딩 시작 시 깜박임 추가
+  document.getElementById("thermoGroup3").classList.add("thermo-group-blinking");
   fetch(API_URL).then(r => r.text()).then(t => {
     var amount = Number(t);
     document.getElementById("status3").innerText = Math.floor(amount / 500) + "명 참여 / " + amount.toLocaleString() + "원 적립";
-    updateVerticalBar("bar3", amount, "bulbText3");
+    setTimeout(() => {
+      // 데이터 로딩 완료 시 깜박임 제거
+      document.getElementById("thermoGroup3").classList.remove("thermo-group-blinking");
+      updateVerticalBar("bar3", amount, "bulbText3");
+    }, 800);
   });
 }
 
 function handleDonate() {
   localStorage.setItem("lastParticipatedDate", new Date().toLocaleDateString());
   goNext(4);
+  // 기부 처리 중 깜박임 추가
   document.getElementById("thermoGroup4").classList.add("thermo-group-blinking");
   fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) })
   .then(res => res.text())
@@ -228,7 +236,7 @@ function handleDonate() {
       document.getElementById("amountText").innerText = Number(total).toLocaleString() + "원 적립 완료!";
       document.getElementById("scratchBtn").style.display = "block";
       updateVerticalBar("bar4", total, "bulbText4"); 
-    }, 1000);
+    }, 1500);
   });
 }
 
@@ -236,7 +244,6 @@ function updateVerticalBar(barId, amount, bulbId) {
   var bar = document.getElementById(barId);
   var per = Math.min(Math.max((amount / GOAL_AMOUNT) * 100, 0), 100);
   if(bar) bar.style.height = per + "%";
-  
   var bulb = document.getElementById(bulbId);
   if(bulb) bulb.innerText = per.toFixed(1) + "%";
 }
@@ -255,11 +262,9 @@ function initScratch() {
   var resBox = document.getElementById("resultBox"), resTxt = document.getElementById("resultText");
   var certBtn = document.getElementById("certBtn"), giftBtn = document.getElementById("giftNextBtn");
   var drawing = false, revealed = false;
-
   ctx.fillStyle = "#aaa"; ctx.fillRect(0, 0, 300, 150);
   ctx.fillStyle = "#fff"; ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center";
   ctx.fillText("슥슥 긁어보세요!", 150, 85);
-
   function checkReveal() {
     if (revealed) return;
     var pix = ctx.getImageData(0,0,300,150).data, t = 0;
@@ -270,7 +275,6 @@ function initScratch() {
       var type = (rand <= 10) ? "WIN" : (rand <= 55 ? "DOUBLE" : "HERO");
       ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, 300, 150);
       ctx.fillStyle = "#0047a0"; ctx.font = "bold 18px sans-serif"; resBox.style.display = "block";
-
       if (type === "WIN") {
         ctx.fillText("★ 커피 쿠폰 당첨 ★", 150, 85);
         resTxt.innerHTML = "<b>축하합니다! 커피 쿠폰 당첨!</b>";
@@ -290,7 +294,6 @@ function initScratch() {
       }
     }
   }
-
   function scratch(e) {
     if (!drawing || revealed) return;
     var r = cvs.getBoundingClientRect();
