@@ -54,7 +54,7 @@
   }
   .thermo-bar::before {
     content: ""; position: absolute; top: -12px; left: -50%; width: 200%; height: 25px;
-    background: rgba(255, 255, 255, 0.3); border-radius: 40%;
+    background: rgba(255, 255, 255, 0.7); border-radius: 40%;
     animation: wave 2s infinite linear;
   }
   @keyframes wave { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -63,16 +63,16 @@
     width: 90px; height: 90px; 
     background: radial-gradient(circle at 30% 30%, #ff5f6d, #d31027);
     border: 5px solid #ffffff; border-radius: 50%; margin: -35px auto 10px; position: relative; z-index: 2; 
-    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.5);
     display: flex; align-items: center; justify-content: center;
     color: white; font-weight: bold; font-size: 16px;
   }
   
   /* [추가] 로딩/진행 중 깜박임 애니메이션 */
   @keyframes pulse-glow {
-    0% { filter: drop-shadow(0 0 5px rgba(230, 57, 70, 0.2)); opacity: 1; }
-    50% { filter: drop-shadow(0 0 20px rgba(230, 57, 70, 0.6)); opacity: 0.8; }
-    100% { filter: drop-shadow(0 0 5px rgba(230, 57, 70, 0.2)); opacity: 1; }
+    0% { filter: drop-shadow(0 0 5px rgba(230, 57, 70, 0.3)); opacity: 1; }
+    50% { filter: drop-shadow(0 0 20px rgba(230, 57, 70, 0.7)); opacity: 0.8; }
+    100% { filter: drop-shadow(0 0 5px rgba(230, 57, 70, 0.3)); opacity: 1; }
   }
   .thermo-group-blinking { animation: pulse-glow 0.8s infinite ease-in-out; }
 
