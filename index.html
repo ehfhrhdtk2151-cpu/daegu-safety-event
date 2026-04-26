@@ -18,35 +18,71 @@
   #step1.active { display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 20px; }
   #step1 button { margin: 30px 20px 50px 20px; width: calc(100% - 40px); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
 
-  /* 온도계 바 스타일 */
-  .bar-wrap { width:100%; margin:20px 0; border:2px solid #333; height:35px; border-radius: 20px; overflow: hidden; background: #eee; position: relative; }
-  .bar { height:100%; width:0%; background: linear-gradient(90deg, #ff4b2b, #ff416c); position: absolute; left: 0; top: 0; transition: width 0.8s ease-out; }
+  /* [핵심] 세로형 온도계 스타일 */
+  .thermometer-container {
+    position: relative;
+    width: 60px;
+    height: 250px; /* 온도계 높이 */
+    margin: 20px auto;
+    background: #eee;
+    border: 3px solid #333;
+    border-radius: 30px 30px 0 0;
+    border-bottom: none;
+  }
+  /* 빨간색 기둥 바 */
+  .thermo-bar {
+    position: absolute;
+    bottom: 0;
+    left: 15%;
+    width: 70%;
+    height: 0%; /* 실시간으로 변화 */
+    background: linear-gradient(to top, #ff4b2b, #ff416c);
+    border-radius: 20px 20px 0 0;
+    transition: height 1s ease-out;
+  }
+  /* 하단 둥근 구슬 부분 */
+  .thermo-bulb {
+    width: 90px;
+    height: 90px;
+    background: #ff4b2b;
+    border: 3px solid #333;
+    border-radius: 50%;
+    margin: -15px auto 20px; /* 기둥과 겹치게 배치 */
+    position: relative;
+    z-index: 2;
+  }
+  /* 눈금 표시 */
+  .marks {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    height: 100%;
+    width: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 11px;
+    color: #666;
+    text-align: left;
+  }
+
   .blinking { animation: blink 0.8s infinite; }
   @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-  /* 텍스트 스타일 */
+  /* 텍스트 및 버튼 스타일 */
   h2 { color: #0047a0; margin-top: 10px; font-size: 20px; word-break: keep-all; }
-  .status-text { font-size: 22px; font-weight: bold; color: #000; margin: 15px 0; }
+  .status-text { font-size: 22px; font-weight: bold; color: #000; margin: 10px 0; }
   .sub-text { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 20px; }
-
-  /* 버튼 공통 스타일 */
-  button { padding:18px 25px; font-size:18px; width: 100%; border: none; border-radius: 10px; background: #852722; color: white; font-weight: bold; cursor: pointer; transition: transform 0.1s; }
-  button:active { transform: scale(0.98); background: #631d1a; }
-  button:disabled { background: #ccc; }
-  
-  /* Step 3 전용 버튼 그룹 */
+  button { padding:18px 25px; font-size:18px; width: 100%; border: none; border-radius: 10px; background: #852722; color: white; font-weight: bold; cursor: pointer; }
   .btn-group { display: flex; gap: 10px; }
   .btn-no { background: #fff; color: #333; border: 2px solid #333; }
 
-  /* 이미지 스타일 */
+  /* 이미지 및 기타 */
   .safety-img { width:100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
   .bye-img { width: 80%; max-width: 300px; margin-top: 50px; border-radius: 20px; }
-  .bye-text { font-size: 22px; font-weight: bold; color: #0047a0; margin-top: 30px; line-height: 1.5; }
-
-  /* 기타 요소 */
   #timerNumber { font-size: 40px; font-weight: bold; color: #ff4b2b; margin: 10px 0; }
   canvas { border:2px solid #ddd; margin-top:20px; touch-action: none; border-radius: 10px; background:#fff; }
-  .privacy-info { font-size: 11px; color: #888; margin-top: 15px; line-height: 1.4; text-align: left; background: #eee; padding: 10px; border-radius: 5px; }
 </style>
 </head>
 <body>
@@ -65,7 +101,12 @@
 
 <div id="step3" class="step">
   <h2>기부 온도계</h2>
-  <div class="bar-wrap"><div id="bar3" class="bar"></div></div>
+  <div style="padding-right: 40px;"> <div class="thermometer-container">
+      <div id="bar3" class="thermo-bar"></div>
+      <div class="marks"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div>
+    </div>
+    <div class="thermo-bulb"></div>
+  </div>
   <div id="status3" class="status-text">현황 불러오는 중...</div>
   <div class="sub-text">기부에 참여하시겠습니까?</div>
   <div class="btn-group">
@@ -76,8 +117,14 @@
 
 <div id="step4" class="step">
   <h2>기부 완료!</h2>
-  <div class="bar-wrap"><div id="bar4" class="bar"></div></div>
-  <p id="amountText" class="status-text">0원 적립 중...</p>
+  <div style="padding-right: 40px;">
+    <div class="thermometer-container">
+      <div id="bar4" class="thermo-bar"></div>
+      <div class="marks"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div>
+    </div>
+    <div class="thermo-bulb"></div>
+  </div>
+  <p id="amountText" class="status-text">0원 적립 완료!</p>
   <button onclick="goNext(5)">럭키 스크래치 확인</button>
 </div>
 
@@ -86,19 +133,12 @@
   <p>회색 부분을 50% 이상 긁어주세요!</p>
   <canvas id="scratch" width="300" height="150"></canvas>
   <div id="resultDisplay" style="margin-top:20px; font-weight:bold; min-height:80px;"></div>
-  <div class="privacy-info">
-    <b>[개인정보 수집 및 이용 안내]</b><br>
-    - 수집 항목: 휴대전화 번호 (당첨 시에 한함)<br>
-    - 이용 목적: 경품(커피 쿠폰) 발송용<br>
-    - 보유 기간: <b>경품 발송 완료 후 즉시 파기</b>
-  </div>
 </div>
 
 <div id="step6" class="step">
   <img src="safety_bye.jpg" class="bye-img">
-  <div class="bye-text">
-    안전운전이 최고의 배려입니다!<br>
-    오늘도 기분 좋은 운행 되세요.
+  <div style="font-size:22px; font-weight:bold; color:#0047a0; margin-top:30px;">
+    안전운전이 최고의 배려입니다!<br>오늘도 기분 좋은 운행 되세요.
   </div>
   <button onclick="location.reload()" style="margin-top:50px; background:#666;">처음으로 돌아가기</button>
 </div>
@@ -110,54 +150,46 @@ function goNext(n) {
   var steps = document.getElementsByClassName('step');
   for (var i = 0; i < steps.length; i++) { steps[i].classList.remove('active'); }
   document.getElementById('step' + n).classList.add('active');
-  
   if (n === 2) { startTimer(); }
   if (n === 3) { refreshStatus(); }
   if (n === 5) { initScratch(); }
   window.scrollTo(0,0);
 }
 
-// Step 3 실시간 현황 로딩
 function refreshStatus() {
-  fetch(API_URL)
-    .then(r => r.text())
-    .then(t => {
-      var amount = Number(t);
-      var count = Math.floor(amount / 500);
-      document.getElementById("status3").innerText = count + "명 참여 / " + amount.toLocaleString() + "원 적립";
-      updateBar("bar3", amount);
-    });
+  fetch(API_URL).then(r => r.text()).then(t => {
+    var amount = Number(t);
+    var count = Math.floor(amount / 500);
+    document.getElementById("status3").innerText = count + "명 참여 / " + amount.toLocaleString() + "원 적립";
+    updateVerticalBar("bar3", amount);
+  });
 }
 
 function handleDonate() {
   goNext(4);
   var txt = document.getElementById("amountText");
   var bar4 = document.getElementById("bar4");
-  
-  txt.innerText = "기부금을 전달하고 있습니다..."; 
+  txt.innerText = "업데이트 중...";
   bar4.classList.add("blinking");
 
-  fetch(API_URL, {
-    method: "POST",
-    body: new URLSearchParams({ type: "DONATE" })
-  })
+  fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) })
   .then(res => res.text())
   .then(data => {
     var serverTotal = data.split('|')[1] || data;
-    localStorage.setItem("totalDonation", serverTotal);
     setTimeout(function() {
       bar4.classList.remove("blinking");
       txt.innerText = Number(serverTotal).toLocaleString() + "원 적립 완료!";
-      updateBar("bar4", serverTotal); 
+      updateVerticalBar("bar4", serverTotal); 
     }, 800);
   });
 }
 
-function updateBar(id, amount) {
+// 세로 바의 높이(height)를 조절하는 함수
+function updateVerticalBar(id, amount) {
   var bar = document.getElementById(id);
   var goal = 10000000;
   var per = Math.min(Math.max((amount / goal) * 100, 5), 100);
-  if(bar) bar.style.width = per + "%";
+  if(bar) bar.style.height = per + "%";
 }
 
 function startTimer() {
@@ -177,48 +209,36 @@ function initScratch() {
   var ctx = cvs.getContext("2d");
   var disp = document.getElementById("resultDisplay");
   var drawing = false; var revealed = false;
-
-  ctx.globalCompositeOperation = "source-over"; 
-  ctx.fillStyle = "#aaa"; ctx.fillRect(0, 0, 300, 150);
+  ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = "#aaa"; ctx.fillRect(0, 0, 300, 150);
   ctx.fillStyle = "#fff"; ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center";
   ctx.fillText("슥슥 긁어보세요!", 150, 85);
-
   function checkReveal() {
     if (revealed) return;
     var pix = ctx.getImageData(0,0,300,150).data;
     var t = 0; for (var i=3; i<pix.length; i+=4) { if(pix[i] === 0) t++; }
     if ((t/(300*150)) > 0.5) {
       revealed = true;
-      disp.innerHTML = "결과 확인 중...";
       fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "SCRATCH" }) })
-      .then(res => res.text())
-      .then(result => {
+      .then(res => res.text()).then(result => {
         ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, 300, 150);
         ctx.fillStyle = (result === "WIN") ? "#0047a0" : "#888";
         ctx.font = "bold 35px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
         ctx.fillText(result === "WIN" ? "★ 당 첨 ★" : "다음 기회에", 150, 75);
-        
         if (result === "WIN") {
-          var phone = prompt("🎁 당첨을 축하드립니다!\n경품 발송용 번호를 입력해 주세요.");
+          var phone = prompt("🎁 당첨! 연락처를 입력해 주세요.");
           if (phone) fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "PHONE", phone: phone }) });
-          disp.innerHTML = "✅ 등록 완료! 커피 쿠폰이 발송됩니다.";
-        } else {
-          disp.innerHTML = "🙏 다음 기회에! 안전운전 하세요.";
         }
       });
     }
   }
-
-  function getPos(e) {
+  function scratch(e) {
+    if (!drawing) return;
     var r = cvs.getBoundingClientRect();
     var cx = e.touches ? e.touches[0].clientX : e.clientX;
     var cy = e.touches ? e.touches[0].clientY : e.clientY;
-    return { x: cx - r.left, y: cy - r.top };
-  }
-  function scratch(e) {
-    if (!drawing) return;
-    var p = getPos(e); ctx.globalCompositeOperation = "destination-out";
-    ctx.beginPath(); ctx.arc(p.x, p.y, 20, 0, Math.PI * 2); ctx.fill();
+    var x = cx - r.left, y = cy - r.top;
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.beginPath(); ctx.arc(x, y, 20, 0, Math.PI * 2); ctx.fill();
     checkReveal();
   }
   cvs.addEventListener("mousedown", () => drawing = true);
@@ -227,12 +247,6 @@ function initScratch() {
   cvs.addEventListener("touchstart", (e) => { drawing = true; if(e.cancelable) e.preventDefault(); }, {passive:false});
   cvs.addEventListener("touchmove", (e) => { scratch(e); if(e.cancelable) e.preventDefault(); }, {passive:false});
   cvs.addEventListener("touchend", () => drawing = false);
-}
-
-window.onload = function() {
-  fetch(API_URL).then(r => r.text()).then(t => {
-    localStorage.setItem("totalDonation", t);
-  });
 }
 </script>
 </body>
