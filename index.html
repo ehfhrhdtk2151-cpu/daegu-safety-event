@@ -18,51 +18,39 @@
   #step1.active { display: flex; flex-direction: column; justify-content: flex-end; }
   #step1 button { margin: 0 20px 40px 20px; width: calc(100% - 40px); box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 10; }
 
-  /* [수정] 세로형 온도계 디자인 고도화 */
-  .thermometer-wrapper { 
-    position: relative; 
-    width: 180px; /* 눈금 가독성을 위해 전체 폭 확대 */
-    margin: 0 auto; 
-    padding-top: 20px; 
-  }
+  /* 세로형 온도계 디자인 */
+  .thermometer-wrapper { position: relative; width: 180px; margin: 0 auto; padding-top: 20px; }
   .thermometer-container {
     position: relative; width: 34px; height: 220px; margin: 0 auto;
-    background: #ddd; border: 3px solid #333; border-radius: 20px 20px 0 0; border-bottom: none; z-index: 1;
-    overflow: hidden; /* 바가 밖으로 튀어나가지 않게 함 */
+    background: #ddd; border: 3px solid #333; border-radius: 20px 20px 0 0; border-bottom: none; z-index: 1; overflow: hidden;
   }
-  .thermo-bar { 
-    position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; 
-    background: linear-gradient(to top, #ff4b2b, #ff416c); transition: height 1s ease-out; 
-  }
+  .thermo-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: linear-gradient(to top, #ff4b2b, #ff416c); transition: height 1s ease-out; }
   
-  /* [수정] 깜박임 애니메이션 (기둥+구슬 일체화) */
   @keyframes total-blink { 0%, 100% { opacity: 1; filter: brightness(1); } 50% { opacity: 0.5; filter: brightness(1.3); } }
   .thermo-group-blinking { animation: total-blink 0.8s infinite ease-in-out; }
 
-  .thermo-bulb { 
-    width: 76px; height: 76px; background: #ff4b2b; border: 3px solid #333; 
-    border-radius: 50%; margin: -18px auto 10px; position: relative; z-index: 2; 
-  }
+  .thermo-bulb { width: 76px; height: 76px; background: #ff4b2b; border: 3px solid #333; border-radius: 50%; margin: -18px auto 10px; position: relative; z-index: 2; }
   
-  /* [수정] 눈금 위치 조정 (온도계에서 더 멀리 배치하여 겹침 방지) */
-  .marks { 
-    position: absolute; left: 110px; top: 20px; height: 220px; 
-    display: flex; flex-direction: column; justify-content: space-between; 
-    font-size: 13px; font-weight: bold; color: #444; text-align: left; 
-  }
+  /* 눈금 가독성 개선 */
+  .marks { position: absolute; left: 110px; top: 20px; height: 220px; display: flex; flex-direction: column; justify-content: space-between; font-size: 13px; font-weight: bold; color: #444; text-align: left; }
   .mark-line-long { position: absolute; left: -35px; width: 25px; height: 2px; background: #333; }
   .mark-line-short { position: absolute; left: -25px; width: 15px; height: 1px; background: #888; transform: translateY(10px); }
 
-  /* 텍스트 및 버튼 */
+  /* 텍스트 스타일 */
   h2 { color: #0047a0; margin-top: 10px; font-size: 20px; word-break: keep-all; }
   .status-text { font-size: 22px; font-weight: bold; color: #000; margin: 10px 0; }
   .sub-text { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 20px; }
   .desc-text { font-size: 14px; color: #666; margin-top: 5px; line-height: 1.5; word-break: keep-all; }
-  
-  button { padding:18px 25px; font-size:18px; width: 100%; border: none; border-radius: 10px; background: #852722; color: white; font-weight: bold; cursor: pointer; }
+  .result-msg { background: #fff; border: 2px dashed #ff4b2b; padding: 15px; border-radius: 10px; margin-top: 20px; font-size: 15px; line-height: 1.6; text-align: left; }
+
+  /* 버튼 스타일 */
+  button { padding:18px 25px; font-size:18px; width: 100%; border: none; border-radius: 10px; background: #852722; color: white; font-weight: bold; cursor: pointer; transition: transform 0.1s; }
+  button:active { transform: scale(0.98); }
+  .cert-btn { background: #0047a0; margin-top: 15px; }
   .btn-group { display: flex; gap: 10px; }
   .btn-no { background: #fff; color: #333; border: 2px solid #333; }
-  
+
+  /* 이미지 및 스크래치 */
   .safety-img { width:100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
   .bye-img { width: 80%; max-width: 250px; margin-top: 40px; border-radius: 20px; }
   #timerNumber { font-size: 40px; font-weight: bold; color: #ff4b2b; margin: 10px 0; }
@@ -132,7 +120,11 @@
   <h2>럭키 스크래치</h2>
   <p>회색 부분을 슥슥 긁어주세요!</p>
   <canvas id="scratch" width="300" height="150"></canvas>
-  <div id="resultDisplay" style="margin-top:20px; font-weight:bold; min-height:80px;"></div>
+  <div id="resultBox" style="display:none; margin-top:20px;">
+    <div id="resultText" class="result-msg"></div>
+    <button id="giftNextBtn" onclick="goNext(6)" style="margin-top:20px; display:none;">참여 완료 ></button>
+    <button id="certBtn" class="cert-btn" onclick="alert('배려운전 인증서 페이지로 이동합니다.')" style="display:none;">배려인증서 확인하기 ></button>
+  </div>
 </div>
 
 <div id="step6" class="step">
@@ -159,7 +151,6 @@ function goNext(n) {
 function refreshStatus() {
   var group = document.getElementById("thermoGroup3");
   group.classList.add("thermo-group-blinking");
-
   fetch(API_URL).then(r => r.text()).then(t => {
     var amount = Number(t);
     document.getElementById("status3").innerText = Math.floor(amount / 500) + "명 참여 / " + amount.toLocaleString() + "원 적립";
@@ -221,8 +212,12 @@ function startTimer() {
 function initScratch() {
   var cvs = document.getElementById("scratch");
   var ctx = cvs.getContext("2d");
-  var disp = document.getElementById("resultDisplay");
+  var resBox = document.getElementById("resultBox");
+  var resTxt = document.getElementById("resultText");
+  var certBtn = document.getElementById("certBtn");
+  var giftBtn = document.getElementById("giftNextBtn");
   var drawing = false; var revealed = false;
+
   ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = "#aaa"; ctx.fillRect(0, 0, 300, 150);
   ctx.fillStyle = "#fff"; ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center";
   ctx.fillText("슥슥 긁어보세요!", 150, 85);
@@ -233,19 +228,34 @@ function initScratch() {
     var t = 0; for (var i=3; i<pix.length; i+=4) if(pix[i] === 0) t++;
     if ((t/(300*150)) > 0.5) {
       revealed = true;
-      fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "SCRATCH" }) })
-      .then(res => res.text()).then(result => {
-        ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, 300, 150);
-        ctx.fillStyle = (result === "WIN") ? "#0047a0" : "#888";
-        ctx.font = "bold 35px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-        ctx.fillText(result === "WIN" ? "★ 당 첨 ★" : "다음 기회에", 150, 75);
-        if (result === "WIN") {
-          var phone = prompt("🎁 당첨! 연락처를 입력해 주세요.");
-          if (phone) fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "PHONE", phone: phone }) });
-        }
-      });
+      var rand = Math.random() * 100;
+      var type = (rand <= 10) ? "WIN" : (rand <= 55 ? "DOUBLE" : "HERO");
+
+      ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, 300, 150);
+      ctx.fillStyle = "#0047a0"; ctx.font = "bold 18px sans-serif";
+      
+      resBox.style.display = "block";
+      certBtn.style.display = "none";
+      giftBtn.style.display = "none";
+
+      if (type === "WIN") {
+        ctx.fillText("★ 커피 쿠폰 당첨 ★", 150, 85);
+        resTxt.innerHTML = "<b>축하합니다! 커피 쿠폰 당첨!</b><br><br>안전운전을 실천해주신 보답으로 시원한 커피 한 잔을 드립니다. 연락처를 입력해 주세요.";
+        var phone = prompt("🎁 당첨! 커피 쿠폰 발송을 위해\n연락처를 입력해 주세요.");
+        if (phone) fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "PHONE", phone: phone }) });
+        giftBtn.style.display = "block";
+      } else if (type === "DOUBLE") {
+        ctx.fillText("기부금 2배 적립 당첨!", 150, 85);
+        resTxt.innerHTML = "<b>기부금 2배 적립 당첨!</b><br><br>운전자님의 참여에 감동하여, 한국도로공사 대구경북본부가 기부금을 2배로 매칭하여 전달하겠습니다.<br><small>(※ 기부금 전액은 대구경북본부가 후원합니다)</small>";
+        giftBtn.style.display = "block";
+      } else {
+        ctx.fillText("베스트 배려운전자 선정!", 150, 85);
+        resTxt.innerHTML = "<b>베스트 배려운전자 인증 대상!</b><br><br>\"당신은 도로를 지키는 보이지 않는 영웅입니다.\"<br>안전과 기부를 실천하신 당신만의 <b>'배려운전 인증서'</b>를 확인해 보세요.";
+        certBtn.style.display = "block";
+      }
     }
   }
+
   function scratch(e) {
     if (!drawing) return;
     var r = cvs.getBoundingClientRect();
