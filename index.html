@@ -39,49 +39,59 @@
   }
   .cheer-bubble::after { content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); border-top: 8px solid #e63946; border-left: 6px solid transparent; border-right: 6px solid transparent; }
 
+  /* [강화] 온도계 몸체 그림자 */
   .thermometer-container {
     position: relative; width: 42px; height: 240px; margin: 0 auto;
     background: #ffffff; border: 4px solid #ffffff; border-radius: 30px 30px 0 0; 
     z-index: 1; overflow: hidden;
-    box-shadow: 0 0 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 0 10px rgba(0,0,0,0.1); 
   }
 
-  /* 찰랑거리는 액체 */
+  /* [강화] 액체 및 위아래 출렁임 효과 */
   .thermo-bar { 
     position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; 
     background: linear-gradient(to right, #d31027, #ff5f6d, #d31027);
     transition: height 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+    border-top: 2px solid rgba(255, 255, 255, 0.7); /* 수면 경계 뚜렷하게 */
   }
+  
+  /* 회전이 아닌 위아래로 출렁거리는 물결 */
   .thermo-bar::before {
-    content: ""; position: absolute; top: -12px; left: -50%; width: 200%; height: 25px;
-    background: rgba(255, 255, 255, 0.7); border-radius: 40%;
-    animation: wave 2s infinite linear;
+    content: ""; position: absolute; top: -10px; left: -25%; width: 150%; height: 25px;
+    background: rgba(180, 0, 0, 0.5); border-radius: 40%;
+    animation: slosh 2.5s infinite ease-in-out; /* slosh 애니메이션 적용 */
+    z-index: 5;
   }
-  @keyframes wave { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  
+  @keyframes slosh {
+    0%, 100% { transform: translateX(-10%) scaleY(1); }
+    50% { transform: translateX(10%) scaleY(1.4); } /* 위로 솟구치며 출렁임 */
+  }
 
+  /* [강화] 하단 구슬 그림자 */
   .thermo-bulb { 
     width: 90px; height: 90px; 
     background: radial-gradient(circle at 30% 30%, #ff5f6d, #d31027);
     border: 5px solid #ffffff; border-radius: 50%; margin: -35px auto 10px; position: relative; z-index: 2; 
-    box-shadow: 0 6px 15px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5); /* 아주 진한 그림자 */
     display: flex; align-items: center; justify-content: center;
-    color: white; font-weight: bold; font-size: 16px;
+    color: white; font-weight: bold; font-size: 17px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
   }
   
-  /* [추가] 로딩/진행 중 깜박임 애니메이션 */
+  /* 로딩 깜박임 */
   @keyframes pulse-glow {
-    0% { filter: drop-shadow(0 0 5px rgba(230, 57, 70, 0.3)); opacity: 1; }
-    50% { filter: drop-shadow(0 0 20px rgba(230, 57, 70, 0.7)); opacity: 0.8; }
-    100% { filter: drop-shadow(0 0 5px rgba(230, 57, 70, 0.3)); opacity: 1; }
+    0%, 100% { filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.2)); opacity: 1; }
+    50% { filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.6)); opacity: 0.8; }
   }
   .thermo-group-blinking { animation: pulse-glow 0.8s infinite ease-in-out; }
 
   .marks { 
     position: absolute; right: 145px; top: 15px; height: 240px; 
     display: flex; flex-direction: column; justify-content: space-between; 
-    font-size: 13px; font-weight: bold; color: #999; text-align: right; width: 40px;
+    font-size: 13px; font-weight: bold; color: #888; text-align: right; width: 40px;
   }
-  .mark-line-long { position: absolute; right: -25px; width: 15px; height: 2px; background: #eee; }
+  .mark-line-long { position: absolute; right: -25px; width: 15px; height: 2px; background: #ddd; }
 
   h2 { color: #0047a0; margin-top: 10px; font-size: 20px; word-break: keep-all; }
   .status-text { font-size: 22px; font-weight: bold; color: #000; margin: 10px 0; }
@@ -107,7 +117,7 @@
   <p id="step0Msg" style="font-size:18px; color:#333; margin-top:15px; line-height:1.6; word-break:keep-all;"></p>
   <button onclick="localStorage.removeItem('lastParticipatedDate'); location.reload();" 
           style="margin-top:50px; background:#aaaaaa; font-size:13px; padding:10px 15px; width:auto; border-radius:5px;">
-    테스트용: 기록 지우고 재참여하기
+    테스트용 초기화
   </button>
 </div>
 
@@ -186,13 +196,13 @@ window.onload = function() {
     if (amount >= GOAL_AMOUNT) {
       goNext(0);
       document.getElementById("step0Title").innerText = "캠페인 종료 안내";
-      document.getElementById("step0Msg").innerHTML = "<b>목표 기부금이 모두 달성되었습니다.</b><br>성황리에 잘 마무리되었습니다. 감사합니다!";
+      document.getElementById("step0Msg").innerHTML = "<b>목표 기부금이 모두 달성되었습니다.</b><br>감사합니다!";
       return;
     }
     if (localStorage.getItem("lastParticipatedDate") === new Date().toLocaleDateString()) {
       goNext(0);
       document.getElementById("step0Title").innerText = "참여 완료 안내";
-      document.getElementById("step0Msg").innerHTML = "<b>이미 기부에 동참하셨습니다.</b><br>안전운행하세요~";
+      document.getElementById("step0Msg").innerHTML = "<b>이미 기부에 동참하셨습니다.</b>";
     }
   });
 }
@@ -208,13 +218,11 @@ function goNext(n) {
 }
 
 function refreshStatus() {
-  // 로딩 시작 시 깜박임 추가
   document.getElementById("thermoGroup3").classList.add("thermo-group-blinking");
   fetch(API_URL).then(r => r.text()).then(t => {
     var amount = Number(t);
     document.getElementById("status3").innerText = Math.floor(amount / 500) + "명 참여 / " + amount.toLocaleString() + "원 적립";
     setTimeout(() => {
-      // 데이터 로딩 완료 시 깜박임 제거
       document.getElementById("thermoGroup3").classList.remove("thermo-group-blinking");
       updateVerticalBar("bar3", amount, "bulbText3");
     }, 800);
@@ -224,7 +232,6 @@ function refreshStatus() {
 function handleDonate() {
   localStorage.setItem("lastParticipatedDate", new Date().toLocaleDateString());
   goNext(4);
-  // 기부 처리 중 깜박임 추가
   document.getElementById("thermoGroup4").classList.add("thermo-group-blinking");
   fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) })
   .then(res => res.text())
