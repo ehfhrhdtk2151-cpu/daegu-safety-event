@@ -63,7 +63,7 @@
 </div>
 
 <div id="step3" class="step">
-  <h2>안전 나눔</h2>
+  <h2>기부 온도계</h2>
   <p>기부하기 버튼을 누르면<br><b>500원</b>이 자동으로 기부됩니다.</p>
   <button onclick="handleDonate()">기부하고 복권 받기</button>
 </div>
@@ -121,26 +121,20 @@ function handleDonate() {
   txt.innerText = "기부 현황을 불러오는 중..."; 
   bar.classList.add("blinking");
 
-  // 낙관적 업데이트
+  // [보강] 초기 기부금액 가져오기 로직 개선
   var lastTotal = Number(localStorage.getItem("totalDonation") || 0);
-  if(lastTotal === 0) {
-      fetch(API_URL).then(r=>r.text()).then(t=>{
-          var cur = Number(t);
-          localStorage.setItem("totalDonation", cur);
-          moveBarOnly(cur + 500);
-      });
-  } else {
-      moveBarOnly(lastTotal + 500);
-  }
-
+  
+  // 서버에 기록 전송
   fetch(API_URL, {
     method: "POST",
     body: new URLSearchParams({ type: "DONATE" })
   })
   .then(function(res) { return res.text(); })
   .then(function(data) {
-    var serverTotal = data.split('|')[1];
+    var parts = data.split('|');
+    var serverTotal = parts[1] || parts[0]; // 데이터 형식 예외 처리
     localStorage.setItem("totalDonation", serverTotal);
+    
     setTimeout(function() {
       bar.classList.remove("blinking");
       txt.style.transition = "all 0.5s";
@@ -148,7 +142,30 @@ function handleDonate() {
       txt.style.fontSize = "24px"; txt.style.color = "#ff4b2b";
       moveBarOnly(serverTotal); 
     }, 800);
+  })
+  .catch(function(err) {
+    // 네트워크 오류 시 안내
+    bar.classList.remove("blinking");
+    txt.innerText = "연결이 원활하지 않습니다. (재시도 필요)";
   });
+}
+
+// [보강] 페이지 로드 시 서버에서 최신 금액을 가져와서 온도계 미리 세팅
+window.onload = function() {
+  // 1. 캐시된 값으로 먼저 표시 (빠른 응답)
+  var lastTotal = Number(localStorage.getItem("totalDonation") || 0);
+  if(lastTotal > 0) moveBarOnly(lastTotal);
+
+  // 2. 서버에서 최신 금액 가져와 동기화 (정확도)
+  fetch(API_URL)
+    .then(r => r.text())
+    .then(t => {
+      var cur = Number(t);
+      if(!isNaN(cur)) {
+        localStorage.setItem("totalDonation", cur);
+        moveBarOnly(cur);
+      }
+    });
 }
 
 function moveBarOnly(amount) {
