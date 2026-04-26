@@ -17,13 +17,14 @@
   #step1.active { display: flex; flex-direction: column; justify-content: flex-end; }
   #step1 button { margin: 0 20px 40px 20px; width: calc(100% - 40px); box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 10; }
 
-  /* 찰랑거리는 입체 온도계 디자인 */
-  .thermometer-wrapper { position: relative; width: 180px; margin: 50px auto 20px; padding-top: 20px; }
-  .thermometer-wrapper::before { content: '☁️'; position: absolute; left: -60px; top: -10px; font-size: 25px; opacity: 0.6; animation: float 3s infinite ease-in-out; }
-  .icon-cloud2 { position: absolute; right: -50px; top: 40px; font-size: 20px; opacity: 0.4; animation: float 4s infinite ease-in-out; }
-  .icon-car { position: absolute; left: -70px; bottom: 50px; font-size: 30px; animation: drive 4s infinite linear; }
-  .icon-heart { position: absolute; right: -55px; bottom: 100px; font-size: 22px; color: #ff416c; animation: beat 1.5s infinite; }
-  .icon-star { position: absolute; left: -40px; top: 100px; font-size: 18px; color: #ffb800; animation: rotate 5s infinite linear; }
+  /* [디자인 보강] 부드러운 입체 온도계 */
+  .thermometer-wrapper { position: relative; width: 220px; margin: 60px auto 30px; padding-top: 20px; }
+  
+  /* 아이콘 애니메이션 */
+  .icon-cloud2 { position: absolute; right: -40px; top: 40px; font-size: 20px; opacity: 0.4; animation: float 4s infinite ease-in-out; }
+  .icon-car { position: absolute; left: -60px; bottom: 80px; font-size: 30px; animation: drive 4s infinite linear; }
+  .icon-heart { position: absolute; right: -45px; bottom: 120px; font-size: 22px; color: #ff416c; animation: beat 1.5s infinite; }
+  .icon-star { position: absolute; left: -30px; top: 120px; font-size: 18px; color: #ffb800; animation: rotate 5s infinite linear; }
 
   @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
   @keyframes drive { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(15px); } }
@@ -31,46 +32,51 @@
   @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
   .cheer-bubble {
-    position: absolute; top: -45px; left: 50%; transform: translateX(-50%);
-    background: #0047a0; color: white; padding: 7px 15px; border-radius: 20px;
-    font-size: 13px; font-weight: bold; white-space: nowrap; z-index: 5;
-    box-shadow: 0 4px 10px rgba(0,64,160,0.3);
+    position: absolute; top: -50px; left: 50%; transform: translateX(-50%);
+    background: #e63946; color: white; padding: 8px 18px; border-radius: 25px;
+    font-size: 14px; font-weight: bold; white-space: nowrap; z-index: 10;
+    box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
   }
-  .cheer-bubble::after { content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); border-top: 8px solid #0047a0; border-left: 6px solid transparent; border-right: 6px solid transparent; }
+  .cheer-bubble::after { content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); border-top: 8px solid #e63946; border-left: 6px solid transparent; border-right: 6px solid transparent; }
 
+  /* 샘플 느낌의 화이트 온도계 몸체 */
   .thermometer-container {
-    position: relative; width: 38px; height: 230px; margin: 0 auto;
-    background: #e0e0e0; border: 3px solid #444; border-radius: 25px 25px 0 0; 
-    border-bottom: none; z-index: 1; overflow: hidden;
-    box-shadow: inset 5px 0px 10px rgba(0,0,0,0.1);
+    position: relative; width: 42px; height: 240px; margin: 0 auto;
+    background: #ffffff; border: 4px solid #ffffff; border-radius: 30px 30px 0 0; 
+    z-index: 1; overflow: hidden;
+    box-shadow: 0 0 15px rgba(0,0,0,0.05), inset 0 0 10px rgba(0,0,0,0.05);
   }
+
+  /* 찰랑거리는 액체 & 물결 */
   .thermo-bar { 
     position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; 
-    background: linear-gradient(to right, #d31027 0%, #ea384d 50%, #d31027 100%);
+    background: linear-gradient(to right, #d31027, #ff5f6d, #d31027);
     transition: height 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
   }
   .thermo-bar::before {
     content: ""; position: absolute; top: -12px; left: -50%; width: 200%; height: 25px;
-    background: rgba(234, 56, 77, 0.5); border-radius: 40%;
+    background: rgba(255, 255, 255, 0.3); border-radius: 40%;
     animation: wave 2s infinite linear;
   }
   @keyframes wave { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-  .thermometer-container::after {
-    content: ''; position: absolute; left: 6px; top: 10px; width: 6px; height: 210px;
-    background: rgba(255, 255, 255, 0.3); border-radius: 10px; z-index: 3;
-  }
+  /* 하단 큰 구슬 및 텍스트 */
   .thermo-bulb { 
-    width: 80px; height: 80px; 
-    background: radial-gradient(circle at 30% 30%, #ff5f6d, #ffc371, #d31027);
-    border: 3px solid #444; border-radius: 50%; margin: -25px auto 10px; position: relative; z-index: 2; 
-    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    width: 90px; height: 90px; 
+    background: radial-gradient(circle at 30% 30%, #ff5f6d, #d31027);
+    border: 5px solid #ffffff; border-radius: 50%; margin: -35px auto 10px; position: relative; z-index: 2; 
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: bold; font-size: 16px;
   }
-  @keyframes total-blink { 0%, 100% { opacity: 1; filter: brightness(1); } 50% { opacity: 0.5; filter: brightness(1.3); } }
-  .thermo-group-blinking { animation: total-blink 0.8s infinite ease-in-out; }
-
-  .marks { position: absolute; left: 115px; top: 20px; height: 230px; display: flex; flex-direction: column; justify-content: space-between; font-size: 14px; font-weight: bold; color: #444; text-align: left; }
-  .mark-line-long { position: absolute; left: -38px; width: 25px; height: 2px; background: #444; }
+  
+  /* 눈금을 왼쪽으로 배치 */
+  .marks { 
+    position: absolute; right: 145px; top: 15px; height: 240px; 
+    display: flex; flex-direction: column; justify-content: space-between; 
+    font-size: 13px; font-weight: bold; color: #999; text-align: right; width: 40px;
+  }
+  .mark-line-long { position: absolute; right: -25px; width: 15px; height: 2px; background: #eee; }
 
   h2 { color: #0047a0; margin-top: 10px; font-size: 20px; word-break: keep-all; }
   .status-text { font-size: 22px; font-weight: bold; color: #000; margin: 10px 0; }
@@ -83,7 +89,6 @@
 
   button { padding: 18px 25px; font-size: 18px; width: 100%; border: none; border-radius: 10px; background: #852722; color: white; font-weight: bold; cursor: pointer; transition: transform 0.1s; }
   button:active { transform: scale(0.98); }
-  .cert-btn { background: #0047a0; margin-top: 15px; }
   .btn-group { display: flex; gap: 10px; }
   .btn-no { background: #fff; color: #333; border: 2px solid #333; }
   canvas { border:2px solid #ddd; margin-top:20px; border-radius: 10px; background:#fff; touch-action: none; }
@@ -114,19 +119,26 @@
 <div id="step3" class="step">
   <h2>기부 온도계</h2>
   <div class="thermometer-wrapper">
-    <div class="cheer-bubble">여러분의 배려가 쌓이고 있어요! ✨</div>
-    <div class="icon-cloud2">☁️</div><div class="icon-car">🚗</div><div class="icon-heart">❤️</div><div class="icon-star">⭐</div>
-    <div id="thermoGroup3"><div class="thermometer-container"><div id="bar3" class="thermo-bar"></div></div><div class="thermo-bulb"></div></div>
+    <div class="cheer-bubble">배려의 온도가 올라가고 있어요! ❤️</div>
+    
     <div class="marks">
-        <div style="position:relative;">100%<div class="mark-line-long"></div></div>
-        <div style="position:relative;">75%<div class="mark-line-long"></div></div>
-        <div style="position:relative;">50%<div class="mark-line-long"></div></div>
-        <div style="position:relative;">25%<div class="mark-line-long"></div></div>
-        <div style="position:relative;">0%<div class="mark-line-long"></div></div>
+        <div style="position:relative;">100<div class="mark-line-long"></div></div>
+        <div style="position:relative;">80<div class="mark-line-long"></div></div>
+        <div style="position:relative;">60<div class="mark-line-long"></div></div>
+        <div style="position:relative;">40<div class="mark-line-long"></div></div>
+        <div style="position:relative;">20<div class="mark-line-long"></div></div>
+        <div style="position:relative;">0<div class="mark-line-long"></div></div>
     </div>
+
+    <div id="thermoGroup3">
+      <div class="thermometer-container"><div id="bar3" class="thermo-bar"></div></div>
+      <div id="bulbText3" class="thermo-bulb">0%</div>
+    </div>
+
+    <div class="icon-cloud2">☁️</div><div class="icon-car">🚗</div><div class="icon-heart">❤️</div><div class="icon-star">⭐</div>
   </div>
   <div id="status3" class="status-text">현황 불러오는 중...</div>
-  <div class="slogan-banner"> 한국도로공사 대구경북본부가<br>여러분의 안전운전을 진심으로 응원합니다!</div>
+  <div class="slogan-banner">한국도로공사 대구경북본부가<br>여러분의 안전운전을 진심으로 응원합니다!</div>
   <div class="question-text">기부하시겠습니까?</div>
   <div class="btn-group">
     <button onclick="handleDonate()">네 좋아요 ></button>
@@ -137,7 +149,10 @@
 <div id="step4" class="step">
   <h2 id="step4Title">기부 진행 중...</h2>
   <div class="thermometer-wrapper">
-    <div id="thermoGroup4"><div class="thermometer-container"><div id="bar4" class="thermo-bar"></div></div><div class="thermo-bulb"></div></div>
+    <div id="thermoGroup4">
+      <div class="thermometer-container"><div id="bar4" class="thermo-bar"></div></div>
+      <div id="bulbText4" class="thermo-bulb">0%</div>
+    </div>
   </div>
   <p id="amountText" class="status-text">처리 중...</p>
   <button id="scratchBtn" onclick="goNext(5)" style="display:none; margin-top:20px;">럭키 스크래치 확인</button>
@@ -150,7 +165,7 @@
   <div id="resultBox" style="display:none; margin-top:20px;">
     <div id="resultText" class="result-msg"></div>
     <button id="giftNextBtn" onclick="goNext(6)" style="margin-top:20px; display:none;">참여 완료 ></button>
-    <button id="certBtn" class="cert-btn" onclick="alert('인증서 확인')" style="display:none;">인증서 확인하기 ></button>
+    <button id="certBtn" class="cert-btn" onclick="alert('인증서 확인')" style="display:none; background:#0047a0;">인증서 확인하기 ></button>
   </div>
 </div>
 
@@ -192,14 +207,10 @@ function goNext(n) {
 }
 
 function refreshStatus() {
-  document.getElementById("thermoGroup3").classList.add("thermo-group-blinking");
   fetch(API_URL).then(r => r.text()).then(t => {
     var amount = Number(t);
     document.getElementById("status3").innerText = Math.floor(amount / 500) + "명 참여 / " + amount.toLocaleString() + "원 적립";
-    setTimeout(() => {
-      document.getElementById("thermoGroup3").classList.remove("thermo-group-blinking");
-      updateVerticalBar("bar3", amount);
-    }, 600);
+    updateVerticalBar("bar3", amount, "bulbText3");
   });
 }
 
@@ -216,15 +227,18 @@ function handleDonate() {
       document.getElementById("step4Title").innerText = "기부 완료!";
       document.getElementById("amountText").innerText = Number(total).toLocaleString() + "원 적립 완료!";
       document.getElementById("scratchBtn").style.display = "block";
-      updateVerticalBar("bar4", total); 
+      updateVerticalBar("bar4", total, "bulbText4"); 
     }, 1000);
   });
 }
 
-function updateVerticalBar(id, amount) {
-  var bar = document.getElementById(id);
-  var per = Math.min(Math.max((amount / GOAL_AMOUNT) * 100, 5), 100);
+function updateVerticalBar(barId, amount, bulbId) {
+  var bar = document.getElementById(barId);
+  var per = Math.min(Math.max((amount / GOAL_AMOUNT) * 100, 0), 100);
   if(bar) bar.style.height = per + "%";
+  
+  var bulb = document.getElementById(bulbId);
+  if(bulb) bulb.innerText = per.toFixed(1) + "%";
 }
 
 function startTimer() {
@@ -254,10 +268,8 @@ function initScratch() {
       revealed = true;
       var rand = Math.random() * 100;
       var type = (rand <= 10) ? "WIN" : (rand <= 55 ? "DOUBLE" : "HERO");
-
       ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, 300, 150);
-      ctx.fillStyle = "#0047a0"; ctx.font = "bold 18px sans-serif";
-      resBox.style.display = "block";
+      ctx.fillStyle = "#0047a0"; ctx.font = "bold 18px sans-serif"; resBox.style.display = "block";
 
       if (type === "WIN") {
         ctx.fillText("★ 커피 쿠폰 당첨 ★", 150, 85);
