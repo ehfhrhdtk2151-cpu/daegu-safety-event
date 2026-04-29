@@ -32,9 +32,12 @@
   .thermo-bar::before { content: ""; position: absolute; top: -10px; left: -25%; width: 150%; height: 25px; background: rgba(180, 0, 0, 0.5); border-radius: 40%; animation: slosh 2.5s infinite ease-in-out; }
   @keyframes slosh { 0%, 100% { transform: translateX(-10%) scaleY(1); } 50% { transform: translateX(10%) scaleY(1.4); } }
   .thermo-bulb { width: 90px; height: 90px; background: radial-gradient(circle at 30% 30%, #ff5f6d, #d31027); border: 5px solid #ffffff; border-radius: 50%; margin: -35px auto 10px; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+  
+  /* 깜박임 애니메이션 [복구] */
   .thermo-group-blinking { animation: pulse-glow 0.8s infinite ease-in-out; }
   @keyframes pulse-glow { 0%, 100% { filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.2)); } 50% { filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.6)); } }
 
+  /* 스크래치 영역 */
   #scratchContainer { position: relative; width: 300px; height: 150px; margin: 20px auto; border-radius: 10px; overflow: hidden; border: 2px solid #ddd; background-color: #fff; background-size: cover; background-position: center; }
   canvas { position: absolute; top: 0; left: 0; touch-action: none; z-index: 5; }
 
@@ -105,24 +108,25 @@
     <canvas id="scratch" width="300" height="150"></canvas>
   </div>
   <div id="resultBox" style="display:none; margin-top:20px;">
-    <div id="resultText" style="background:#fff; border:2px dashed #ff4b2b; padding:18px; border-radius:10px; text-align:left;"></div>
+    <div id="resultText" style="background:#fff; border:2px dashed #ff4b2b; padding:18px; border-radius:10px; text-align:left; line-height: 1.6;"></div>
     <button id="giftNextBtn" style="margin-top:20px; display:none;">참여 완료 ></button>
   </div>
 </div>
 
 <div id="phoneModal" class="modal-overlay">
   <div class="modal-content">
-    <h2 style="color:#0047a0; margin-bottom: 10px;">🎉 당첨 축하드립니다!</h2>
-    <p><b>'잠 깨우는 왕눈이' 스티커 당첨!</b></p>
+    <h2 style="color:#0047a0; margin-bottom: 10px;">🎉 축하합니다!</h2>
+    <p style="font-size: 15px; font-weight: bold; margin-bottom: 15px;">'잠 깨우는 왕눈이' 스티커 당첨!</p>
     <input type="text" id="userName" class="input-field" placeholder="성함">
     <input type="tel" id="phoneInput" class="input-field" placeholder="연락처 (010-0000-0000)">
     <textarea id="userAddress" class="input-field" style="height:70px;" placeholder="배송지 주소"></textarea>
     <div class="privacy-info">
       <strong>※ 경품 발송을 위한 안내사항</strong><br><br>
       • 개인정보 활용 동의 시에만 경품 발송이 가능합니다.<br>
-      • 캠페인 종료 후 일괄 발송되며 오직 배송 목적으로만 사용됩니다.
+      • 입력해주신 정보로 캠페인 종료 후 일괄 발송해 드릴 예정입니다.<br>
+      • 소중한 정보는 오직 경품 배송 목적으로만 사용되니 안심하세요!
     </div>
-    <label style="font-size:12px; display: block; text-align: left; margin-bottom: 20px;">
+    <label style="font-size:12px; display: block; text-align: left; margin-bottom: 20px; cursor: pointer;">
       <input type="checkbox" id="privacyAgree"> <strong>개인정보 수집 및 경품 발송에 동의합니다</strong>
     </label>
     <button onclick="submitDeliveryInfo()">배송 정보 입력하기</button>
@@ -149,7 +153,6 @@ var preloadedWinData = null;
 var lastKnownTotal = 0;
 
 window.onload = function() {
-  // 첫 로딩 시에만 서버에서 금액을 가져옴
   fetch(API_URL).then(r => r.text()).then(t => {
     lastKnownTotal = Number(t.split('|')[0]);
     if (lastKnownTotal >= GOAL_AMOUNT) {
@@ -169,15 +172,24 @@ function goNext(n) {
   for (var i = 0; i < steps.length; i++) steps[i].classList.remove('active');
   document.getElementById('step' + n).classList.add('active');
   if (n === 2) startTimer();
-  if (n === 3) displayLastTotal(); // 서버 대기 없이 즉시 표시
+  if (n === 3) refreshStatus(); 
   if (n === 5) initScratch();
   window.scrollTo(0,0);
 }
 
-function displayLastTotal() {
-  // 서버 응답을 기다리지 않고 이미 알고 있는 숫자를 즉시 표시
+function refreshStatus() {
+  document.getElementById("thermoGroup3").classList.add("thermo-group-blinking");
   document.getElementById("status3").innerText = lastKnownTotal.toLocaleString() + "원 적립 중";
   updateVerticalBar("bar3", lastKnownTotal, "bulbText3");
+
+  fetch(API_URL).then(r => r.text()).then(t => {
+    lastKnownTotal = Number(t.split('|')[0]);
+    document.getElementById("status3").innerText = lastKnownTotal.toLocaleString() + "원 적립 중";
+    updateVerticalBar("bar3", lastKnownTotal, "bulbText3");
+    setTimeout(() => {
+      document.getElementById("thermoGroup3").classList.remove("thermo-group-blinking");
+    }, 500);
+  });
 }
 
 function animateValue(obj, start, end, duration) {
@@ -194,24 +206,23 @@ function animateValue(obj, start, end, duration) {
 
 function handleDonate() {
   localStorage.setItem("participatedCampaign", "true"); 
-  goNext(4); // 즉시 다음 페이지로 이동
+  goNext(4); 
+  document.getElementById("thermoGroup4").classList.add("thermo-group-blinking");
   
   const amountObj = document.getElementById("amountText");
   const optimisticTotal = lastKnownTotal + 500;
   
-  // 1. 낙관적 업데이트: 서버 응답 전 미리 500원을 더해 보여줌
   amountObj.innerText = optimisticTotal.toLocaleString() + "원 적립 완료!";
   updateVerticalBar("bar4", optimisticTotal, "bulbText4");
 
-  // 2. 서버 통신은 백그라운드에서 실행 (병렬 처리)
   const donateRequest = fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) }).then(r => r.text());
   const winRequest = fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "CHECK_WIN", prob: STICKER_PROBABILITY }) }).then(r => r.json());
 
   Promise.all([donateRequest, winRequest]).then(([donateData, winData]) => {
     const serverTotal = Number(donateData.split('|')[1]);
     preloadedWinData = winData;
+    document.getElementById("thermoGroup4").classList.remove("thermo-group-blinking");
     
-    // 결과가 2배 적립인 경우 애니메이션 효과와 함께 추가 500원 업데이트
     if(winData.result === "DOUBLE") {
       animateValue(amountObj, serverTotal - 500, serverTotal, 800);
       updateVerticalBar("bar4", serverTotal, "bulbText4");
@@ -219,17 +230,9 @@ function handleDonate() {
       amountObj.innerText = serverTotal.toLocaleString() + "원 적립 완료!";
       updateVerticalBar("bar4", serverTotal, "bulbText4");
     }
-    
-    // 버튼은 통신 완료 후 즉시 노출
     document.getElementById("scratchBtn").style.display = "block";
-  });
-}
-
-function refreshStatus() {
-  // Step 3에 진입할 때 서버에서 최신값을 다시 확인 (배경에서 실행)
-  fetch(API_URL).then(r => r.text()).then(t => {
-    lastKnownTotal = Number(t.split('|')[0]);
-    displayLastTotal();
+  }).catch(() => {
+    document.getElementById("thermoGroup4").classList.remove("thermo-group-blinking");
   });
 }
 
@@ -255,7 +258,6 @@ function initScratch() {
     if (revealed || !preloadedWinData) return;
     var pix = ctx.getImageData(0,0,300,150).data, t = 0;
     for (var i=3; i<pix.length; i+=4) if(pix[i] === 0) t++;
-    
     if ((t/(300*150)) > 0.4) {
       revealed = true;
       currentWinType = preloadedWinData.result;
@@ -305,10 +307,8 @@ function submitDeliveryInfo() {
   if (!name || !phone || !address || !document.getElementById("privacyAgree").checked) { 
     alert("배송 정보 입력과 개인정보 동의가 필요합니다."); return; 
   }
-  fetch(API_URL, { 
-    method: "POST", 
-    body: new URLSearchParams({ type: "PHONE", name: name, phone: phone, address: address, resultType: currentWinType }) 
-  }).then(() => { alert("정보가 접수되었습니다!"); document.getElementById("phoneModal").style.display = "none"; goNext(6); });
+  fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "PHONE", name: name, phone: phone, address: address, resultType: currentWinType }) })
+  .then(() => { alert("정보가 접수되었습니다!"); document.getElementById("phoneModal").style.display = "none"; goNext(6); });
 }
 
 function startTimer() {
