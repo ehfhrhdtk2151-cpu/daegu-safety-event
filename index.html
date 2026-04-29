@@ -8,41 +8,87 @@
   body { margin:0; font-family: sans-serif; text-align:center; background:#f9f9f9; color: #333; overflow-x: hidden; }
   .step { display:none; padding:20px; max-width: 500px; margin: 0 auto; min-height: 100vh; box-sizing: border-box; }
   .active { display:block; }
+  
+  /* [수정] 첫 페이지 포스터와 버튼 간격 확보 */
   #step1 { display: none; padding: 0; background-color: #FDF3D0; position: relative; min-height: 100vh; }
   #step1.active { display: flex; flex-direction: column; align-items: center; }
   .intro-poster { width: 100%; max-width: 500px; height: auto; display: block; margin: 0 auto; }
-  
-  /* 온도계 디자인 */
-  .thermometer-wrapper { position: relative; width: 220px; margin: 60px auto 30px; padding-top: 20px; }
-  .thermometer-container { position: relative; width: 42px; height: 240px; margin: 0 auto; background: #ffffff; border: 4px solid #ffffff; border-radius: 30px 30px 0 0; z-index: 1; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 0 10px rgba(0,0,0,0.1); }
-  .thermo-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: linear-gradient(to right, #d31027, #ff5f6d, #d31027); transition: height 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67); border-top: 2px solid rgba(255, 255, 255, 0.7); }
-  .thermo-bulb { width: 90px; height: 90px; background: radial-gradient(circle at 30% 30%, #ff5f6d, #d31027); border: 5px solid #ffffff; border-radius: 50%; margin: -35px auto 10px; position: relative; z-index: 2; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 17px; text-shadow: 0 1px 3px rgba(0,0,0,0.4); }
-  
-  /* 모달 디자인 */
-  .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; overflow-y: auto; }
-  .modal-content { background:#fff; padding:25px; border-radius:15px; width:85%; max-width:400px; text-align:center; margin: 20px auto; }
-  .input-field { width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box; font-size:14px; }
-  
-  button { padding: 18px 25px; font-size: 18px; width: 100%; border: none; border-radius: 10px; background: #244aa1; color: white; font-weight: bold; cursor: pointer; transition: transform 0.1s; }
-  
-  /* [수정] 스크래치 컨테이너 및 배경 설정 */
-  #scratchContainer { 
-    position: relative; 
-    width: 300px; 
-    height: 150px; 
-    margin: 20px auto; 
-    border-radius: 10px; 
-    overflow: hidden; 
-    border: 2px solid #ddd;
-    /* 배경으로 왕눈이 이미지 설정 */
-    background-image: url('large_eye.jpg'); 
-    background-size: cover; 
-    background-position: center;
+  #step1 button { 
+    margin: 40px auto; /* 이미지와 버튼 사이 간격 넓힘 */
+    width: calc(100% - 40px); max-width: 460px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
   }
-  canvas { position: absolute; top: 0; left: 0; touch-action: none; background: transparent; }
+
+  /* [복구] 입체 온도계 및 애니메이션 아이콘 */
+  .thermometer-wrapper { position: relative; width: 220px; margin: 60px auto 30px; padding-top: 20px; }
+  .icon-cloud2 { position: absolute; right: -40px; top: 40px; font-size: 20px; opacity: 0.4; animation: float 4s infinite ease-in-out; }
+  .icon-car { position: absolute; left: -60px; bottom: 80px; font-size: 30px; animation: drive 4s infinite linear; }
+  .icon-heart { position: absolute; right: -45px; bottom: 120px; font-size: 22px; color: #ff416c; animation: beat 1.5s infinite; }
+  .icon-star { position: absolute; left: -30px; top: 120px; font-size: 18px; color: #ffb800; animation: rotate 5s infinite linear; }
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  @keyframes drive { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(15px); } }
+  @keyframes beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+  @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  .cheer-bubble {
+    position: absolute; top: -50px; left: 50%; transform: translateX(-50%);
+    background: #e63946; color: white; padding: 8px 18px; border-radius: 25px;
+    font-size: 14px; font-weight: bold; white-space: nowrap; z-index: 10;
+  }
+
+  .thermometer-container {
+    position: relative; width: 42px; height: 240px; margin: 0 auto;
+    background: #ffffff; border: 4px solid #ffffff; border-radius: 30px 30px 0 0; 
+    z-index: 1; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 0 10px rgba(0,0,0,0.1); 
+  }
+  .thermo-bar { 
+    position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; 
+    background: linear-gradient(to right, #d31027, #ff5f6d, #d31027);
+    transition: height 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+  }
+  /* [복구] 온도계 액체 출렁임 애니메이션 */
+  .thermo-bar::before {
+    content: ""; position: absolute; top: -10px; left: -25%; width: 150%; height: 25px;
+    background: rgba(180, 0, 0, 0.5); border-radius: 40%; animation: slosh 2.5s infinite ease-in-out;
+  }
+  @keyframes slosh { 0%, 100% { transform: translateX(-10%) scaleY(1); } 50% { transform: translateX(10%) scaleY(1.4); } }
+
+  .thermo-bulb { 
+    width: 90px; height: 90px; background: radial-gradient(circle at 30% 30%, #ff5f6d, #d31027);
+    border: 5px solid #ffffff; border-radius: 50%; margin: -35px auto 10px; position: relative; z-index: 2; 
+    display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;
+  }
+  /* [복구] 온도계 깜박임 효과 */
+  @keyframes pulse-glow { 0%, 100% { filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.2)); opacity: 1; } 50% { filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.6)); opacity: 0.8; } }
+  .thermo-group-blinking { animation: pulse-glow 0.8s infinite ease-in-out; }
+
+  /* [수정] 스크래치 영역: 기본은 흰색, 당첨시에만 왕눈이 배경 */
+  #scratchContainer { 
+    position: relative; width: 300px; height: 150px; margin: 20px auto; 
+    border-radius: 10px; overflow: hidden; border: 2px solid #ddd;
+    background-color: #fff; background-size: cover; background-position: center;
+  }
+  canvas { position: absolute; top: 0; left: 0; touch-action: none; z-index: 5; }
+
+  /* 버튼 스타일 */
+  button { padding: 18px 25px; font-size: 18px; width: 100%; border: none; border-radius: 10px; background: #244aa1; color: white; font-weight: bold; cursor: pointer; }
+  .btn-group { display: flex; gap: 10px; }
+  .btn-no { background: #fff; color: #333; border: 2px solid #333; }
+  
+  /* 모달 스타일 */
+  .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; }
+  .modal-content { background:#fff; padding:25px; border-radius:15px; width:85%; max-width:400px; }
+  .input-field { width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box; }
 </style>
 </head>
 <body>
+
+<div id="step0" class="step">
+  <img src="safety_bye.jpg" style="width:80%; border-radius:20px; margin-top:40px;">
+  <div id="step0Title" style="font-size:22px; font-weight:bold; color:#852722; margin-top:30px;">안내</div>
+  <p id="step0Msg" style="font-size:18px; color:#333; margin-top:15px; line-height:1.6;"></p>
+  <button onclick="localStorage.removeItem('lastParticipatedDate'); location.reload();" style="margin-top:50px; background:#aaa; font-size:13px; width:auto;">테스트용 초기화</button>
+</div>
 
 <div id="step1" class="step active">
   <img src="intro.png" class="intro-poster">
@@ -59,16 +105,26 @@
 <div id="step3" class="step">
   <h2>기부 온도계</h2>
   <div class="thermometer-wrapper">
-    <div id="thermoGroup3"><div class="thermometer-container"><div id="bar3" class="thermo-bar"></div></div><div id="bulbText3" class="thermo-bulb">0%</div></div>
+    <div class="cheer-bubble">배려의 온도가 올라가고 있어요! ❤️</div>
+    <div id="thermoGroup3">
+      <div class="thermometer-container"><div id="bar3" class="thermo-bar"></div></div>
+      <div id="bulbText3" class="thermo-bulb">0%</div>
+    </div>
+    <div class="icon-cloud2">☁️</div><div class="icon-car">🚗</div><div class="icon-heart">❤️</div><div class="icon-star">⭐</div>
   </div>
   <div id="status3" style="font-size: 22px; font-weight: bold; margin: 10px 0;">현황 불러오는 중...</div>
-  <button onclick="handleDonate()">네 좋아요 ></button>
+  <div class="btn-group">
+    <button onclick="handleDonate()">네 좋아요 ></button>
+    <button class="btn-no" onclick="goNext(6)">아니요 ></button> </div>
 </div>
 
 <div id="step4" class="step">
   <h2 id="step4Title">기부 진행 중...</h2>
   <div class="thermometer-wrapper">
-    <div id="thermoGroup4"><div class="thermometer-container"><div id="bar4" class="thermo-bar"></div></div><div id="bulbText4" class="thermo-bulb">0%</div></div>
+    <div id="thermoGroup4">
+      <div class="thermometer-container"><div id="bar4" class="thermo-bar"></div></div>
+      <div id="bulbText4" class="thermo-bulb">0%</div>
+    </div>
   </div>
   <p id="amountText" style="font-size: 22px; font-weight: bold;">처리 중...</p>
   <button id="scratchBtn" onclick="goNext(5)" style="display:none; margin-top:20px;">럭키 스크래치 확인</button>
@@ -88,51 +144,50 @@
 
 <div id="phoneModal" class="modal-overlay">
   <div class="modal-content">
-    <h2 style="color:#0047a0; margin-bottom:10px;">🎉 축하합니다!</h2>
-    <p style="font-size:16px; font-weight:bold;">'잠 깨우는 왕눈이' 스티커 당첨!</p>
-    <p style="font-size:13px; color:#666;">"당신의 소중한 배려에 왕눈이 스티커가 안전을 더해드립니다."</p>
-    
-    <div style="text-align:left; border-top:1px solid #eee; padding-top:15px;">
-      <p style="font-size:12px; color:#888;">※ 경품 발송을 위한 안내사항</p>
-      <input type="text" id="userName" class="input-field" placeholder="성함">
-      <input type="tel" id="phoneInput" class="input-field" placeholder="연락처 (010-0000-0000)">
-      <textarea id="userAddress" class="input-field" style="height:60px;" placeholder="배송지 주소"></textarea>
-      
-      <div style="background:#f9f9f9; padding:10px; border-radius:5px; font-size:11px; color:#666; margin-bottom:15px;">
-        개인정보 활용 동의 시에만 경품 발송이 가능합니다. 캠페인 종료 후 일괄 발송되며 오직 배송 목적으로만 사용됩니다.
-      </div>
-      
-      <label style="display:flex; align-items:center; font-size:12px; cursor:pointer; margin-bottom:20px;">
-        <input type="checkbox" id="privacyAgree" style="margin-right:8px;"> 개인정보 수집 및 경품 발송에 동의합니다.
-      </label>
-    </div>
-    <button onclick="submitDeliveryInfo()">배송 정보 입력하기</button>
+    <h2 style="color:#0047a0;">🎉 축하합니다!</h2>
+    <p><b>'잠 깨우는 왕눈이' 스티커 당첨!</b></p>
+    <input type="text" id="userName" class="input-field" placeholder="성함">
+    <input type="tel" id="phoneInput" class="input-field" placeholder="연락처">
+    <textarea id="userAddress" class="input-field" style="height:60px;" placeholder="배송지 주소"></textarea>
+    <label style="font-size:12px;"><input type="checkbox" id="privacyAgree"> 개인정보 수집 및 발송 동의</label>
+    <button onclick="submitDeliveryInfo()" style="margin-top:15px;">정보 입력하기</button>
   </div>
 </div>
 
 <div id="step6" class="step">
-  <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh;">
-    <h2 style="color:#0047a0;">참여해주셔서 감사합니다!</h2>
-    <p>오늘도 안전운전 하세요.</p>
-    <button onclick="location.reload()" style="background:#666; width: 200px;">처음으로</button>
-  </div>
+  <img src="safety_bye.jpg" style="width:80%; border-radius:20px; margin-top:40px;">
+  <div style="font-size:20px; font-weight:bold; color:#0047a0; margin-top:30px;">안전운전이 최고의 배려입니다!</div>
+  <button onclick="location.reload()" style="margin-top:40px; background:#666;">처음으로</button>
 </div>
 
 <script>
-// [필독] 구글 앱 스크립트 배포 URL을 여기에 입력하세요.
-var API_URL = "https://script.google.com/macros/s/AKfycbwtwjIds-fYjwVM1YETXLIiSEPk35ewIXsb4CLlSQbnUgK6OgQR2SSJE2RdZwv0L-BjqQ/exec"; 
+var API_URL = "https://script.google.com/macros/s/AKfycbzhvvHx7dNpp456FfiECPtMRqYA95X1gea8cFlS0n248xzUfp9z8NfP67ff19Eaw-EPnA/exec"; 
 var GOAL_AMOUNT = 10000000; 
 var currentWinType = "";
 
-// 기능 구현 함수들은 기존과 동일 (handleDonate, refreshStatus, startTimer 등)
+// [복구] 하루 한번 참여 제한 로직
+window.onload = function() {
+  fetch(API_URL).then(r => r.text()).then(t => {
+    var amount = Number(t.split('|')[0]);
+    if (amount >= GOAL_AMOUNT) {
+      goNext(0);
+      document.getElementById("step0Title").innerText = "캠페인 종료 안내";
+      document.getElementById("step0Msg").innerText = "목표 기부금이 달성되어 종료되었습니다.";
+    } else if (localStorage.getItem("lastParticipatedDate") === new Date().toLocaleDateString()) {
+      goNext(0);
+      document.getElementById("step0Title").innerText = "참여 완료 안내";
+      document.getElementById("step0Msg").innerText = "오늘은 이미 참여하셨습니다. 내일 또 뵙겠습니다!";
+    }
+  });
+}
 
 function goNext(n) {
   var steps = document.getElementsByClassName('step');
-  for (var i = 0; i < steps.length; i++) { steps[i].classList.remove('active'); }
+  for (var i = 0; i < steps.length; i++) steps[i].classList.remove('active');
   document.getElementById('step' + n).classList.add('active');
   if (n === 2) startTimer();
   if (n === 3) refreshStatus();
-  if (n === 5) initScratch(); // 스크래치 초기화
+  if (n === 5) initScratch();
   window.scrollTo(0,0);
 }
 
@@ -140,39 +195,41 @@ function startTimer() {
   var time = 5;
   var interval = setInterval(function() {
     time--;
-    if (time > 0) document.getElementById("timerNumber").innerText = time;
-    else { clearInterval(interval); document.getElementById("timerNumber").innerText = "✓"; document.getElementById("nextBtn").disabled = false; }
+    document.getElementById("timerNumber").innerText = (time > 0) ? time : "✓";
+    if (time <= 0) { clearInterval(interval); document.getElementById("nextBtn").disabled = false; }
   }, 1000);
 }
 
 function refreshStatus() {
+  document.getElementById("thermoGroup3").classList.add("thermo-group-blinking");
   fetch(API_URL).then(r => r.text()).then(t => {
     var amount = Number(t.split('|')[0]);
     document.getElementById("status3").innerText = amount.toLocaleString() + "원 적립 중";
     updateVerticalBar("bar3", amount, "bulbText3");
+    setTimeout(() => document.getElementById("thermoGroup3").classList.remove("thermo-group-blinking"), 1000);
   });
 }
 
 function handleDonate() {
+  localStorage.setItem("lastParticipatedDate", new Date().toLocaleDateString()); // 하루 제한 저장
   goNext(4);
+  document.getElementById("thermoGroup4").classList.add("thermo-group-blinking");
   fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) })
-  .then(res => res.text())
-  .then(data => {
+  .then(res => res.text()).then(data => {
     var total = data.split('|')[1];
-    document.getElementById("step4Title").innerText = "기부 완료!";
-    document.getElementById("amountText").innerText = Number(total).toLocaleString() + "원 적립!";
+    document.getElementById("amountText").innerText = Number(total).toLocaleString() + "원 적립 완료!";
     document.getElementById("scratchBtn").style.display = "block";
-    updateVerticalBar("bar4", total, "bulbText4"); 
+    updateVerticalBar("bar4", total, "bulbText4");
+    setTimeout(() => document.getElementById("thermoGroup4").classList.remove("thermo-group-blinking"), 1000);
   });
 }
 
 function updateVerticalBar(barId, amount, bulbId) {
-  var per = Math.min(Math.max((amount / GOAL_AMOUNT) * 100, 0), 100);
+  var per = Math.min((amount / GOAL_AMOUNT) * 100, 100);
   document.getElementById(barId).style.height = per + "%";
   document.getElementById(bulbId).innerText = per.toFixed(1) + "%";
 }
 
-// [수정] 스크래치 초기화 및 당첨 로직 강화
 function initScratch() {
   var cvs = document.getElementById("scratch"), ctx = cvs.getContext("2d");
   var container = document.getElementById("scratchContainer");
@@ -180,45 +237,32 @@ function initScratch() {
   var giftBtn = document.getElementById("giftNextBtn");
   var drawing = false, revealed = false;
 
-  // 캔버스 초기화 (투명하게) 및 덮개 그리기
-  ctx.clearRect(0, 0, 300, 150); 
-  ctx.globalCompositeOperation = "source-over"; // 기본 드로잉 모드
-  ctx.fillStyle = "#aaa"; // 회색 덮개 색상
-  ctx.fillRect(0, 0, 300, 150);
-
-  // 덮개 위에 안내 문구 추가
+  ctx.fillStyle = "#aaa"; ctx.fillRect(0, 0, 300, 150);
   ctx.fillStyle = "#fff"; ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center";
   ctx.fillText("슥슥 긁어보세요!", 150, 85);
 
-  // 긁어낸 비율 확인 함수 (변화 없음)
   function checkReveal() {
     if (revealed) return;
     var pix = ctx.getImageData(0,0,300,150).data, t = 0;
-    for (var i=3; i<pix.length; i+=4) if(pix[i] === 0) t++; // 투명해진 픽셀 카운트
-    if ((t/(300*150)) > 0.4) { // 40% 이상 긁었을 때 결과 노출
+    for (var i=3; i<pix.length; i+=4) if(pix[i] === 0) t++;
+    if ((t/(300*150)) > 0.4) {
       revealed = true;
-      // [수정] 캔버스를 완전히 투명하게 만들어 배경 이미지가 선명하게 보이도록 함
       ctx.clearRect(0, 0, 300, 150);
       
-      // 서버에서 당첨 결과 가져오기 (변화 없음)
       fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "CHECK_WIN" }) })
       .then(r => r.json()).then(data => {
         currentWinType = data.result;
-        resBox.style.display = "block"; // 결과 창 표시
+        resBox.style.display = "block";
 
         if (currentWinType === "STICKER") {
-          // [수정] 당첨 문구 강화
-          resTxt.innerHTML = "<b>🎉 축하합니다!</b><br>'잠 깨우는 왕눈이' 스티커 당첨!<br>아래 버튼을 눌러 배송 정보를 입력해주세요.";
+          container.style.backgroundImage = "url('large_eye.jpg')"; // [수정] 당첨시에만 왕눈이 배경 설정
+          resTxt.innerHTML = "<b>🎉 당첨! '잠 깨우는 왕눈이' 스티커</b><br>아래 버튼을 눌러 배송 정보를 입력해주세요.";
           giftBtn.innerText = "배송 정보 입력하기";
-          giftBtn.style.background = "#ff4b2b"; // 버튼 색상 강조
-          giftBtn.onclick = () => { document.getElementById("phoneModal").style.display = "flex"; };
-        } else if (currentWinType === "DOUBLE") {
-          resTxt.innerText = "기부금 2배 적립 당첨!";
-          giftBtn.innerText = "참여 완료하기";
-          giftBtn.onclick = () => goNext(6);
+          giftBtn.onclick = () => document.getElementById("phoneModal").style.display = "flex";
         } else {
-          resTxt.innerText = "꽝입니다! 따뜻한 마음에 감사드립니다.";
-          giftBtn.innerText = "확인";
+          container.style.backgroundImage = "none";
+          resTxt.innerText = (currentWinType === "DOUBLE") ? "기부금 2배 적립 당첨!" : "아쉽지만 꽝입니다!";
+          giftBtn.innerText = "참여 완료";
           giftBtn.onclick = () => goNext(6);
         }
         giftBtn.style.display = "block";
@@ -226,37 +270,26 @@ function initScratch() {
     }
   }
 
-  // 스크래치 동작 함수 (변화 없음)
   function scratch(e) {
     if (!drawing || revealed) return;
     var r = cvs.getBoundingClientRect();
-    var cx = e.touches ? e.touches[0].clientX : e.clientX, cy = e.touches ? e.touches[0].clientY : e.clientY;
-    ctx.globalCompositeOperation = "destination-out"; // 긁어내는 모드 (지우개)
-    ctx.beginPath(); ctx.arc(cx - r.left, cy - r.top, 25, 0, Math.PI * 2); ctx.fill();
-    checkReveal(); // 긁을 때마다 비율 확인
+    var cx = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+    var cy = (e.touches ? e.touches[0].clientY : e.clientY) - r.top;
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.beginPath(); ctx.arc(cx, cy, 25, 0, Math.PI * 2); ctx.fill();
+    checkReveal();
   }
-
-  // 이벤트 리스너 등록 (마우스 & 터치)
-  cvs.onmousedown = () => drawing = true;
-  cvs.onmousemove = scratch;
-  window.onmouseup = () => drawing = false;
-  cvs.ontouchstart = (e) => { drawing = true; e.preventDefault(); }; // 모바일 스크롤 방지
-  cvs.ontouchmove = (e) => { scratch(e); e.preventDefault(); };
+  cvs.onmousedown = () => drawing = true; cvs.onmousemove = scratch; window.onmouseup = () => drawing = false;
+  cvs.ontouchstart = (e) => { drawing = true; e.preventDefault(); }; cvs.ontouchmove = (e) => { scratch(e); e.preventDefault(); };
 }
 
-// 정보 제출 함수 (변화 없음)
 function submitDeliveryInfo() {
   var name = document.getElementById("userName").value;
   var phone = document.getElementById("phoneInput").value;
   var address = document.getElementById("userAddress").value;
-  var agree = document.getElementById("privacyAgree").checked;
-
-  if (!name || !phone || !address || !agree) { alert("정보 입력 및 동의가 필요합니다."); return; }
-
-  fetch(API_URL, { 
-    method: "POST", 
-    body: new URLSearchParams({ type: "PHONE", name: name, phone: phone, address: address, resultType: currentWinType }) 
-  }).then(() => { alert("접수되었습니다!"); document.getElementById("phoneModal").style.display = "none"; goNext(6); });
+  if (!name || !phone || !address || !document.getElementById("privacyAgree").checked) { alert("모든 정보를 입력하고 동의해주세요."); return; }
+  fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "PHONE", name: name, phone: phone, address: address, resultType: currentWinType }) })
+  .then(() => { alert("접수되었습니다!"); document.getElementById("phoneModal").style.display = "none"; goNext(6); });
 }
 </script>
 </body>
