@@ -26,8 +26,15 @@
   .marks { position: absolute; right: 145px; top: 15px; height: 240px; display: flex; flex-direction: column; justify-content: space-between; font-size: 13px; font-weight: bold; color: #888; text-align: right; width: 40px; }
   .mark-line-long { position: absolute; right: -25px; width: 15px; height: 2px; background: #ddd; }
 
-  /* 이미지 가로 꽉 차게 설정 */
-  .full-width-img { width: 100vw; max-width: 100%; height: auto; display: block; margin: 0 auto; margin-left: calc(-50vw + 50%); }
+  /* [핵심] 이미지 가로 꽉 차고 가운데 정렬 */
+  .full-width-center-img { 
+    width: 100vw; 
+    max-width: 500px; /* 모바일 폭 제한 */
+    height: auto; 
+    display: block; 
+    margin: 0 auto; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
 
   h2 { color: #0047a0; margin-top: 10px; font-size: 20px; word-break: keep-all; }
   .status-text { font-size: 22px; font-weight: bold; color: #000; margin: 10px 0; }
@@ -39,7 +46,7 @@
 <body>
 
 <div id="step0" class="step">
-  <img src="safety_bye.jpg" class="full-width-img">
+  <img src="safety_bye.jpg" class="full-width-center-img">
   <div id="step0Title" style="font-size:22px; font-weight:bold; color:#852722; margin-top:30px;">안내</div>
   <p id="step0Msg" style="font-size:18px; color:#333; margin-top:15px; line-height:1.6; word-break:keep-all;"></p>
   <button onclick="localStorage.removeItem('lastParticipatedDate'); location.reload();" 
@@ -99,21 +106,25 @@
 </div>
 
 <div id="step6" class="step">
-  <img src="safety_bye.jpg" class="full-width-img">
-  <div id="finalThanks" style="font-size:20px; font-weight:bold; color:#0047a0; margin-top:30px;">안전운전이 최고의 배려입니다!</div>
-  <button onclick="location.reload()" style="margin-top:40px; background:#666;">처음으로</button>
+  <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh;">
+    <img src="safety_bye.jpg" class="full-width-center-img">
+    <div id="finalThanks" style="font-size:20px; font-weight:bold; color:#0047a0; margin-top:30px; word-break: keep-all;">
+      안전운전이 최고의 배려입니다!<br>오늘도 기분 좋은 운행 되세요.
+    </div>
+    <button onclick="location.reload()" style="margin-top:40px; background:#666; width: 200px;">처음으로</button>
+  </div>
 </div>
 
 <script>
 var API_URL = "https://script.google.com/macros/s/AKfycbw7HZRTLdytiZiYnOIGHwq5OoL1bHG7MeX4OFgDCyZ4cljC7dXabmqq0bJIgACiKNrcIQ/exec"; 
 var GOAL_AMOUNT = 10000000; 
-var canWinSticker = false; // 서버에서 받아올 당첨 가능 여부
+var canWinSticker = false; 
 
 window.onload = function() {
   fetch(API_URL).then(r => r.text()).then(t => {
     var data = t.split('|');
     var amount = Number(data[0]);
-    canWinSticker = (data[1] === "true"); // 서버에서 스티커 수량 확인
+    canWinSticker = (data[1] === "true");
 
     if (amount >= GOAL_AMOUNT) {
       goNext(0);
@@ -203,10 +214,9 @@ function initScratch() {
       var rand = Math.random() * 100;
       var type = "";
 
-      // [서버 기반 확률 로직]
-      if (canWinSticker && rand <= 15) type = "STICKER"; // 스티커 수량 남았을 때 15% 확률
-      else if (rand <= 60) type = "DOUBLE"; // 2배 적립 45% 확률
-      else type = "LOSE"; // 나머지 꽝
+      if (canWinSticker && rand <= 15) type = "STICKER"; 
+      else if (rand <= 60) type = "DOUBLE"; 
+      else type = "LOSE"; 
 
       ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, 300, 150);
       ctx.fillStyle = "#0047a0"; ctx.font = "bold 18px sans-serif"; resBox.style.display = "block";
@@ -224,7 +234,7 @@ function initScratch() {
         giftBtn.style.display = "block";
       } else {
         ctx.fillText("아쉽지만 다음 기회에!", 150, 85);
-        resTxt.innerHTML = "<b>꽝입니다!</b><br>비록 당첨은 안 되었지만, 여러분의 따뜻한 마음은 잘 전달되었습니다.";
+        resTxt.innerHTML = "<b>아쉽지만 꽝입니다!</b><br>비록 당첨은 안 되었지만, 여러분의 따뜻한 마음은 잘 전달되었습니다.";
         fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "PHONE", phone: "꽝", resultType: "LOSE" }) });
         giftBtn.style.display = "block";
       }
