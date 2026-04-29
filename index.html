@@ -229,7 +229,7 @@ function initScratch() {
 
         if (currentWinType === "STICKER") {
           container.style.backgroundImage = "url('large_eye.jpg')";
-          resTxt.innerHTML = "<b>🎉 당첨! '잠 깨우는 왕눈이' 스티커</b><br>아래 버튼을 눌러 배송 정보를 입력해주세요.";
+          resTxt.innerHTML = "<b>🎉 당첨! '잠 깨우는 왕눈이' 스티커</b><br>아래 버튼을 눌러 배송 정보를 입력해주세요.<br>개인정보 활용 동의시에만 경품 발송이 가능합니다.<br>소중한 정보는 오직 경품 배송 목적으로만 사용되니 안심하세요!<br>입력해주신 정보로 캠페인 종료 후 일괄 발송해 드릴 예정입니다.";
           giftBtn.innerText = "배송 정보 입력하기";
           giftBtn.onclick = () => document.getElementById("phoneModal").style.display = "flex";
         } else {
