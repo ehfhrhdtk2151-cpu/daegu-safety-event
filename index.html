@@ -9,17 +9,13 @@
   .step { display:none; padding:20px; max-width: 500px; margin: 0 auto; min-height: 100vh; box-sizing: border-box; }
   .active { display:block; }
   
-  /* [수정] 첫 페이지 포스터와 버튼 간격 확보 */
+  /* Step 1: 포스터 및 버튼 배치 개선 */
   #step1 { display: none; padding: 0; background-color: #FDF3D0; position: relative; min-height: 100vh; }
   #step1.active { display: flex; flex-direction: column; align-items: center; }
   .intro-poster { width: 100%; max-width: 500px; height: auto; display: block; margin: 0 auto; }
-  #step1 button { 
-    margin: 40px auto; /* 이미지와 버튼 사이 간격 넓힘 */
-    width: calc(100% - 40px); max-width: 460px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
-  }
+  #step1 button { margin: 40px auto; width: calc(100% - 40px); max-width: 460px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 
-  /* [복구] 입체 온도계 및 애니메이션 아이콘 */
+  /* 입체 온도계 및 애니메이션 아이콘 복구 */
   .thermometer-wrapper { position: relative; width: 220px; margin: 60px auto 30px; padding-top: 20px; }
   .icon-cloud2 { position: absolute; right: -40px; top: 40px; font-size: 20px; opacity: 0.4; animation: float 4s infinite ease-in-out; }
   .icon-car { position: absolute; left: -60px; bottom: 80px; font-size: 30px; animation: drive 4s infinite linear; }
@@ -30,52 +26,23 @@
   @keyframes beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
   @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-  .cheer-bubble {
-    position: absolute; top: -50px; left: 50%; transform: translateX(-50%);
-    background: #e63946; color: white; padding: 8px 18px; border-radius: 25px;
-    font-size: 14px; font-weight: bold; white-space: nowrap; z-index: 10;
-  }
-
-  .thermometer-container {
-    position: relative; width: 42px; height: 240px; margin: 0 auto;
-    background: #ffffff; border: 4px solid #ffffff; border-radius: 30px 30px 0 0; 
-    z-index: 1; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 0 10px rgba(0,0,0,0.1); 
-  }
-  .thermo-bar { 
-    position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; 
-    background: linear-gradient(to right, #d31027, #ff5f6d, #d31027);
-    transition: height 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
-  }
-  /* [복구] 온도계 액체 출렁임 애니메이션 */
-  .thermo-bar::before {
-    content: ""; position: absolute; top: -10px; left: -25%; width: 150%; height: 25px;
-    background: rgba(180, 0, 0, 0.5); border-radius: 40%; animation: slosh 2.5s infinite ease-in-out;
-  }
+  .cheer-bubble { position: absolute; top: -50px; left: 50%; transform: translateX(-50%); background: #e63946; color: white; padding: 8px 18px; border-radius: 25px; font-size: 14px; font-weight: bold; white-space: nowrap; z-index: 10; }
+  .thermometer-container { position: relative; width: 42px; height: 240px; margin: 0 auto; background: #ffffff; border: 4px solid #ffffff; border-radius: 30px 30px 0 0; z-index: 1; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 0 10px rgba(0,0,0,0.1); }
+  .thermo-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: linear-gradient(to right, #d31027, #ff5f6d, #d31027); transition: height 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+  .thermo-bar::before { content: ""; position: absolute; top: -10px; left: -25%; width: 150%; height: 25px; background: rgba(180, 0, 0, 0.5); border-radius: 40%; animation: slosh 2.5s infinite ease-in-out; }
   @keyframes slosh { 0%, 100% { transform: translateX(-10%) scaleY(1); } 50% { transform: translateX(10%) scaleY(1.4); } }
-
-  .thermo-bulb { 
-    width: 90px; height: 90px; background: radial-gradient(circle at 30% 30%, #ff5f6d, #d31027);
-    border: 5px solid #ffffff; border-radius: 50%; margin: -35px auto 10px; position: relative; z-index: 2; 
-    display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;
-  }
-  /* [복구] 온도계 깜박임 효과 */
+  .thermo-bulb { width: 90px; height: 90px; background: radial-gradient(circle at 30% 30%, #ff5f6d, #d31027); border: 5px solid #ffffff; border-radius: 50%; margin: -35px auto 10px; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
   @keyframes pulse-glow { 0%, 100% { filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.2)); opacity: 1; } 50% { filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.6)); opacity: 0.8; } }
   .thermo-group-blinking { animation: pulse-glow 0.8s infinite ease-in-out; }
 
-  /* [수정] 스크래치 영역: 기본은 흰색, 당첨시에만 왕눈이 배경 */
-  #scratchContainer { 
-    position: relative; width: 300px; height: 150px; margin: 20px auto; 
-    border-radius: 10px; overflow: hidden; border: 2px solid #ddd;
-    background-color: #fff; background-size: cover; background-position: center;
-  }
+  /* 스크래치 영역 제어 */
+  #scratchContainer { position: relative; width: 300px; height: 150px; margin: 20px auto; border-radius: 10px; overflow: hidden; border: 2px solid #ddd; background-color: #fff; background-size: cover; background-position: center; }
   canvas { position: absolute; top: 0; left: 0; touch-action: none; z-index: 5; }
 
-  /* 버튼 스타일 */
   button { padding: 18px 25px; font-size: 18px; width: 100%; border: none; border-radius: 10px; background: #244aa1; color: white; font-weight: bold; cursor: pointer; }
   .btn-group { display: flex; gap: 10px; }
   .btn-no { background: #fff; color: #333; border: 2px solid #333; }
   
-  /* 모달 스타일 */
   .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; }
   .modal-content { background:#fff; padding:25px; border-radius:15px; width:85%; max-width:400px; }
   .input-field { width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box; }
@@ -87,7 +54,7 @@
   <img src="safety_bye.jpg" style="width:80%; border-radius:20px; margin-top:40px;">
   <div id="step0Title" style="font-size:22px; font-weight:bold; color:#852722; margin-top:30px;">안내</div>
   <p id="step0Msg" style="font-size:18px; color:#333; margin-top:15px; line-height:1.6;"></p>
-  <button onclick="localStorage.removeItem('lastParticipatedDate'); location.reload();" style="margin-top:50px; background:#aaa; font-size:13px; width:auto;">테스트용 초기화</button>
+  <button onclick="localStorage.removeItem('participatedCampaign'); location.reload();" style="margin-top:50px; background:#aaa; font-size:13px; width:auto; padding: 10px 15px;">테스트용 초기화</button>
 </div>
 
 <div id="step1" class="step active">
@@ -115,7 +82,8 @@
   <div id="status3" style="font-size: 22px; font-weight: bold; margin: 10px 0;">현황 불러오는 중...</div>
   <div class="btn-group">
     <button onclick="handleDonate()">네 좋아요 ></button>
-    <button class="btn-no" onclick="goNext(6)">아니요 ></button> </div>
+    <button class="btn-no" onclick="goNext(6)">아니요 ></button>
+  </div>
 </div>
 
 <div id="step4" class="step">
@@ -154,10 +122,14 @@
   </div>
 </div>
 
-<div id="step6" class="step">
-  <img src="safety_bye.jpg" style="width:80%; border-radius:20px; margin-top:40px;">
-  <div style="font-size:20px; font-weight:bold; color:#0047a0; margin-top:30px;">안전운전이 최고의 배려입니다!</div>
-  <button onclick="location.reload()" style="margin-top:40px; background:#666;">처음으로</button>
+<div id="step6" class="step" style="padding: 0;">
+  <div style="display: flex; flex-direction: column; align-items: center; min-height: 100vh;">
+    <img src="safety_bye.jpg" style="width: 100%; height: auto; display: block;" alt="캠페인 종료">
+    <div style="padding: 20px; text-align: center;">
+      <div style="font-size: 20px; font-weight: bold; color: #0047a0; margin-top: 10px;">안전운전이 최고의 배려입니다!</div>
+      <button onclick="location.reload()" style="margin-top: 40px; background: #666; width: 200px;">처음으로</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -165,18 +137,17 @@ var API_URL = "https://script.google.com/macros/s/AKfycbxlMGp-SqifAirASBW0jQjQsn
 var GOAL_AMOUNT = 10000000; 
 var currentWinType = "";
 
-// [복구] 하루 한번 참여 제한 로직
 window.onload = function() {
   fetch(API_URL).then(r => r.text()).then(t => {
     var amount = Number(t.split('|')[0]);
     if (amount >= GOAL_AMOUNT) {
       goNext(0);
       document.getElementById("step0Title").innerText = "캠페인 종료 안내";
-      document.getElementById("step0Msg").innerText = "목표 기부금이 달성되어 종료되었습니다.";
-    } else if (localStorage.getItem("lastParticipatedDate") === new Date().toLocaleDateString()) {
+      document.getElementById("step0Msg").innerHTML = "<b>목표 기부금이 모두 달성되었습니다.</b><br>보내주신 성원에 감사드립니다.";
+    } else if (localStorage.getItem("participatedCampaign") === "true") {
       goNext(0);
       document.getElementById("step0Title").innerText = "참여 완료 안내";
-      document.getElementById("step0Msg").innerText = "이미 참여하셨습니다. 안전 운전하세요!";
+      document.getElementById("step0Msg").innerHTML = "<b>이미 기부에 동참하셨습니다.</b><br>안전운전이 최고의 배려입니다!";
     }
   });
 }
@@ -211,7 +182,7 @@ function refreshStatus() {
 }
 
 function handleDonate() {
-  localStorage.setItem("lastParticipatedDate", new Date().toLocaleDateString()); // 하루 제한 저장
+  localStorage.setItem("participatedCampaign", "true"); 
   goNext(4);
   document.getElementById("thermoGroup4").classList.add("thermo-group-blinking");
   fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) })
@@ -237,6 +208,7 @@ function initScratch() {
   var giftBtn = document.getElementById("giftNextBtn");
   var drawing = false, revealed = false;
 
+  ctx.globalCompositeOperation = "source-over";
   ctx.fillStyle = "#aaa"; ctx.fillRect(0, 0, 300, 150);
   ctx.fillStyle = "#fff"; ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center";
   ctx.fillText("슥슥 긁어보세요!", 150, 85);
@@ -248,6 +220,7 @@ function initScratch() {
     if ((t/(300*150)) > 0.4) {
       revealed = true;
       ctx.clearRect(0, 0, 300, 150);
+      ctx.globalCompositeOperation = "source-over";
       
       fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "CHECK_WIN" }) })
       .then(r => r.json()).then(data => {
@@ -255,13 +228,20 @@ function initScratch() {
         resBox.style.display = "block";
 
         if (currentWinType === "STICKER") {
-          container.style.backgroundImage = "url('large_eye.jpg')"; // [수정] 당첨시에만 왕눈이 배경 설정
+          container.style.backgroundImage = "url('large_eye.jpg')";
           resTxt.innerHTML = "<b>🎉 당첨! '잠 깨우는 왕눈이' 스티커</b><br>아래 버튼을 눌러 배송 정보를 입력해주세요.";
           giftBtn.innerText = "배송 정보 입력하기";
           giftBtn.onclick = () => document.getElementById("phoneModal").style.display = "flex";
         } else {
           container.style.backgroundImage = "none";
-          resTxt.innerText = (currentWinType === "DOUBLE") ? "기부금 2배 적립 당첨!" : "아쉽지만 꽝입니다!";
+          ctx.fillStyle = "#0047a0"; ctx.font = "bold 24px sans-serif"; ctx.textAlign = "center";
+          if (currentWinType === "DOUBLE") {
+            ctx.fillText("기부금 2배 적립 당첨!", 150, 85);
+            resTxt.innerText = "축하합니다! 기부금이 2배로 적립되었습니다.";
+          } else {
+            ctx.fillText("아쉽지만 꽝입니다!", 150, 85);
+            resTxt.innerText = "따뜻한 마음을 나누어 주셔서 감사합니다.";
+          }
           giftBtn.innerText = "참여 완료";
           giftBtn.onclick = () => goNext(6);
         }
