@@ -9,13 +9,11 @@
   .step { display:none; padding:20px; max-width: 500px; margin: 0 auto; min-height: 100vh; box-sizing: border-box; }
   .active { display:block; }
   
-  /* Step 1: 인트로 포스터 최적화 */
   #step1 { display: none; padding: 0; background-color: #FDF3D0; position: relative; min-height: 100vh; }
   #step1.active { display: flex; flex-direction: column; align-items: center; }
   .intro-poster { width: 100%; max-width: 500px; height: auto; display: block; margin: 0 auto; }
   #step1 button { margin: 40px auto; width: calc(100% - 40px); max-width: 460px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 
-  /* 입체 온도계 및 애니메이션 */
   .thermometer-wrapper { position: relative; width: 220px; margin: 60px auto 30px; padding-top: 20px; }
   .icon-cloud2 { position: absolute; right: -40px; top: 40px; font-size: 20px; opacity: 0.4; animation: float 4s infinite ease-in-out; }
   .icon-car { position: absolute; left: -60px; bottom: 80px; font-size: 30px; animation: drive 4s infinite linear; }
@@ -28,20 +26,18 @@
 
   .cheer-bubble { position: absolute; top: -50px; left: 50%; transform: translateX(-50%); background: #e63946; color: white; padding: 8px 18px; border-radius: 25px; font-size: 14px; font-weight: bold; white-space: nowrap; z-index: 10; }
   .thermometer-container { position: relative; width: 42px; height: 240px; margin: 0 auto; background: #ffffff; border: 4px solid #ffffff; border-radius: 30px 30px 0 0; z-index: 1; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 0 10px rgba(0,0,0,0.1); }
-  .thermo-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: linear-gradient(to right, #d31027, #ff5f6d, #d31027); transition: height 1s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+  .thermo-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: linear-gradient(to right, #d31027, #ff5f6d, #d31027); transition: height 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
   .thermo-bar::before { content: ""; position: absolute; top: -10px; left: -25%; width: 150%; height: 25px; background: rgba(180, 0, 0, 0.5); border-radius: 40%; animation: slosh 2.5s infinite ease-in-out; }
   @keyframes slosh { 0%, 100% { transform: translateX(-10%) scaleY(1); } 50% { transform: translateX(10%) scaleY(1.4); } }
   .thermo-bulb { width: 90px; height: 90px; background: radial-gradient(circle at 30% 30%, #ff5f6d, #d31027); border: 5px solid #ffffff; border-radius: 50%; margin: -35px auto 10px; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
-  
-  /* 깜박임 애니메이션 [복구] */
   .thermo-group-blinking { animation: pulse-glow 0.8s infinite ease-in-out; }
   @keyframes pulse-glow { 0%, 100% { filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.2)); } 50% { filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.6)); } }
 
-  /* 스크래치 영역 */
   #scratchContainer { position: relative; width: 300px; height: 150px; margin: 20px auto; border-radius: 10px; overflow: hidden; border: 2px solid #ddd; background-color: #fff; background-size: cover; background-position: center; }
   canvas { position: absolute; top: 0; left: 0; touch-action: none; z-index: 5; }
 
-  button { padding: 18px 25px; font-size: 18px; width: 100%; border: none; border-radius: 10px; background: #244aa1; color: white; font-weight: bold; cursor: pointer; }
+  button { padding: 18px 25px; font-size: 18px; width: 100%; border: none; border-radius: 10px; background: #244aa1; color: white; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+  button:disabled { background: #ccc; cursor: not-allowed; }
   .btn-group { display: flex; gap: 10px; }
   .btn-no { background: #fff; color: #333; border: 2px solid #333; }
   
@@ -83,7 +79,7 @@
     <div class="icon-cloud2">☁️</div><div class="icon-car">🚗</div><div class="icon-heart">❤️</div><div class="icon-star">⭐</div>
   </div>
   <div id="status3" style="font-size: 22px; font-weight: bold; margin: 10px 0; color: #d31027;">현황 불러오는 중...</div>
-  <div style="font-size: 22px; font-weight: bold; margin: 10px 0; color: #d31027;">기부하시겠습니까?</div>
+  <p>기부하시겠습니까?</p>
   <div class="btn-group">
     <button onclick="handleDonate()">네, 좋아요! ></button>
     <button class="btn-no" onclick="goNext(6)">다음에 할게요 ></button>
@@ -109,7 +105,7 @@
   </div>
   <div id="resultBox" style="display:none; margin-top:20px;">
     <div id="resultText" style="background:#fff; border:2px dashed #ff4b2b; padding:18px; border-radius:10px; text-align:left; line-height: 1.6;"></div>
-    <button id="giftNextBtn" style="margin-top:20px; display:none;">참여 완료 ></button>
+    <button id="giftNextBtn" style="margin-top:20px; display:none; background: #244aa1;">참여 완료 ></button>
   </div>
 </div>
 
@@ -127,7 +123,7 @@
       • 소중한 정보는 오직 경품 배송 목적으로만 사용되니 안심하세요!
     </div>
     <label style="font-size:12px; display: block; text-align: left; margin-bottom: 20px; cursor: pointer;">
-      <input type="checkbox" id="privacyAgree"> <strong>개인정보 수집 및 경품 발송에 동의합니다</strong>
+      <input type="checkbox" id="privacyAgree" style="margin-right: 5px;"> <strong>개인정보 수집 및 경품 발송에 동의합니다</strong>
     </label>
     <button onclick="submitDeliveryInfo()">배송 정보 입력하기</button>
   </div>
@@ -188,7 +184,7 @@ function refreshStatus() {
     updateVerticalBar("bar3", lastKnownTotal, "bulbText3");
     setTimeout(() => {
       document.getElementById("thermoGroup3").classList.remove("thermo-group-blinking");
-    }, 500);
+    }, 400);
   });
 }
 
@@ -210,27 +206,33 @@ function handleDonate() {
   document.getElementById("thermoGroup4").classList.add("thermo-group-blinking");
   
   const amountObj = document.getElementById("amountText");
-  const optimisticTotal = lastKnownTotal + 500;
+  const scratchBtn = document.getElementById("scratchBtn");
   
+  // 1. 초가속 낙관적 업데이트: 즉시 500원 증가 표시
+  const optimisticTotal = lastKnownTotal + 500;
   amountObj.innerText = optimisticTotal.toLocaleString() + "원 적립 완료!";
   updateVerticalBar("bar4", optimisticTotal, "bulbText4");
 
-  const donateRequest = fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) }).then(r => r.text());
-  const winRequest = fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "CHECK_WIN", prob: STICKER_PROBABILITY }) }).then(r => r.json());
+  // 2. 서버 응답 전 버튼을 미리 노출 (0.5초 대기 후 시각적 자연스러움 부여)
+  setTimeout(() => { scratchBtn.style.display = "block"; }, 500);
 
-  Promise.all([donateRequest, winRequest]).then(([donateData, winData]) => {
+  // 3. 백그라운드 병렬 처리
+  const winRequest = fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "CHECK_WIN", prob: STICKER_PROBABILITY }) }).then(r => r.json());
+  const donateRequest = fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) }).then(r => r.text());
+
+  Promise.all([winRequest, donateRequest]).then(([winData, donateData]) => {
     const serverTotal = Number(donateData.split('|')[1]);
     preloadedWinData = winData;
     document.getElementById("thermoGroup4").classList.remove("thermo-group-blinking");
     
     if(winData.result === "DOUBLE") {
-      animateValue(amountObj, serverTotal - 500, serverTotal, 800);
+      // 2배 적립 시에만 추가 상승 애니메이션
+      animateValue(amountObj, serverTotal - 500, serverTotal, 600);
       updateVerticalBar("bar4", serverTotal, "bulbText4");
     } else {
       amountObj.innerText = serverTotal.toLocaleString() + "원 적립 완료!";
       updateVerticalBar("bar4", serverTotal, "bulbText4");
     }
-    document.getElementById("scratchBtn").style.display = "block";
   }).catch(() => {
     document.getElementById("thermoGroup4").classList.remove("thermo-group-blinking");
   });
@@ -252,7 +254,7 @@ function initScratch() {
   ctx.globalCompositeOperation = "source-over";
   ctx.fillStyle = "#bbb"; ctx.fillRect(0, 0, 300, 150);
   ctx.fillStyle = "#fff"; ctx.font = "bold 18px sans-serif"; ctx.textAlign = "center";
-  ctx.fillText("이곳을 슥슥 긁어보세요!", 150, 85);
+  ctx.fillText("슥슥 문질러보세요!", 150, 85);
 
   function checkReveal() {
     if (revealed || !preloadedWinData) return;
