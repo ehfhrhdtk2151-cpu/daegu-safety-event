@@ -9,11 +9,13 @@
   .step { display:none; padding:20px; max-width: 500px; margin: 0 auto; min-height: 100vh; box-sizing: border-box; }
   .active { display:block; }
   
+  /* Step 1: 인트로 포스터 최적화 */
   #step1 { display: none; padding: 0; background-color: #FDF3D0; position: relative; min-height: 100vh; }
   #step1.active { display: flex; flex-direction: column; align-items: center; }
   .intro-poster { width: 100%; max-width: 500px; height: auto; display: block; margin: 0 auto; }
   #step1 button { margin: 40px auto; width: calc(100% - 40px); max-width: 460px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 
+  /* 입체 온도계 및 애니메이션 */
   .thermometer-wrapper { position: relative; width: 220px; margin: 60px auto 30px; padding-top: 20px; }
   .icon-cloud2 { position: absolute; right: -40px; top: 40px; font-size: 20px; opacity: 0.4; animation: float 4s infinite ease-in-out; }
   .icon-car { position: absolute; left: -60px; bottom: 80px; font-size: 30px; animation: drive 4s infinite linear; }
@@ -26,7 +28,7 @@
 
   .cheer-bubble { position: absolute; top: -50px; left: 50%; transform: translateX(-50%); background: #e63946; color: white; padding: 8px 18px; border-radius: 25px; font-size: 14px; font-weight: bold; white-space: nowrap; z-index: 10; }
   .thermometer-container { position: relative; width: 42px; height: 240px; margin: 0 auto; background: #ffffff; border: 4px solid #ffffff; border-radius: 30px 30px 0 0; z-index: 1; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 0 10px rgba(0,0,0,0.1); }
-  .thermo-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: linear-gradient(to right, #d31027, #ff5f6d, #d31027); transition: height 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+  .thermo-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: linear-gradient(to right, #d31027, #ff5f6d, #d31027); transition: height 1s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
   .thermo-bar::before { content: ""; position: absolute; top: -10px; left: -25%; width: 150%; height: 25px; background: rgba(180, 0, 0, 0.5); border-radius: 40%; animation: slosh 2.5s infinite ease-in-out; }
   @keyframes slosh { 0%, 100% { transform: translateX(-10%) scaleY(1); } 50% { transform: translateX(10%) scaleY(1.4); } }
   .thermo-bulb { width: 90px; height: 90px; background: radial-gradient(circle at 30% 30%, #ff5f6d, #d31027); border: 5px solid #ffffff; border-radius: 50%; margin: -35px auto 10px; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
@@ -52,7 +54,7 @@
   <img src="safety_bye.jpg" style="width:100%; border-radius:20px; margin-top:40px;">
   <div id="step0Title" style="font-size:22px; font-weight:bold; color:#0047a0; margin-top:30px;">안내</div>
   <p id="step0Msg" style="font-size:18px; color:#333; margin-top:15px; line-height:1.6;"></p>
-  <button onclick="localStorage.removeItem('participatedCampaign'); location.reload();" style="margin-top:50px; background:#aaa; font-size:13px; width:auto; padding: 10px 15px;">초기화(관리자)</button>
+  <button onclick="localStorage.removeItem('participatedCampaign'); location.reload();" style="margin-top:50px; background:#aaa; font-size:13px; width:auto; padding: 10px 15px;">테스트용 초기화</button>
 </div>
 
 <div id="step1" class="step active">
@@ -147,6 +149,7 @@ var preloadedWinData = null;
 var lastKnownTotal = 0;
 
 window.onload = function() {
+  // 첫 로딩 시에만 서버에서 금액을 가져옴
   fetch(API_URL).then(r => r.text()).then(t => {
     lastKnownTotal = Number(t.split('|')[0]);
     if (lastKnownTotal >= GOAL_AMOUNT) {
@@ -166,9 +169,15 @@ function goNext(n) {
   for (var i = 0; i < steps.length; i++) steps[i].classList.remove('active');
   document.getElementById('step' + n).classList.add('active');
   if (n === 2) startTimer();
-  if (n === 3) refreshStatus();
+  if (n === 3) displayLastTotal(); // 서버 대기 없이 즉시 표시
   if (n === 5) initScratch();
   window.scrollTo(0,0);
+}
+
+function displayLastTotal() {
+  // 서버 응답을 기다리지 않고 이미 알고 있는 숫자를 즉시 표시
+  document.getElementById("status3").innerText = lastKnownTotal.toLocaleString() + "원 적립 중";
+  updateVerticalBar("bar3", lastKnownTotal, "bulbText3");
 }
 
 function animateValue(obj, start, end, duration) {
@@ -185,41 +194,42 @@ function animateValue(obj, start, end, duration) {
 
 function handleDonate() {
   localStorage.setItem("participatedCampaign", "true"); 
-  goNext(4);
+  goNext(4); // 즉시 다음 페이지로 이동
   
   const amountObj = document.getElementById("amountText");
-  const tempTotal = lastKnownTotal + 500;
+  const optimisticTotal = lastKnownTotal + 500;
   
-  // 서버 응답 전 미리 500원 더해 보여주기 (눈속임)
-  amountObj.innerText = tempTotal.toLocaleString() + "원 적립 완료!";
-  updateVerticalBar("bar4", tempTotal, "bulbText4");
+  // 1. 낙관적 업데이트: 서버 응답 전 미리 500원을 더해 보여줌
+  amountObj.innerText = optimisticTotal.toLocaleString() + "원 적립 완료!";
+  updateVerticalBar("bar4", optimisticTotal, "bulbText4");
 
-  fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) })
-  .then(res => res.text()).then(data => {
-    const serverTotal = Number(data.split('|')[1]);
+  // 2. 서버 통신은 백그라운드에서 실행 (병렬 처리)
+  const donateRequest = fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) }).then(r => r.text());
+  const winRequest = fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "CHECK_WIN", prob: STICKER_PROBABILITY }) }).then(r => r.json());
+
+  Promise.all([donateRequest, winRequest]).then(([donateData, winData]) => {
+    const serverTotal = Number(donateData.split('|')[1]);
+    preloadedWinData = winData;
     
-    fetch(API_URL, { 
-      method: "POST", 
-      body: new URLSearchParams({ type: "CHECK_WIN", prob: STICKER_PROBABILITY }) 
-    }).then(r => r.json()).then(winData => { 
-      preloadedWinData = winData;
-      if(winData.result === "DOUBLE") {
-        animateValue(amountObj, serverTotal, serverTotal + 500, 1000);
-        updateVerticalBar("bar4", serverTotal + 500, "bulbText4");
-      } else {
-        amountObj.innerText = serverTotal.toLocaleString() + "원 적립 완료!";
-        updateVerticalBar("bar4", serverTotal, "bulbText4");
-      }
-      document.getElementById("scratchBtn").style.display = "block";
-    });
+    // 결과가 2배 적립인 경우 애니메이션 효과와 함께 추가 500원 업데이트
+    if(winData.result === "DOUBLE") {
+      animateValue(amountObj, serverTotal - 500, serverTotal, 800);
+      updateVerticalBar("bar4", serverTotal, "bulbText4");
+    } else {
+      amountObj.innerText = serverTotal.toLocaleString() + "원 적립 완료!";
+      updateVerticalBar("bar4", serverTotal, "bulbText4");
+    }
+    
+    // 버튼은 통신 완료 후 즉시 노출
+    document.getElementById("scratchBtn").style.display = "block";
   });
 }
 
 function refreshStatus() {
+  // Step 3에 진입할 때 서버에서 최신값을 다시 확인 (배경에서 실행)
   fetch(API_URL).then(r => r.text()).then(t => {
     lastKnownTotal = Number(t.split('|')[0]);
-    document.getElementById("status3").innerText = lastKnownTotal.toLocaleString() + "원 적립 중";
-    updateVerticalBar("bar3", lastKnownTotal, "bulbText3");
+    displayLastTotal();
   });
 }
 
@@ -245,12 +255,13 @@ function initScratch() {
     if (revealed || !preloadedWinData) return;
     var pix = ctx.getImageData(0,0,300,150).data, t = 0;
     for (var i=3; i<pix.length; i+=4) if(pix[i] === 0) t++;
+    
     if ((t/(300*150)) > 0.4) {
       revealed = true;
-      ctx.clearRect(0, 0, 300, 150);
-      ctx.globalCompositeOperation = "source-over";
-      resBox.style.display = "block";
       currentWinType = preloadedWinData.result;
+      ctx.clearRect(0, 0, 300, 150);
+      ctx.globalCompositeOperation = "source-over"; 
+      resBox.style.display = "block";
 
       if (currentWinType === "STICKER") {
         container.style.backgroundImage = "url('large_eye.jpg')";
@@ -258,14 +269,16 @@ function initScratch() {
         giftBtn.innerText = "배송 정보 입력하기";
         giftBtn.onclick = () => document.getElementById("phoneModal").style.display = "flex";
       } else if (currentWinType === "DOUBLE") {
-        ctx.fillStyle = "#d31027"; ctx.font = "bold 24px sans-serif";
+        ctx.fillStyle = "#d31027"; ctx.font = "bold 24px sans-serif"; ctx.textAlign = "center";
         ctx.fillText("기부금 2배 적립 당첨!", 150, 85);
-        resTxt.innerText = "기부금이 2배로 적립되었습니다! 따뜻한 마음 감사합니다.";
+        resTxt.innerHTML = "<b>기부금 2배 적립 당첨!</b><br>당신의 배려가 두 배의 기적을 만들었습니다.<br>추가 기부금은 대구경북본부가 전액 후원합니다.";
+        giftBtn.innerText = "참여 완료";
         giftBtn.onclick = () => goNext(6);
       } else {
-        ctx.fillStyle = "#666"; ctx.font = "bold 24px sans-serif";
-        ctx.fillText("따뜻한 참여 감사합니다!", 150, 85);
-        resTxt.innerText = "아쉽지만 당첨되지 않았습니다. 안전운전 하세요!";
+        ctx.fillStyle = "#666"; ctx.font = "bold 24px sans-serif"; ctx.textAlign = "center";
+        ctx.fillText("따뜻한 마음 감사합니다!", 150, 85);
+        resTxt.innerText = "비록 경품 당첨은 아니지만, 당신의 나눔이 누군가에게는 큰 희망이 됩니다. 오늘도 안전운전하세요!";
+        giftBtn.innerText = "참여 완료";
         giftBtn.onclick = () => goNext(6);
       }
       giftBtn.style.display = "block";
@@ -290,10 +303,12 @@ function submitDeliveryInfo() {
   var phone = document.getElementById("phoneInput").value;
   var address = document.getElementById("userAddress").value;
   if (!name || !phone || !address || !document.getElementById("privacyAgree").checked) { 
-    alert("정보 입력과 동의가 필요합니다."); return; 
+    alert("배송 정보 입력과 개인정보 동의가 필요합니다."); return; 
   }
-  fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "PHONE", name: name, phone: phone, address: address, resultType: currentWinType }) })
-  .then(() => { alert("정보가 접수되었습니다!"); document.getElementById("phoneModal").style.display = "none"; goNext(6); });
+  fetch(API_URL, { 
+    method: "POST", 
+    body: new URLSearchParams({ type: "PHONE", name: name, phone: phone, address: address, resultType: currentWinType }) 
+  }).then(() => { alert("정보가 접수되었습니다!"); document.getElementById("phoneModal").style.display = "none"; goNext(6); });
 }
 
 function startTimer() {
