@@ -201,26 +201,39 @@ function refreshStatus() {
 }
 
 function handleDonate() {
-  localStorage.setItem("participatedCampaign", "true"); // [cite: 355]
+  localStorage.setItem("participatedCampaign", "true"); 
   goNext(4);
   document.getElementById("thermoGroup4").classList.add("thermo-group-blinking");
   
+  // 1. 기본 기부 먼저 실행
   fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) })
   .then(res => res.text()).then(data => {
     var total = data.split('|')[1];
     document.getElementById("amountText").innerText = Number(total).toLocaleString() + "원 적립 완료!";
-    document.getElementById("scratchBtn").style.display = "block";
     updateVerticalBar("bar4", total, "bulbText4");
+    
+    // 2. 기본 기부 완료 후 당첨 여부 확인 (이때 서버에서 2배 적립 처리됨)
+    return fetch(API_URL, { 
+      method: "POST", 
+      body: new URLSearchParams({ type: "CHECK_WIN", prob: STICKER_PROBABILITY }) 
+    });
+  })
+  .then(r => r.json()).then(data => { 
+    preloadedWinData = data; 
+    
+    // 3. 만약 2배 적립 당첨이라면 화면의 금액을 다시 한 번 갱신 (서버엔 이미 반영됨)
+    if(data.result === "DOUBLE") {
+      fetch(API_URL).then(r => r.text()).then(t => {
+        var newTotal = Number(t.split('|')[0]);
+        document.getElementById("amountText").innerText = newTotal.toLocaleString() + "원 적립 완료!";
+        updateVerticalBar("bar4", newTotal, "bulbText4");
+      });
+    }
+    
+    document.getElementById("scratchBtn").style.display = "block";
     setTimeout(() => document.getElementById("thermoGroup4").classList.remove("thermo-group-blinking"), 1000);
   });
-
-  // 서버에 확률 변수를 함께 보내어 당첨 결정 요청 [cite: 50, 108]
-  fetch(API_URL, { 
-    method: "POST", 
-    body: new URLSearchParams({ type: "CHECK_WIN", prob: STICKER_PROBABILITY }) 
-  }).then(r => r.json()).then(data => { preloadedWinData = data; });
 }
-
 function updateVerticalBar(barId, amount, bulbId) {
   var per = Math.min((amount / GOAL_AMOUNT) * 100, 100);
   document.getElementById(barId).style.height = per + "%";
