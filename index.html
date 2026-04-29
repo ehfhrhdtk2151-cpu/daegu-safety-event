@@ -224,7 +224,7 @@ function initScratch() {
         giftBtn.style.display = "block";
       } else {
         ctx.fillText("아쉽지만 다음 기회에!", 150, 85);
-        resTxt.innerHTML = "<b>꽝입니다!</b><br>비록 당첨은 안 되었지만, 차장님의 따뜻한 마음은 잘 전달되었습니다.";
+        resTxt.innerHTML = "<b>꽝입니다!</b><br>비록 당첨은 안 되었지만, 여러분의 따뜻한 마음은 잘 전달되었습니다.";
         fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "PHONE", phone: "꽝", resultType: "LOSE" }) });
         giftBtn.style.display = "block";
       }
