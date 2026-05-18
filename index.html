@@ -9,11 +9,13 @@
   .step { display:none; padding:20px; max-width: 500px; margin: 0 auto; min-height: 100vh; box-sizing: border-box; }
   .active { display:block; }
   
+  /* Step 1: 인트로 포스터 최적화 */
   #step1 { display: none; padding: 0; background-color: #FDF3D0; position: relative; min-height: 100vh; }
   #step1.active { display: flex; flex-direction: column; align-items: center; }
   .intro-poster { width: 100%; max-width: 500px; height: auto; display: block; margin: 0 auto; }
   #step1 button { margin: 40px auto; width: calc(100% - 40px); max-width: 460px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 
+  /* 입체 온도계 및 애니메이션 */
   .thermometer-wrapper { position: relative; width: 220px; margin: 60px auto 30px; padding-top: 20px; }
   .icon-cloud2 { position: absolute; right: -40px; top: 40px; font-size: 20px; opacity: 0.4; animation: float 4s infinite ease-in-out; }
   .icon-car { position: absolute; left: -60px; bottom: 80px; font-size: 30px; animation: drive 4s infinite linear; }
@@ -26,7 +28,7 @@
 
   .cheer-bubble { position: absolute; top: -50px; left: 50%; transform: translateX(-50%); background: #e63946; color: white; padding: 8px 18px; border-radius: 25px; font-size: 14px; font-weight: bold; white-space: nowrap; z-index: 10; }
   .thermometer-container { position: relative; width: 42px; height: 240px; margin: 0 auto; background: #ffffff; border: 4px solid #ffffff; border-radius: 30px 30px 0 0; z-index: 1; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 0 10px rgba(0,0,0,0.1); }
-  .thermo-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: linear-gradient(to right, #d31027, #ff5f6d, #d31027); transition: height 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+  .thermo-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: linear-gradient(to right, #d31027, #ff5f6d, #d31027); transition: height 1s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
   .thermo-bar::before { content: ""; position: absolute; top: -10px; left: -25%; width: 150%; height: 25px; background: rgba(180, 0, 0, 0.5); border-radius: 40%; animation: slosh 2.5s infinite ease-in-out; }
   @keyframes slosh { 0%, 100% { transform: translateX(-10%) scaleY(1); } 50% { transform: translateX(10%) scaleY(1.4); } }
   .thermo-bulb { width: 90px; height: 90px; background: radial-gradient(circle at 30% 30%, #ff5f6d, #d31027); border: 5px solid #ffffff; border-radius: 50%; margin: -35px auto 10px; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
@@ -79,7 +81,7 @@
     <div class="icon-cloud2">☁️</div><div class="icon-car">🚗</div><div class="icon-heart">❤️</div><div class="icon-star">⭐</div>
   </div>
   <div id="status3" style="font-size: 22px; font-weight: bold; margin: 10px 0; color: #d31027;">현황 불러오는 중...</div>
-  <p>기부하시겠습니까?</p>
+  <div style="font-size: 22px; font-weight: bold; margin: 10px 0; color: #d31027;">기부하시겠습니까?</div>
   <div class="btn-group">
     <button onclick="handleDonate()">네, 좋아요! ></button>
     <button class="btn-no" onclick="goNext(6)">다음에 할게요 ></button>
@@ -95,7 +97,7 @@
     </div>
   </div>
   <p id="amountText" style="font-size: 22px; font-weight: bold; color: #d31027;">적립 처리 중...</p>
-  <button id="scratchBtn" onclick="goNext(5)" style="display:none; margin-top:20px; background: #ff4b2b;">럭키 스크래치 확인</button>
+  <button id="scratchBtn" onclick="goNext(5)" style="margin-top:20px; background: #ccc;" disabled>결과 데이터 불러오는 중...</button>
 </div>
 
 <div id="step5" class="step">
@@ -208,33 +210,37 @@ function handleDonate() {
   const amountObj = document.getElementById("amountText");
   const scratchBtn = document.getElementById("scratchBtn");
   
-  // 1. 초가속 낙관적 업데이트: 즉시 500원 증가 표시
+  // 낙관적 업데이트: 서버 응답 전 미리 500원 증가 표시
   const optimisticTotal = lastKnownTotal + 500;
   amountObj.innerText = optimisticTotal.toLocaleString() + "원 적립 완료!";
   updateVerticalBar("bar4", optimisticTotal, "bulbText4");
 
-  // 2. 서버 응답 전 버튼을 미리 노출 (0.5초 대기 후 시각적 자연스러움 부여)
-  setTimeout(() => { scratchBtn.style.display = "block"; }, 500);
-
-  // 3. 백그라운드 병렬 처리
+  // 백그라운드 병렬 처리 요청 시작
   const winRequest = fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "CHECK_WIN", prob: STICKER_PROBABILITY }) }).then(r => r.json());
   const donateRequest = fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) }).then(r => r.text());
 
   Promise.all([winRequest, donateRequest]).then(([winData, donateData]) => {
     const serverTotal = Number(donateData.split('|')[1]);
-    preloadedWinData = winData;
-    document.getElementById("thermoGroup4").classList.remove("thermo-group-blinking");
+    preloadedWinData = winData; // [핵심] 결과 데이터가 변수에 안전하게 탑재됨
+    document.getElementById("thermoGroup4").removeClassName ? document.getElementById("thermoGroup4").removeClassName("thermo-group-blinking") : document.getElementById("thermoGroup4").classList.remove("thermo-group-blinking");
     
     if(winData.result === "DOUBLE") {
-      // 2배 적립 시에만 추가 상승 애니메이션
       animateValue(amountObj, serverTotal - 500, serverTotal, 600);
       updateVerticalBar("bar4", serverTotal, "bulbText4");
     } else {
       amountObj.innerText = serverTotal.toLocaleString() + "원 적립 완료!";
       updateVerticalBar("bar4", serverTotal, "bulbText4");
     }
+    
+    // [보안 및 안정성 강화] 데이터 다운로드가 완벽하게 끝나면 버튼을 활성화하여 흰 바탕 오류를 원천 차단
+    scratchBtn.innerText = "럭키 스크래치 확인";
+    scratchBtn.style.background = "#ff4b2b";
+    scratchBtn.disabled = false;
+    scratchBtn.style.display = "block";
   }).catch(() => {
     document.getElementById("thermoGroup4").classList.remove("thermo-group-blinking");
+    scratchBtn.innerText = "다시 시도하기";
+    scratchBtn.disabled = false;
   });
 }
 
@@ -256,36 +262,57 @@ function initScratch() {
   ctx.fillStyle = "#fff"; ctx.font = "bold 18px sans-serif"; ctx.textAlign = "center";
   ctx.fillText("슥슥 문질러보세요!", 150, 85);
 
+  // [오류 해결 핵심 보완] 만약 통신 지연 등으로 데이터 로드가 늦어 스크래치 시점에 결과가 안 나왔을 때를 위한 이중 방어 콜백 함수
+  function drawResultText(winType) {
+    ctx.clearRect(0, 0, 300, 150);
+    ctx.globalCompositeOperation = "source-over"; 
+    resBox.style.display = "block";
+
+    if (winType === "STICKER") {
+      container.style.backgroundImage = "url('large_eye.jpg')";
+      resTxt.innerHTML = "🎉 <b>축하합니다! 왕눈이 스티커 당첨!</b><br>당신의 배려에 왕눈이가 안전을 더해드립니다.";
+      giftBtn.innerText = "배송 정보 입력하기";
+      giftBtn.onclick = () => document.getElementById("phoneModal").style.display = "flex";
+    } else if (winType === "DOUBLE") {
+      container.style.backgroundImage = "none";
+      ctx.fillStyle = "#d31027"; ctx.font = "bold 24px sans-serif"; ctx.textAlign = "center";
+      ctx.fillText("기부금 2배 적립 당첨!", 150, 85);
+      resTxt.innerHTML = "<b>기부금 2배 적립 당첨!</b><br>당신의 배려가 두 배의 기적을 만들었습니다.<br>추가 기부금은 대구경북본부가 전액 후원합니다.";
+      giftBtn.innerText = "참여 완료";
+      giftBtn.onclick = () => goNext(6);
+    } else {
+      container.style.backgroundImage = "none";
+      ctx.fillStyle = "#666"; ctx.font = "bold 24px sans-serif"; ctx.textAlign = "center";
+      ctx.fillText("따뜻한 마음 감사합니다!", 150, 85);
+      resTxt.innerText = "비록 경품 당첨은 아니지만, 당신의 나눔이 누군가에게는 큰 희망이 됩니다. 오늘도 안전운전하세요!";
+      giftBtn.innerText = "참여 완료";
+      giftBtn.onclick = () => goNext(6);
+    }
+    giftBtn.style.display = "block";
+  }
+
   function checkReveal() {
-    if (revealed || !preloadedWinData) return;
+    if (revealed) return;
     var pix = ctx.getImageData(0,0,300,150).data, t = 0;
     for (var i=3; i<pix.length; i+=4) if(pix[i] === 0) t++;
+    
     if ((t/(300*150)) > 0.4) {
       revealed = true;
-      currentWinType = preloadedWinData.result;
-      ctx.clearRect(0, 0, 300, 150);
-      ctx.globalCompositeOperation = "source-over"; 
-      resBox.style.display = "block";
-
-      if (currentWinType === "STICKER") {
-        container.style.backgroundImage = "url('large_eye.jpg')";
-        resTxt.innerHTML = "🎉 <b>축하합니다! 왕눈이 스티커 당첨!</b><br>당신의 배려에 왕눈이가 안전을 더해드립니다.";
-        giftBtn.innerText = "배송 정보 입력하기";
-        giftBtn.onclick = () => document.getElementById("phoneModal").style.display = "flex";
-      } else if (currentWinType === "DOUBLE") {
-        ctx.fillStyle = "#d31027"; ctx.font = "bold 24px sans-serif"; ctx.textAlign = "center";
-        ctx.fillText("기부금 2배 적립 당첨!", 150, 85);
-        resTxt.innerHTML = "<b>기부금 2배 적립 당첨!</b><br>당신의 배려가 두 배의 기적을 만들었습니다.<br>추가 기부금은 대구경북본부가 전액 후원합니다.";
-        giftBtn.innerText = "참여 완료";
-        giftBtn.onclick = () => goNext(6);
+      
+      // 결과 데이터가 탑재되었는지 실시간 체크 및 안전 드로잉 실행
+      if (preloadedWinData && preloadedWinData.result) {
+        currentWinType = preloadedWinData.result;
+        drawResultText(currentWinType);
       } else {
-        ctx.fillStyle = "#666"; ctx.font = "bold 24px sans-serif"; ctx.textAlign = "center";
-        ctx.fillText("따뜻한 마음 감사합니다!", 150, 85);
-        resTxt.innerText = "비록 경품 당첨은 아니지만, 당신의 나눔이 누군가에게는 큰 희망이 됩니다. 오늘도 안전운전하세요!";
-        giftBtn.innerText = "참여 완료";
-        giftBtn.onclick = () => goNext(6);
+        // 초고속 스크래치로 인해 아직 비동기 결과가 도착 안 했다면 0.1초 간격으로 확인 후 그리기 (흰 바탕 방지)
+        var checkInterval = setInterval(function() {
+          if (preloadedWinData && preloadedWinData.result) {
+            clearInterval(checkInterval);
+            currentWinType = preloadedWinData.result;
+            drawResultText(currentWinType);
+          }
+        }, 100);
       }
-      giftBtn.style.display = "block";
     }
   }
 
