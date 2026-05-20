@@ -100,7 +100,7 @@
     </div>
   </div>
   <p id="amountText" style="font-size: 22px; font-weight: bold; color: #d31027;">적립 처리 중...</p>
-  <button id="scratchBtn" onclick="goNext(5)" style="margin-top:20px; background: #ccc;" disabled>결과 데이터 불러오는 중...</button>
+  <button id="scratchBtn" onclick="if(this.innerText==='다시 시도하기'){handleDonate();}else{goNext(5);}" style="margin-top:20px; background: #ccc;" disabled>결과 데이터 불러오는 중...</button>
 </div>
 
 <div id="step5" class="step">
