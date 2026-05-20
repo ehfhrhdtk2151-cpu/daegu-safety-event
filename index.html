@@ -55,7 +55,10 @@
   <img src="safety_bye.png" style="width:100%; border-radius:20px; margin-top:40px;">
   <div id="step0Title" style="font-size:22px; font-weight:bold; color:#0047a0; margin-top:30px;">안내</div>
   <p id="step0Msg" style="font-size:18px; color:#333; margin-top:15px; line-height:1.6;"></p>
-  <button onclick="localStorage.removeItem('participatedCampaign'); location.reload();" style="margin-top:50px; background:#aaa; font-size:13px; width:auto; padding: 10px 15px;">테스트용 초기화</button>
+  <button onclick="localStorage.removeItem('participatedCampaign'); location.reload();" 
+        style="position: fixed; bottom: 0; right: 0; z-index: 9999; width: 30px; height: 30px; opacity: 0; cursor: default; border: none; background: transparent;">
+  초기화
+</button>
 </div>
 
 <div id="step1" class="step active">
