@@ -271,7 +271,7 @@ function initScratch() {
     // 꽝(LOSE) 분기를 완벽히 배제하고 STICKER와 DOUBLE만 처리
     if (winType === "STICKER") {
       container.style.backgroundImage = "url('large_eye.jpg')";
-      resTxt.innerHTML = "🎉 <b>축하합니다! 왕눈이 스티커 당첨!</b><br>당신의 배려에 왕눈이가 안전을 더해드립니다.";
+      resTxt.innerHTML = "🎉 <b>축하합니다! 잠깨우는 왕눈이 스티커 당첨!</b><br>캠페인에 동참해 주셔서 감사합니다.<br>졸음운전예방 필수템! 잠깨우는 왕눈이 스티커를 보내드립니다.";
       giftBtn.innerText = "배송 정보 입력하기";
       giftBtn.onclick = () => document.getElementById("phoneModal").style.display = "flex";
     } else {
@@ -279,7 +279,7 @@ function initScratch() {
       container.style.backgroundImage = "none";
       ctx.fillStyle = "#d31027"; ctx.font = "bold 24px sans-serif"; ctx.textAlign = "center";
       ctx.fillText("기부금 2배 적립 당첨!", 150, 85);
-      resTxt.innerHTML = "🎉 <b>축하합니다! 기부금 2배 적립 당첨!</b><br>당신의 배려가 두 배의 기적을 만들었습니다.<br>추가 기부금은 전액 후원 처리됩니다.";
+      resTxt.innerHTML = "🎉 <b>축하합니다! 기부금 2배 적립 당첨!</b><br>캠페인에 동참해 주셔서 감사합니다.<br>운전자님을 대신해 1000원의 기부금이 적립되었습니다.";
       giftBtn.innerText = "참여 완료";
       giftBtn.onclick = () => goNext(6);
     }
