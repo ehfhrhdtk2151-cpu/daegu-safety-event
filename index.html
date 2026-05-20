@@ -145,10 +145,9 @@
 </div>
 
 <script>
-// [필수 확인] 사용중인 구글 Apps Script 웹앱 URL과 정확히 일치하는지 점검하세요.
 var API_URL = "https://script.google.com/macros/s/AKfycbxaeyCIXC3JdgefXtjB13CMdqtKe1R0cz9zfGqezUJtBNspP8aCiGCzg6xF4ItfVfCDJg/exec"; 
 var GOAL_AMOUNT = 10000000; 
-var STICKER_PROBABILITY = 5; // 기본 당첨 배정 확률 (필요시 백엔드 스크립트와 맞춰 변경 가능)
+var STICKER_PROBABILITY = 5; // 하루 최대 2명 균등 배정을 위한 확률 값 (5%)
 
 var currentWinType = "";
 var preloadedWinData = null;
@@ -190,7 +189,7 @@ function refreshStatus() {
     updateVerticalBar("bar3", lastKnownTotal, "bulbText3");
     setTimeout(() => {
       document.getElementById("thermoGroup3").classList.remove("thermo-group-blinking");
-    }, 400);
+    }, 150); // 깜빡임 대기시간 최적화 단축
   });
 }
 
@@ -206,6 +205,7 @@ function animateValue(obj, start, end, duration) {
   window.requestAnimationFrame(step);
 }
 
+// === [속도 혁신 핵심 구간] 요청을 단 1회로 병합하고 낙관적 UI 기법 적용 ===
 function handleDonate() {
   localStorage.setItem("participatedCampaign", "true"); 
   goNext(4); 
@@ -214,31 +214,39 @@ function handleDonate() {
   const amountObj = document.getElementById("amountText");
   const scratchBtn = document.getElementById("scratchBtn");
   
+  // [눈속임/체감 최적화] 서버 응답이 오는 시간 동안 사용자가 랙을 느끼지 않도록 500원 상승 연출을 미리 가동시킵니다.
   const optimisticTotal = lastKnownTotal + 500;
   amountObj.innerText = optimisticTotal.toLocaleString() + "원 적립 완료!";
   updateVerticalBar("bar4", optimisticTotal, "bulbText4");
 
-  const winRequest = fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "CHECK_WIN", prob: STICKER_PROBABILITY }) }).then(r => r.json());
-  const donateRequest = fetch(API_URL, { method: "POST", body: new URLSearchParams({ type: "DONATE" }) }).then(r => r.text());
-
-  Promise.all([winRequest, donateRequest]).then(([winData, donateData]) => {
-    const serverTotal = Number(donateData.split('|')[1]);
-    preloadedWinData = winData; 
+  // [통합 단일 API 호출] 기부 적립 데이터 기록과 당첨 처리를 단 한 번의 네트워크 통신으로 처리합니다.
+  fetch(API_URL, { 
+    method: "POST", 
+    body: new URLSearchParams({ type: "EXEC_DONATE", prob: STICKER_PROBABILITY }) 
+  })
+  .then(r => r.json())
+  .then(data => {
+    // 백엔드로부터 결합형 JSON 전달받음: { result: "DOUBLE/STICKER", totalAmount: 최신합계 }
+    preloadedWinData = data; 
+    const serverTotal = Number(data.totalAmount);
     document.getElementById("thermoGroup4").classList.remove("thermo-group-blinking");
     
-    if(winData.result === "DOUBLE") {
-      animateValue(amountObj, serverTotal - 500, serverTotal, 600);
+    // 더블 적립인 경우 가상으로 채운 바에 추가 500원을 더 얹어 롤링 애니메이션 처리
+    if(data.result === "DOUBLE") {
+      animateValue(amountObj, optimisticTotal, serverTotal, 350);
       updateVerticalBar("bar4", serverTotal, "bulbText4");
     } else {
       amountObj.innerText = serverTotal.toLocaleString() + "원 적립 완료!";
       updateVerticalBar("bar4", serverTotal, "bulbText4");
     }
     
+    // 네트워크 대기가 이미 완전히 끝났으므로 버튼 상태를 딜레이 제로 수준으로 활성화합니다.
     scratchBtn.innerText = "럭키 스크래치 확인";
     scratchBtn.style.background = "#ff4b2b";
     scratchBtn.disabled = false;
     scratchBtn.style.display = "block";
-  }).catch(() => {
+  })
+  .catch(() => {
     document.getElementById("thermoGroup4").classList.remove("thermo-group-blinking");
     scratchBtn.innerText = "다시 시도하기";
     scratchBtn.disabled = false;
@@ -268,14 +276,13 @@ function initScratch() {
     ctx.globalCompositeOperation = "source-over"; 
     resBox.style.display = "block";
 
-    // 꽝(LOSE) 분기를 완벽히 배제하고 STICKER와 DOUBLE만 처리
+    // 꽝(LOSE) 문구 완벽 배제 및 원래 디자인 원본 텍스트 및 태그 유지
     if (winType === "STICKER") {
       container.style.backgroundImage = "url('large_eye.jpg')";
       resTxt.innerHTML = "🎉 <b>축하합니다! 잠깨우는 왕눈이 스티커 당첨!</b><br>캠페인에 동참해 주셔서 감사합니다.<br>졸음운전예방 필수템! 잠깨우는 왕눈이 스티커를 보내드립니다.";
       giftBtn.innerText = "배송 정보 입력하기";
       giftBtn.onclick = () => document.getElementById("phoneModal").style.display = "flex";
     } else {
-      // STICKER 분과 분배 확률에서 제외된 나머지는 전부 기분 좋은 '기부금 2배 적립' 당첨
       container.style.backgroundImage = "none";
       ctx.fillStyle = "#d31027"; ctx.font = "bold 24px sans-serif"; ctx.textAlign = "center";
       ctx.fillText("기부금 2배 적립 당첨!", 150, 85);
@@ -298,13 +305,14 @@ function initScratch() {
         currentWinType = preloadedWinData.result;
         drawResultText(currentWinType);
       } else {
+        // 데이터 인터벌 체크 간격을 50ms로 쪼개어 스크래치 인지 즉시 결과 드로잉 구현
         var checkInterval = setInterval(function() {
           if (preloadedWinData && preloadedWinData.result) {
             clearInterval(checkInterval);
             currentWinType = preloadedWinData.result;
             drawResultText(currentWinType);
           }
-        }, 100);
+        }, 50);
       }
     }
   }
