@@ -15,15 +15,19 @@
   .intro-poster { width: 100%; max-width: 500px; height: auto; display: block; margin: 0 auto; }
   #step1 button { margin: 40px auto; width: calc(100% - 40px); max-width: 460px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 
-  /* Step 2 스크롤 방지 및 한 화면 꽉 차게 최적화 */
+/* Step 2 스크롤 없이 한 화면에 딱 맞게 꽉 차게 최적화 */
   #step2.active {
     display: flex;
     flex-direction: column;
-    justify-content: space-around; /* 요소들 사이의 위아래 간격을 균등하게 자동 분배 */
+    /* justify-content: space-around는 간격을 균등하게 배분, 
+       justify-content: space-between은 위아래를 꽉 채우고 남는 공간을 이미지에 몰아줌. 
+       이미지 확장을 위해 space-between 사용 */
+    justify-content: space-between; 
     align-items: center;
     height: 100vh; /* 화면 전체 높이(100%)에 딱 맞춤 */
-    padding: 5vh 20px; /* 상하 여백을 픽셀이 아닌 화면 비율(5%)로 설정 */
+    padding: 5vh 20px; /* 상하 여백을 비율 단위(vh)로 설정 */
     box-sizing: border-box;
+    overflow: hidden; /* 절대 스크롤 안 생기게 방지 */
   }
 
   /* 입체 온도계 및 애니메이션 */
@@ -79,8 +83,8 @@
 
 <div id="step2" class="step">
   <h2 style="color:#0047a0; margin: 0; font-size: 20px; line-height: 1.4;">나눔을 실천하는 당신,<br>도로 위에서도 배려를 보여주세요!</h2>
-  <img src="safety.jpg" style="width:100%; max-height: 45vh; object-fit: contain; border-radius:12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-  <div id="timerNumber" style="font-size:40px; font-weight:bold; color:#ff4b2b; margin: 0;">5</div>
+  <img src="safety.jpg" style="width:100%; flex-grow: 1; min-height: 0; object-fit: contain; border-radius:12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+  <div id="timerNumber" style="font-size:40px; font-weight:bold; color:#ff4b2b; margin: 0;">10</div>
   <button id="nextBtn" onclick="goNext(3)" disabled style="margin: 0; margin-bottom: 2vh;">기부 참여하기</button>
 </div>
 
