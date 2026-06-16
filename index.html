@@ -84,7 +84,7 @@
 <div id="step2" class="step">
   <h2 style="color:#0047a0; margin: 0; font-size: 20px; line-height: 1.4;">나눔을 실천하는 당신,<br>도로 위에서도 배려를 보여주세요!</h2>
   <img src="safety.jpg" style="width:100%; flex-grow: 1; min-height: 0; object-fit: contain; border-radius:12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-  <div id="timerNumber" style="font-size:40px; font-weight:bold; color:#ff4b2b; margin: 0;">10</div>
+  <div id="timerNumber" style="font-size:40px; font-weight:bold; color:#ff4b2b; margin: 0;">5</div>
   <button id="nextBtn" onclick="goNext(3)" disabled style="margin: 0; margin-bottom: 2vh;">기부 참여하기</button>
 </div>
 
@@ -357,7 +357,7 @@ function submitDeliveryInfo() {
 }
 
 function startTimer() {
-  var time = 10;
+  var time = 5;
   var interval = setInterval(function() {
     time--;
     document.getElementById("timerNumber").innerText = (time > 0) ? time : "✓";
